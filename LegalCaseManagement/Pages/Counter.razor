@@ -1,0 +1,425 @@
+﻿@page "/counter"
+@* @attribute [Authorize(Roles = "Admin")] *@
+@inject AppUserService userService
+@inject IServiceScopeFactory ServiceScopeFactory
+@inject ISnackbar snackbar
+
+<PageTitle>Counter</PageTitle>
+
+@using LegalCaseManagement.Data
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Security.Claims
+@inject IJSRuntime jstRuntime
+@inject UserManager<ApplicationUser> _userManager
+@inject SignInManager<ApplicationUser> _signInManager
+@inject ISnackbar snackbar
+
+   @if (showModal)
+{
+    <div class="modal fade show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Student</h4>
+                    <button type="button" class="btn-close" @onclick="ToggleModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="newUser" OnValidSubmit="AddNewUserWithRoles">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">Frst Name</label>
+                            <input class="form-control" placeholder="Enter First Name" @bind-value="newUser.FirstNameUser" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input class="form-control" placeholder="Enter Last Name" @bind-value="newUser.LastNameUser" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input class="form-control" placeholder="Enter Email Address" @bind-value="newUser.LoginName" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input class="form-control" placeholder="Enter Phone Number" @bind-value="newUser.Phone" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Country</label>
+                            <input class="form-control" placeholder="Enter Country" @bind-value="newUser.CountryUser" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">City</label>
+                            <input class="form-control" placeholder="Enter City" @bind-value="newUser.CityUser" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <input class="form-control" placeholder="Enter Adress" @bind-value="newUser.AddressUser" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" placeholder="Enter Password" @bind-value="newUser.LoginPassword" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            <InputSelect class="form-control" @bind-Value="newUser.UserRole" placeholder="Select Role">
+                                @foreach (var role in selectList)
+                                {
+                                    <option value="@role.Value" selected="@role.Selected">@role.Text</option>
+
+                                }
+                            </InputSelect>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="ToggleModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<MudCard Elevation="25">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Add User</MudButton>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="GetAll()" Filter="new Func<ApplicationUser,bool>(Search)" @bind-appUsers="appUsers">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">System Users</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>FIRST NAME</MudTh>
+                <MudTh>Last Name</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Phone</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="First fName">@context.FirstName</MudTd>
+                <MudTd DataLabel="lName">>@context.LastName</MudTd>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Phone">@context.PhoneNumber</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Edit" aria-label="delete" ></MudIconButton>
+                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>DeleteRec(context))"></MudIconButton>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+        <br />
+        <div class="row">
+    <div class="col-md-6">
+        <MudCard Class="mb-4">
+            <MudCardHeader Class="mud-theme-primary mud-text-white">
+                <h5 class="card-title">Roles</h5>
+            </MudCardHeader>
+            <MudCardContent>
+                        <MudTable Items="roles" Dense="true" Hover="true">
+                            <HeaderContent>
+                                <MudTh>Role Name</MudTh>
+                                <MudTh>Actions</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                
+                                <MudTd DataLabel="Role Name">@context.Name</MudTd>
+                                
+                                <MudTd>
+                                    <MudIconButton Color="Color.Info" Icon="@Icons.Material.Filled.Edit" aria-label="edit" OnClick="@(() => EditRole(context))" />
+                                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(() => DeleteRole(context))" />
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudCardContent>
+        </MudCard>
+    </div>
+    <div class="col-md-6">
+        <MudCard Class="mb-4">
+            <MudCardHeader Class="mud-theme-primary mud-text-white">
+                <h5 class="card-title">Add Role</h5>
+            </MudCardHeader>
+            <MudCardContent>
+                        <EditForm Model="newRole" OnValidSubmit="SubmitForm">
+                            <div class="mb-3">
+                        <label class="form-label">Role Name</label>
+                                <MudTextField Label="Role Name" @bind-Value="newRole.Name" Required="true" />
+                            </div>
+
+                            <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled">Add Role</MudButton>
+
+                        </EditForm>
+            </MudCardContent>
+        </MudCard>
+    </div>
+</div>
+        @if (editRole != null)
+        {
+            <MudDialog @bind-Open="isEditDialogOpen">
+                <DialogContent>
+                    <MudText Typo="Typo.h6">Edit Role</MudText>
+                    <MudTextField Label="Role Name" @bind-Value="editRole.Name" Required="true" />
+                </DialogContent>
+                <DialogActions>
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="@(async () => await SaveEdit())">Save</MudButton>
+                    <MudButton Color="Color.Default" Variant="Variant.Outlined" OnClick="CloseEditDialog">Cancel</MudButton>
+                </DialogActions>
+            </MudDialog>
+        }
+
+    </MudCardContent>
+</MudCard>
+<MudSpacer></MudSpacer>
+
+@code {
+    private string searchString = "";
+    User newUser = new User();
+    List<Role> rolesList = new List<Role>();
+    List<SelectListItem> selectList = new List<SelectListItem>();
+    List<User> MyUser = new List<User>();
+    List<ApplicationUser> userList = new List<ApplicationUser>();
+    ApplicationUser appUsers = new ApplicationUser();
+    private bool showModal = false;
+    private List<IdentityRole> roles = new List<IdentityRole>();
+    private IdentityRole newRole = new IdentityRole();
+    private IdentityRole editRole;
+    private MudForm form;
+    private bool isEditDialogOpen = false;
+
+    private bool Search(ApplicationUser applicationUser)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if(applicationUser.UserName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+
+
+    private List<ApplicationUser> GetAll()
+    {
+        userList = userService.GetAll();
+        return userList;
+    }
+
+    private void ToggleModal()
+    {
+        showModal = !showModal;
+    }
+
+    //delete method
+    private async Task DeleteRec(ApplicationUser rec)
+    {
+        userService.Delete(rec);
+        GetAll();
+        await jstRuntime.InvokeVoidAsync("alert", "User Removed succefully");
+
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        userList = userService.GetAll();
+        await LoadUsersAndRoles();
+
+        rolesList = new List<Role>()
+        {
+            new Role(){RoleName = "Admin", ID = "1"},
+            new Role(){RoleName = "Team", ID = "2"},
+            new Role(){RoleName = "Client", ID = "3"}
+        };
+
+        // userList = _userManager.Users.ToList();
+        foreach (var role in rolesList)
+        {
+            if (rolesList.Count < 1)
+            {
+                selectList.Add(new SelectListItem()
+                    {
+                        Text = role.RoleName,
+                        Value = role.ID,
+                        Selected = true
+
+                    });
+            }
+            else
+            {
+                selectList.Add(new SelectListItem()
+                    {
+                        Text = role.RoleName,
+                        Value = role.ID,
+                        Selected = false
+
+                    });
+            }
+        }
+
+    }
+
+    private async Task LoadUsersAndRoles()
+    {
+        try
+        {
+            using (var scope = ServiceScopeFactory.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+                // Fetch roles here
+                roles = roleManager.Roles.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception in LoadUsersAndRoles: {ex}");
+            throw;
+        }
+    }
+
+    private async Task SubmitForm()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var result = await roleManager.CreateAsync(new IdentityRole(newRole.Name));
+            if (result.Succeeded)
+            {
+                roles.Add(new IdentityRole { Name = newRole.Name, NormalizedName = newRole.Name.ToUpper() });
+                newRole = new IdentityRole();
+                snackbar.Add("The Role Was Added Successfuly", Severity.Success);
+            }
+            else
+            {
+                Console.WriteLine("Error creating role.");
+            }
+        }
+    }
+
+    private async Task EditRole(IdentityRole role)
+    {
+        editRole = role;
+        isEditDialogOpen = true;
+    }
+
+    private async Task SaveEdit()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            var role = await roleManager.FindByIdAsync(editRole.Id);
+            if (role != null)
+            {
+                role.Name = editRole.Name;
+                var result = await roleManager.UpdateAsync(role);
+                if (result.Succeeded)
+                {
+                    var roleIndex = roles.FindIndex(r => r.Id == role.Id);
+                    if (roleIndex != -1)
+                    {
+                        roles[roleIndex].Name = role.Name;
+                        roles[roleIndex].NormalizedName = role.NormalizedName;
+                    }
+                    isEditDialogOpen = false;
+                    editRole = null;
+                }
+                else
+                {
+                    Console.WriteLine("Error updating role.");
+                }
+            }
+        }
+    }
+
+    private void CloseEditDialog()
+    {
+        isEditDialogOpen = false;
+        editRole = null;
+    }
+
+
+    private async Task DeleteRole(IdentityRole role)
+    {
+        try
+        {
+            using (var scope = ServiceScopeFactory.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var result = await roleManager.DeleteAsync(role);
+                if (result.Succeeded)
+                {
+                    roles.Remove(role);
+                    snackbar.Add("Role was Removed", Severity.Error);
+                }
+                else
+                {
+                    Console.WriteLine("Error deleting role.");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception in DeleteRole: {ex}");
+            throw;
+        }
+    }
+
+    public async void AddNewUserWithRoles(EditContext context)
+    {
+        var usermodel = context.Model as User;
+
+        var passwordHash = _userManager.PasswordHasher.HashPassword(null, usermodel.LoginPassword);
+
+        var user = new ApplicationUser
+            {
+                UserName = usermodel.LoginName,
+                Email = usermodel.LoginName,
+                EmailConfirmed = true,
+                PhoneNumber = usermodel.Phone,
+                City = usermodel.CityUser,
+                Country = usermodel.CountryUser,
+                Address = usermodel.AddressUser,
+                FirstName = usermodel.FirstNameUser,
+                LastName = usermodel.LastNameUser,
+                PasswordHash = passwordHash
+
+                
+            };
+
+        try
+        {
+            var result = await _userManager.CreateAsync(user, usermodel.LoginPassword);
+
+            if (result.Succeeded)
+            {
+                var getRoleFromList = rolesList.FirstOrDefault(x => x.ID == usermodel?.UserRole);
+                var roleAddedResult = await _userManager.AddToRoleAsync(user, getRoleFromList?.RoleName ?? "Client");
+
+                if (roleAddedResult.Succeeded)
+                {
+                    snackbar.Add("User was Addedd Successfuly with Roles", Severity.Success);
+                    
+                    return;
+                }
+            }
+
+            await jstRuntime.InvokeVoidAsync("alert", "User creation failed. Please check the input data.");
+        }
+        catch (Exception ex)
+        {
+            await jstRuntime.InvokeVoidAsync("console.error", ex.Message);
+            await jstRuntime.InvokeVoidAsync("alert", "An error occurred during user creation. Please try again later.");
+        }
+    }
+
+
+}

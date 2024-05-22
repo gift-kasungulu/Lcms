@@ -1,0 +1,179 @@
+﻿@page "/advocates"
+@using LegalCaseManagement.Data
+@inject LawyerService lawyerService
+@inject IJSRuntime jstRuntime
+@inject ISnackbar snackbar
+<PageTitle>Advocates</PageTitle>
+
+
+@if (showModal)
+{
+    <div class="modal fade show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Lawyer</h4>
+                    <button type="button" class="btn-close" @onclick="ToggleModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="lawyers" OnValidSubmit="Add">
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">First Name</label>
+                            <input class="form-control" placeholder="Enter First Name" @bind-value="lawyers.LFirstName" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input class="form-control" placeholder="Enter Last Name" @bind-value="lawyers.LLastName" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input class="form-control" placeholder="Enter Phone Number" @bind-value="lawyers.Phone" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input class="form-control" placeholder="Enter Email" @bind-value="lawyers.Email" maxlength="255" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Country</label>
+                            <input class="form-control" placeholder="Enter Country" @bind-value="lawyers.Country" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">City</label>
+                            <input class="form-control" placeholder="Enter City" @bind-value="lawyers.City" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Age</label>
+                            <input type="number" class="form-control" placeholder="Enter Age" @bind-value="lawyers.Age" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Case Type</label>
+                            <input type="text" class="form-control" placeholder="Enter Case Type" @bind-value="lawyers.CaseType" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Experience Years</label>
+                            <input type="number" class="form-control" placeholder="Enter Experience Years" @bind-value="lawyers.ExperienceYears" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Win Percentage</label>
+                            <input type="number" class="form-control" placeholder="Enter Win Percentage" @bind-value="lawyers.CaseWinPercentage" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="ToggleModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<MudCard Elevation="25">
+    <MudCardHeader>
+        <CardHeaderContent>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Add Advocate</MudButton>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="GetAll()" Filter="new Func<Lawyers,bool>(Searchrec)" @bind-lawyers="lawyers">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Advocates</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>#</MudTh>
+                <MudTh>FIRST NAME</MudTh>
+                <MudTh>Last Name</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Phone</MudTh>
+                <MudTh>Experience</MudTh>
+                <MudTh>Win %</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Phone">@context.LawyerId</MudTd>
+                <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
+                <MudTd DataLabel="LastName">@context.LLastName</MudTd>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Phone">@context.Phone</MudTd>
+                <MudTd DataLabel="Experince">@context.ExperienceYears</MudTd>
+                <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudIconButton Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" aria-label="delete"></MudIconButton>
+                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>DeleteRec(context))"></MudIconButton>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private Lawyers lawyers = new Lawyers();
+    private List<Lawyers> lawyersList = new List<Lawyers>();
+    private bool showModal = false;
+    private string searchString = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        lawyersList = lawyerService.GetAll();
+
+    }
+
+    private async Task DeleteRec(Lawyers rec)
+    {
+        lawyerService.Delete(rec);
+        GetAll();
+        snackbar.Add("Lawyer was removed Successfully",Severity.Success);
+
+    }
+
+    public async Task Add()
+    {
+        try
+        {
+            await Task.Run(() => lawyerService.Add(lawyers));
+            snackbar.Add("Lawyer Was Added Successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed Try Again later", Severity.Error);
+        }
+    }
+
+    private List<Lawyers> GetAll()
+    {
+        lawyersList = lawyerService.GetAll();
+        return lawyersList;
+    }
+
+    private void ToggleModal()
+    {
+        showModal = !showModal;
+    }
+
+    private bool Searchrec(Lawyers lawyers)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (lawyers.LFirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private bool _processing = false;
+
+    async Task ProcessSomething()
+    {
+        _processing = true;
+        await Task.Delay(2000);
+        _processing = false;
+    }
+}
+

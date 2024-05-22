@@ -1,0 +1,41 @@
+﻿*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.table{
+    /*width: 100%;*/
+
+}
+
+.table-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background-color: rgb(240, 240, 240);
+}
+button {
+    /*outline: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;*/
+    
+}
+
+input{
+    padding: 10px 20px;
+    margin: 0 10px;
+    outline: none;
+    border:1px solid #0026ff;
+}
+
+.add_new {
+    outline: none;
+    border: none;
+    background-color: #0026ff;
+    padding: 10px 20px;
+    color: rgb(240, 240, 240);
+    border-radius: 6px;
+}

@@ -1,0 +1,17 @@
+﻿body {
+    background-color: #6c757d;
+}
+.circle-button {
+    width: 40px; /* Adjust the width and height as needed */
+    height: 40px;
+    border-radius: 50%; /* Make it a circle */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.header {
+    display: grid;
+    grid-template-columns: 1fr auto; /* Adjust column sizes as needed */
+    align-items: center;
+    margin-bottom: 1rem; /* Adjust spacing as needed */
+}

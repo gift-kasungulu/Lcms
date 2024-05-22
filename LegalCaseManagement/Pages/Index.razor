@@ -1,0 +1,172 @@
+﻿@page "/"
+
+@using LegalCaseManagement.Data
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject LawyerService lawyerService
+@inject IJSRuntime jstRuntime
+@inject ISnackbar snackbar
+<PageTitle>Home</PageTitle>
+
+<MudCard>
+    <MudCardContent>
+        <MudText Typo="Typo.h4">
+            Welcome
+        </MudText>
+        <br />
+        <MudGrid>
+            <MudItem xs="12">
+                <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
+                    xs=12
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12">
+                <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
+                    xs=12
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12">
+                <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
+                    xs=12
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12">
+                <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
+                    xs=12
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+        <br />
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+            <MudTabPanel Text="Advocates">
+                <MudTable Items="GetAll()" Filter="new Func<Lawyers,bool>(Searchrec)" @bind-lawyers="lawyers">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Advocates</MudText>
+                        <MudSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>#</MudTh>
+                        <MudTh>FIRST NAME</MudTh>
+                        <MudTh>Last Name</MudTh>
+                        <MudTh>Email</MudTh>
+                        <MudTh>Phone</MudTh>
+                        <MudTh>Experience</MudTh>
+                        <MudTh>Win %</MudTh>
+                        <MudTh>Status</MudTh>
+                        <MudTh>Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Phone">@context.LawyerId</MudTd>
+                        <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
+                        <MudTd DataLabel="LastName">@context.LLastName</MudTd>
+                        <MudTd DataLabel="Email">@context.Email</MudTd>
+                        <MudTd DataLabel="Phone">@context.Phone</MudTd>
+                        <MudTd DataLabel="Experince">@context.ExperienceYears</MudTd>
+                        <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
+                        <MudTd DataLabel="Status">
+                            <MudSwitch @bind-Value="@BasicSwitch2" Color="Color.Primary" />
+                        </MudTd>
+                        <MudTd DataLabel="Actions">
+                            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ReadMore" OnClick="@(()=>ViewLawyerDetails(context))"></MudFab>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
+                </MudTable>
+            </MudTabPanel>
+            <MudTabPanel Text="Recent Cases">
+                <MudPaper xs="12" sm="6">
+                    <MudList Clickable="true">
+                        <MudListSubheader>
+                            Recent cases
+                        </MudListSubheader>
+                        <MudListItem Avatar="@Icons.Material.Filled.Work">
+                            First case
+                        </MudListItem>
+                        <MudListItem Avatar="@Icons.Material.Filled.Work">
+                            second case
+                        </MudListItem>
+                        <MudListItem Avatar="@Icons.Material.Filled.Work">
+                            third case
+                        </MudListItem>
+                        <MudListItem Avatar="@Icons.Material.Filled.Work">
+                            another case
+                        </MudListItem>
+                    </MudList>
+                </MudPaper>
+            </MudTabPanel>
+            <MudTabPanel Text="About">
+                <MudText>Content Three</MudText>
+            </MudTabPanel>
+        </MudTabs>
+    </MudCardContent>
+</MudCard>
+
+
+@code {
+    private Lawyers lawyers = new Lawyers();
+    private List<Lawyers> lawyersList = new List<Lawyers>();
+    private bool showModal = false;
+    private string searchString = "";
+    public bool BasicSwitch2 { get; set; } = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        lawyersList = lawyerService.GetAll();
+
+        // var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        // var isAuthenticated = authState.User.Identity.IsAuthenticated;
+
+        // if (!isAuthenticated)
+        // {
+        //     Nav.NavigateTo("/Identity/Account/Login", forceLoad: true);
+        // }
+    }
+
+    private void ViewLawyerDetails(Lawyers lawyerId)
+    {
+        lawyers = lawyerId;
+
+        Nav.NavigateTo($"/details/{lawyerId.LawyerId}");
+    }
+
+    public async Task Add()
+    {
+        if (lawyers.LawyerId == 0)
+        {
+            lawyerService.Add(lawyers);
+            snackbar.Add("Lawyer was Added Successfully", Severity.Success);
+
+        }
+        else
+        {
+            snackbar.Add("Failed to Add Lawyer, try again later");
+        }
+        GetAll();
+
+    }
+
+    private List<Lawyers> GetAll()
+    {
+        lawyersList = lawyerService.GetAll();
+        return lawyersList;
+    }
+
+    private void ToggleModal()
+    {
+        showModal = !showModal;
+    }
+
+    private bool Searchrec(Lawyers lawyers)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (lawyers.LFirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+}

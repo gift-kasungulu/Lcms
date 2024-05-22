@@ -1,0 +1,106 @@
+﻿@page "/details/{LawyerId}"
+@using LegalCaseManagement.Data
+@using MailKit.Net.Smtp
+@inject LawyerService lawyerService
+@inject EmailService emailService
+@inject NavigationManager Navigation
+@inject IJSRuntime jstRuntime
+
+@if (lawyer != null)
+{
+    <div class="row">
+    <div class="col-md-6">
+        <MudCard Class="mb-4">
+            <MudCardHeader Class="mud-theme-primary mud-text-white">
+                <h5 class="card-title">Lawyer Details</h5>
+            </MudCardHeader>
+            <MudCardContent>
+                <h5 class="card-title">FirstName: @lawyer.LFirstName</h5>
+                <h5 class="card-title">LastName: @lawyer.LLastName</h5>
+                <p class="card-text">Email: @lawyer.Email</p>
+                <p class="card-text">Phone: @lawyer.Phone</p>
+                <p class="card-text">Country: @lawyer.Country</p>
+                <p class="card-text">City: @lawyer.City</p>
+                <p class="card-text">Age: @lawyer.Age</p>
+                <p class="card-text">Case Type: @lawyer.CaseType</p>
+                <p class="card-text">Experience Years: @lawyer.ExperienceYears</p>
+                <p class="card-text">Win Percentage:</p>
+                <MudProgress Linear Value="@lawyer.CaseWinPercentage" Color="Color.Info" />
+                <p class="card-text">@lawyer.CaseWinPercentage%</p>
+            </MudCardContent>
+        </MudCard>
+    </div>
+    <div class="col-md-6">
+        <MudCard Class="mb-4">
+            <MudCardHeader Class="mud-theme-primary mud-text-white">
+                <h5 class="card-title">Request for Lawyer</h5>
+            </MudCardHeader>
+            <MudCardContent>
+                <EditForm Model="request" OnValidSubmit="HandleValidSubmit">
+                    <div class="mb-3">
+                        <label class="form-label">Your Email</label>
+                        <MudTextField @bind-Value="request.Email" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <MudTextField @bind-Value="request.Message" TextArea="true" />
+                    </div>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
+                   
+                </EditForm>
+            </MudCardContent>
+        </MudCard>
+    </div>
+</div>
+}
+else
+{
+    <p>Lawyer details not found.</p>
+}
+
+<button class="btn btn-primary mt-4" @onclick="GoBack">Back to Index</button>
+
+@code {
+    [Parameter]
+    public string LawyerId { get; set; }
+
+    private Lawyers lawyer;
+    private RequestModel request = new RequestModel();
+
+    protected override void OnInitialized()
+    {
+        lawyer = lawyerService.GetById(int.Parse(LawyerId));
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await emailService.SendEmailAsync(request.Email, "Lawyer Request", request.Message, null);
+            await jstRuntime.InvokeVoidAsync("alert", "Email sent successfully!");
+        }
+        catch (SmtpCommandException smtpEx)
+        {
+            await jstRuntime.InvokeVoidAsync("alert", $"SMTP error: {smtpEx.Message}");
+        }
+        catch (SmtpProtocolException protocolEx)
+        {
+            await jstRuntime.InvokeVoidAsync("alert", $"SMTP protocol error: {protocolEx.Message}");
+        }
+        catch (Exception ex)
+        {
+            await jstRuntime.InvokeVoidAsync("alert", $"An error occurred: {ex.Message}");
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private class RequestModel
+    {
+        public string Email { get; set; }
+        public string Message { get; set; }
+    }
+}
