@@ -1,4 +1,6 @@
-﻿namespace LegalCaseManagement.Data
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace LegalCaseManagement.Data
 {
     public class GenService<T> : GenInterface<T> where T : class
     {
@@ -38,6 +40,11 @@
         public List<T> GetAll()
         {
             return myDbContext.Set<T>().ToList();
+        }
+
+        public async Task<List<T>> GetAllAsync()
+        {
+            return await myDbContext.Set<T>().ToListAsync();
         }
 
         public T GetById(int id)

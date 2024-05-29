@@ -8,8 +8,8 @@ namespace LegalCaseManagement.Data
     {
         [Key]
         public int CaseId { get; set; }
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
         public string Petitioner { get; set; } = string.Empty;
         public string Defendant { get; set; } = string.Empty;
 

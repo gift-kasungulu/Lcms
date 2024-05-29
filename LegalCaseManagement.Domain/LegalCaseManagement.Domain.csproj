@@ -6,4 +6,11 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MailKit" Version="4.6.0" />
+    <PackageReference Include="Microsoft.AspNet.Identity.EntityFramework" Version="2.2.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.28" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.28" />
+  </ItemGroup>
+
 </Project>

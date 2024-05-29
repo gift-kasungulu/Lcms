@@ -15,7 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString),
+    ServiceLifetime.Transient);
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true)
     .AddRoles<IdentityRole>()
@@ -24,11 +25,14 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddScoped<AuthenticationStateProvider, RevalidatingIdentityAuthenticationStateProvider<ApplicationUser>>();
 builder.Services.AddSingleton<WeatherForecastService>();
-builder.Services.AddScoped<AppUserService>();
-builder.Services.AddScoped<CaseService>();
-builder.Services.AddScoped<LawyerService>();
-builder.Services.AddScoped<EmailService>();
-builder.Services.AddScoped<RoleService>();
+builder.Services.AddTransient<AppUserService>();
+builder.Services.AddTransient<CaseService>();
+builder.Services.AddTransient<LawyerService>();
+builder.Services.AddTransient<EmailService>();
+builder.Services.AddTransient<RoleService>();
+builder.Services.AddTransient<CaseTypeService>();
+builder.Services.AddTransient<CaseStatusService>();
+builder.Services.AddTransient<CaseService>();
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddMudServices();
 

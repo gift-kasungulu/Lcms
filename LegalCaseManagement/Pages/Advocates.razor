@@ -1,4 +1,5 @@
 ﻿@page "/advocates"
+@attribute [Authorize(Roles = "Admin, Team")] 
 @using LegalCaseManagement.Data
 @inject LawyerService lawyerService
 @inject IJSRuntime jstRuntime
@@ -137,6 +138,7 @@
         try
         {
             await Task.Run(() => lawyerService.Add(lawyers));
+            GetAll();
             snackbar.Add("Lawyer Was Added Successfully", Severity.Success);
         }
         catch (Exception ex)

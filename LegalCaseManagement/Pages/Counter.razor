@@ -1,10 +1,5 @@
 ﻿@page "/counter"
-@* @attribute [Authorize(Roles = "Admin")] *@
-@inject AppUserService userService
-@inject IServiceScopeFactory ServiceScopeFactory
-@inject ISnackbar snackbar
-
-<PageTitle>Counter</PageTitle>
+@attribute [Authorize(Roles = "Admin")] 
 
 @using LegalCaseManagement.Data
 @using Microsoft.AspNetCore.Identity
@@ -14,6 +9,10 @@
 @inject UserManager<ApplicationUser> _userManager
 @inject SignInManager<ApplicationUser> _signInManager
 @inject ISnackbar snackbar
+@inject AppUserService userService
+@inject IServiceScopeFactory ServiceScopeFactory
+
+<PageTitle>Counter</PageTitle>
 
    @if (showModal)
 {
@@ -229,8 +228,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        userList = userService.GetAll();
         await LoadUsersAndRoles();
+        userList = userService.GetAll();
+        
 
         rolesList = new List<Role>()
         {

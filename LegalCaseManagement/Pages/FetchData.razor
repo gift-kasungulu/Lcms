@@ -1,17 +1,18 @@
 ﻿@page "/fetchdata"
 
-@attribute [Authorize(Roles = "Client")]
-<PageTitle>Weather forecast</PageTitle>
+@attribute [Authorize(Roles = "Client, Admin, Team")]
 
 @using LegalCaseManagement.Data
-@inject WeatherForecastService ForecastService
+
+
+<PageTitle>Appointments</PageTitle>
 
 
 @code {
-    private WeatherForecast[]? forecasts;
+    
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+       
     }
 }

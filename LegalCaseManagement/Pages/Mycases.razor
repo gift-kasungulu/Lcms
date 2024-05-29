@@ -1,0 +1,165 @@
+﻿@page "/cases"
+@attribute [Authorize(Roles = "Team, Admin")] 
+
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Data.LegalServices
+@inject UserManager<ApplicationUser> _userManager
+@inject ISnackbar snackbar
+@inject CaseTypeService caseTypeService
+@inject CaseStatusService caseStatusService
+@inject CaseService caseService
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Add New Case</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudForm Model="newCase" OnValidSubmit="AddNewCase">
+            <MudGrid>
+                <MudItem xs="12" sm="4" md="6">
+                    <MudTextField T="DateTime?" Format="yyyy-MM-dd" Label="Date"  InputType="InputType.Date"
+                         @bind-Value="newCase.Startate"/>
+                </MudItem>
+            </MudGrid>
+            <MudGrid>
+                <MudItem xs="12" sm="4" md="6">
+                    <MudTextField T="DateTime?" Format="yyyy-MM-dd" Label="Date"  InputType="InputType.Date"
+                         @bind-Value="newCase.EndDate"/>
+                </MudItem>
+            </MudGrid>
+            <MudGrid>
+                <MudItem xs="12" sm="4" md="6">
+                    <MudTextField Label="Petitioner" @bind-Value="newCase.Petitioner" Required="true" />
+                </MudItem>
+            </MudGrid>
+            <MudGrid>
+                <MudItem xs="12" sm="4" md="6">
+                    <MudTextField Label="Defendant" @bind-Value="newCase.Defendant" Required="true" />
+                </MudItem>
+            </MudGrid>
+            <MudGrid>
+                <MudItem xs="12" sm="4" md="6">
+                   <MudSelect Label="Client" @bind-Value="newCase.UserId" Required="true">
+                @foreach (var client in clients)
+                {
+                    <MudSelectItem Value="@client.Id">@client.FirstName @client.LastName</MudSelectItem>
+                }
+            </MudSelect>
+                </MudItem>
+            </MudGrid>
+            <MudGrid>
+                <MudItem xs="12" sm="4" md="6">
+                    <MudSelect T="int" Label="Case Type" @bind-Value="newCase.CaseTypeId" Required="true">
+                @foreach (var caseType in caseTypes)
+                {
+                    <MudSelectItem Value="@caseType.CaseTypeId">@caseType.TypeName</MudSelectItem>
+                }
+            </MudSelect>
+                </MudItem>
+            </MudGrid>
+            
+            <MudSelect T="int" Label="Case Status" @bind-Value="newCase.StatusId" Required="true">
+                @foreach (var caseStatus in caseStatuses)
+                {
+                    <MudSelectItem Value="@caseStatus.StatusId">@caseStatus.StatusName</MudSelectItem>
+                }
+            </MudSelect>
+            <br />
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Add Case</MudButton>
+        </MudForm>
+    </MudCardContent>
+</MudCard>
+<br />
+<MudCard>
+    <MudCardHeader>
+
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="GetAll()" Filter="new Func<Case,bool>(Search)" @bind-newCase="newCase">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Cases</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Large" StartIcon=" @Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                
+                <MudTh>ate Started</MudTh>
+                <MudTh>Next Date</MudTh>
+                <MudTh>Pertitioner</MudTh>
+               
+                <MudTh>Court</MudTh>
+                 <MudTh>Status</MudTh>
+                  <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="start">@context.StartDate</MudTd>
+                <MudTd DataLabel="next date">>@context.EndDate</MudTd>
+                <MudTd DataLabel="pertitioner">@context.Petitioner</MudTd>
+                <MudTd DataLabel="defendant">@context.Defendant</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Edit" aria-label="delete" ></MudIconButton>
+                    
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+
+@code {
+    
+    private string searchString = "";
+    private Case newCase = new Case();
+    private List<Case> caseList = new List<Case>();
+    private List<ApplicationUser> clients = new List<ApplicationUser>();
+    private List<CaseType> caseTypes = new List<CaseType>();
+    private List<CaseStatus> caseStatuses = new List<CaseStatus>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        caseList = caseService.GetAll();
+        clients = (await _userManager.GetUsersInRoleAsync("Client")).ToList();
+        caseTypes = await caseTypeService.GetAllAsync();
+        caseStatuses = await caseStatusService.GetAllAsync();
+    }
+
+    private bool Search(Case mycase)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (mycase.Petitioner.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private async Task AddNewCase()
+    {
+        try
+        {
+            await Task.Run(() => caseService.Add(newCase));
+            snackbar.Add("Case added successfully", Severity.Success);
+            GetAll();
+            
+            
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Failed to add the case. Please try again.", Severity.Error);
+        }
+    }
+
+    private List<Case> GetAll()
+    {
+        caseList = caseService.GetAll();
+        return caseList;
+    }
+}

@@ -1,7 +1,206 @@
 ﻿@page "/settings"
+@attribute [Authorize(Roles = "Admin")] 
+
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Data.LegalServices
+@inject LawyerService lawyerService
+@inject IJSRuntime jstRuntime
+@inject ISnackbar snackbar
+@inject CaseTypeService caseTypeService
+@inject CaseStatusService casestatusService
+
+<PageTitle>Settings</PageTitle>
+
+@if (showModal)
+{
+    <div class="modal fade show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Case Type/Category</h4>
+                    <button type="button" class="btn-close" @onclick="ToggleModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="casetype" OnValidSubmit="Add">
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">First Name</label>
+                            <input class="form-control" placeholder="Enter Type Name" @bind-value="casetype.TypeName" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="ToggleModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<!-- second modal here -->
+@if (showModalsecond)
+{
+    <div class="modal fade show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Case Status</h4>
+                    <button type="button" class="btn-close" @onclick="ToggleModalSecond"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="casestatus" OnValidSubmit="AddStatus">
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">Status Name</label>
+                            <input class="form-control" placeholder="Enter Status Name" @bind-value="casestatus.StatusName" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="ToggleModalSecond">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<MudCard Elevation="25">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Add CaseType</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModalSecond">Add CaseStatus</MudButton>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <div class="row">
+    <div class="col-md-6">
+        <MudCard Class="mb-4">
+            <MudCardHeader Class="mud-theme-primary mud-text-white">
+                <h5 class="card-title">Case Type Categories</h5>
+            </MudCardHeader>
+            <MudCardContent>
+                        <MudTable Items="casetypeList" Dense="true" Hover="true">
+                            <HeaderContent>
+                                <MudTh>#</MudTh>
+                                <MudTh> Name</MudTh>
+                                <MudTh>Actions</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Id">@context.CaseTypeId</MudTd>
+                                <MudTd DataLabel="Case Type Name">@context.TypeName</MudTd>
+                                
+                                <MudTd>
+                                    <MudIconButton Color="Color.Info" Icon="@Icons.Material.Filled.Edit" aria-label="edit"  />
+                                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete"  />
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+            </MudCardContent>
+        </MudCard>
+    </div>
+    <div class="col-md-6">
+        <MudCard Class="mb-4">
+            <MudCardHeader Class="mud-theme-primary mud-text-white">
+                <h5 class="card-title">Case Status</h5>
+            </MudCardHeader>
+            <MudCardContent>
+                     <MudTable Items="casestatusList" Dense="true" Hover="true">
+                            <HeaderContent>
+                                <MudTh>#</MudTh>
+                                <MudTh> Name</MudTh>
+                                <MudTh>Actions</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Id">@context.StatusId</MudTd>
+                                <MudTd DataLabel="Status Name">@context.StatusName</MudTd>
+                                
+                                <MudTd>
+                                    <MudIconButton Color="Color.Info" Icon="@Icons.Material.Filled.Edit" aria-label="edit"  />
+                                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete"  />
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>   
+            </MudCardContent>
+        </MudCard>
+    </div>
+</div>
+    </MudCardContent>
+</MudCard>
 
 
-<PageTitle>Index</PageTitle>
+@code{
+    private CaseType casetype = new CaseType();
+    private CaseStatus casestatus = new CaseStatus();
+    private List<CaseStatus> casestatusList = new List<CaseStatus>();
+    private List<CaseType> casetypeList = new List<CaseType>();
+    private bool showModal = false;
+    private bool showModalsecond = false;
 
-<h1>Hello, world!</h1>
+    protected override async Task OnInitializedAsync()
+    {
+        casetypeList = caseTypeService.GetAll();
+        casestatusList = casestatusService.GetAll();
+
+    }
+
+    private void ToggleModal()
+    {
+        showModal = !showModal;
+    }
+
+    private void ToggleModalSecond()
+    {
+        showModalsecond = !showModalsecond;
+    }
+
+    public async Task Add()
+    {
+        try
+        {
+            await Task.Run(() => caseTypeService.Add(casetype));
+            GetAll();
+            snackbar.Add("Case Type Was Added Was Added Successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed Try Again later", Severity.Error);
+        }
+    }
+
+     public async Task AddStatus()
+    {
+        try
+        {
+            await Task.Run(() => casestatusService.Add(casestatus));
+            GetAllStatus();
+            snackbar.Add("Case Status Was Added Was Added Successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed Try Again later", Severity.Error);
+        }
+    }
+
+    private async Task DeleteRec(CaseType rec)
+    {
+        caseTypeService.Delete(rec);
+        GetAll();
+        snackbar.Add("Type was removed Successfully",Severity.Success);
+
+    }
+
+    private List<CaseType> GetAll()
+    {
+        casetypeList = caseTypeService.GetAll();
+        return casetypeList;
+    }
+
+    private List<CaseStatus> GetAllStatus()
+    {
+        casestatusList = casestatusService.GetAll();
+        return casestatusList;
+    }
+    
+}
 

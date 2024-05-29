@@ -116,14 +116,14 @@
     {
         lawyersList = lawyerService.GetAll();
 
-        // var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
-        // var isAuthenticated = authState.User.Identity.IsAuthenticated;
+        var isAuthenticated = authState.User.Identity.IsAuthenticated;
 
-        // if (!isAuthenticated)
-        // {
-        //     Nav.NavigateTo("/Identity/Account/Login", forceLoad: true);
-        // }
+        if (!isAuthenticated)
+        {
+            Nav.NavigateTo("/Identity/Account/Login", forceLoad: true);
+        }
     }
 
     private void ViewLawyerDetails(Lawyers lawyerId)
