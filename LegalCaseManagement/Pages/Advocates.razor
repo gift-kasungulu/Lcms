@@ -2,10 +2,10 @@
 @attribute [Authorize(Roles = "Admin, Team")] 
 @using LegalCaseManagement.Data
 @inject LawyerService lawyerService
-@inject IJSRuntime jstRuntime
+@inject IJSRuntime jsRuntime
 @inject ISnackbar snackbar
-<PageTitle>Advocates</PageTitle>
 
+<PageTitle>Advocates</PageTitle>
 
 @if (showModal)
 {
@@ -72,12 +72,11 @@
 <MudCard Elevation="25">
     <MudCardHeader>
         <CardHeaderContent>
-
             <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Add Advocate</MudButton>
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudTable Items="GetAll()" Filter="new Func<Lawyers,bool>(Searchrec)" @bind-lawyers="lawyers">
+        <MudTable Items="lawyersList" Filter="new Func<Lawyers, bool>(Searchrec)" @bind-lawyersList="lawyersList">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Advocates</MudText>
                 <MudSpacer />
@@ -99,11 +98,11 @@
                 <MudTd DataLabel="LastName">@context.LLastName</MudTd>
                 <MudTd DataLabel="Email">@context.Email</MudTd>
                 <MudTd DataLabel="Phone">@context.Phone</MudTd>
-                <MudTd DataLabel="Experince">@context.ExperienceYears</MudTd>
+                <MudTd DataLabel="Experience">@context.ExperienceYears</MudTd>
                 <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudIconButton Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" aria-label="delete"></MudIconButton>
-                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>DeleteRec(context))"></MudIconButton>
+                    <MudIconButton Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" aria-label="edit"></MudIconButton>
+                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(() => DeleteRec(context))"></MudIconButton>
                 </MudTd>
             </RowTemplate>
             <PagerContent>
@@ -121,61 +120,61 @@
 
     protected override async Task OnInitializedAsync()
     {
-        lawyersList = lawyerService.GetAll();
-
+        lawyersList = await lawyerService.GetAllAsync();
     }
 
     private async Task DeleteRec(Lawyers rec)
     {
-        lawyerService.Delete(rec);
-        GetAll();
-        snackbar.Add("Lawyer was removed Successfully",Severity.Success);
-
+        if (await lawyerService.DeleteAsync(rec))
+        {
+            lawyersList = await lawyerService.GetAllAsync();
+            snackbar.Add("Lawyer was removed Successfully", Severity.Info);
+        }
+        else
+        {
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+        }
     }
 
     public async Task Add()
     {
         try
         {
-            await Task.Run(() => lawyerService.Add(lawyers));
-            GetAll();
-            snackbar.Add("Lawyer Was Added Successfully", Severity.Success);
+            if (await lawyerService.AddAsync(lawyers))
+            {
+                lawyersList = await lawyerService.GetAllAsync();
+                snackbar.Add("Lawyer Was Added Successfully", Severity.Success);
+                ToggleModal(); // Close the modal after adding
+            }
+            else
+            {
+                snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            snackbar.Add("Operation Failed Try Again later", Severity.Error);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
         }
-    }
-
-    private List<Lawyers> GetAll()
-    {
-        lawyersList = lawyerService.GetAll();
-        return lawyersList;
     }
 
     private void ToggleModal()
     {
         showModal = !showModal;
+        if (!showModal)
+        {
+            lawyers = new Lawyers(); // Reset the form when closing the modal
+        }
     }
 
     private bool Searchrec(Lawyers lawyers)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
-        if (lawyers.LFirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-        return false;
-    }
-
-    private bool _processing = false;
-
-    async Task ProcessSomething()
-    {
-        _processing = true;
-        await Task.Delay(2000);
-        _processing = false;
+        return lawyers.LFirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+               lawyers.LLastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+               lawyers.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+               lawyers.Phone.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+               lawyers.City.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
+               lawyers.Country.Contains(searchString, StringComparison.OrdinalIgnoreCase);
     }
 }
-

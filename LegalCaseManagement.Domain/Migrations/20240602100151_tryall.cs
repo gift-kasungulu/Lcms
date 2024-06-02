@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace LegalCaseManagement.Migrations
+namespace LegalCaseManagement.Domain.Migrations
 {
-    public partial class First : Migration
+    public partial class tryall : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -215,8 +215,9 @@ namespace LegalCaseManagement.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Petitioner = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Defendant = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Petitioner = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Defendant = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Discription = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     CaseTypeId = table.Column<int>(type: "int", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)

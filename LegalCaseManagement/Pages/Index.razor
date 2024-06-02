@@ -68,7 +68,7 @@
                             <MudSwitch @bind-Value="@BasicSwitch2" Color="Color.Primary" />
                         </MudTd>
                         <MudTd DataLabel="Actions">
-                            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.ReadMore" OnClick="@(()=>ViewLawyerDetails(context))"></MudFab>
+                            <MudFab Color="Color.Secondary" Size="Size.Small" StartIcon="@Icons.Material.Filled.ReadMore" OnClick="@(()=>ViewLawyerDetails(context))"></MudFab>
                         </MudTd>
                     </RowTemplate>
                     <PagerContent>
@@ -109,7 +109,7 @@
     private Lawyers lawyers = new Lawyers();
     private List<Lawyers> lawyersList = new List<Lawyers>();
     private bool showModal = false;
-    private string searchString = "";
+    private string searchString = " ";
     public bool BasicSwitch2 { get; set; } = false;
 
     protected override async Task OnInitializedAsync()

@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = "Admin")] 
 
 @using LegalCaseManagement.Data
+@using Microsoft.AspNetCore.Mvc.Rendering
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using System.Security.Claims
@@ -17,7 +18,7 @@
    @if (showModal)
 {
     <div class="modal fade show" tabindex="-1" style="display: block;">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Add Student</h4>
@@ -105,12 +106,12 @@
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="First fName">@context.FirstName</MudTd>
-                <MudTd DataLabel="lName">>@context.LastName</MudTd>
+                <MudTd DataLabel="lName">@context.LastName</MudTd>
                 <MudTd DataLabel="Email">@context.Email</MudTd>
                 <MudTd DataLabel="Phone">@context.PhoneNumber</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Edit" aria-label="delete" ></MudIconButton>
-                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>DeleteRec(context))"></MudIconButton>
+                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(()=>Update(context))" />
+                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small"  OnClick="@(()=>DeleteRec(context))" />
                 </MudTd>
             </RowTemplate>
             <PagerContent>
@@ -205,6 +206,12 @@
         return false;
     }
 
+    public void Update(ApplicationUser userRecord)
+    {
+        ToggleModal();
+        appUsers = userRecord;
+        StateHasChanged();
+    }
 
     private List<ApplicationUser> GetAll()
     {
@@ -406,13 +413,17 @@
 
                 if (roleAddedResult.Succeeded)
                 {
-                    snackbar.Add("User was Addedd Successfuly with Roles", Severity.Success);
+                    snackbar.Add("User was Addedd Successfuly with Role", Severity.Success);
                     
                     return;
                 }
+                else
+                {
+                    
+                }
             }
-
-            await jstRuntime.InvokeVoidAsync("alert", "User creation failed. Please check the input data.");
+            snackbar.Add("User creation failed. Please check the input data.", Severity.Error);
+            
         }
         catch (Exception ex)
         {

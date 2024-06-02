@@ -4,16 +4,18 @@ using LegalCaseManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace LegalCaseManagement.Migrations
+namespace LegalCaseManagement.Domain.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240602100151_tryall")]
+    partial class tryall
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,16 +122,25 @@ namespace LegalCaseManagement.Migrations
 
                     b.Property<string>("Defendant")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<string>("Discription")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("EndDate")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Petitioner")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("StartDate")
+                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<int>("StatusId")
@@ -374,19 +385,19 @@ namespace LegalCaseManagement.Migrations
             modelBuilder.Entity("LegalCaseManagement.Data.Case", b =>
                 {
                     b.HasOne("LegalCaseManagement.Data.CaseType", "CaseType")
-                        .WithMany("Cases")
+                        .WithMany()
                         .HasForeignKey("CaseTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("LegalCaseManagement.Data.CaseStatus", "CaseStatus")
-                        .WithMany("Cases")
+                        .WithMany()
                         .HasForeignKey("StatusId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("LegalCaseManagement.Data.ApplicationUser", "AppUser")
-                        .WithMany("Cases")
+                        .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -447,21 +458,6 @@ namespace LegalCaseManagement.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("LegalCaseManagement.Data.ApplicationUser", b =>
-                {
-                    b.Navigation("Cases");
-                });
-
-            modelBuilder.Entity("LegalCaseManagement.Data.CaseStatus", b =>
-                {
-                    b.Navigation("Cases");
-                });
-
-            modelBuilder.Entity("LegalCaseManagement.Data.CaseType", b =>
-                {
-                    b.Navigation("Cases");
                 });
 #pragma warning restore 612, 618
         }

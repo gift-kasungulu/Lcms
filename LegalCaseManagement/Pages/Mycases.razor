@@ -1,76 +1,102 @@
 ﻿@page "/cases"
-@attribute [Authorize(Roles = "Team, Admin")] 
+@attribute [Authorize(Roles = "Team, Admin")]
 
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Identity
 @using LegalCaseManagement.Data
 @using LegalCaseManagement.Data.LegalServices
-@inject UserManager<ApplicationUser> _userManager
+@using MudBlazor
 @inject ISnackbar snackbar
 @inject CaseTypeService caseTypeService
 @inject CaseStatusService caseStatusService
 @inject CaseService caseService
+@inject IServiceScopeFactory ServiceScopeFactory
+@inject UserManager<ApplicationUser> _userManager
 
 <MudCard>
     <MudCardHeader>
         <CardHeaderContent>
-            <MudText Typo="Typo.h6">Add New Case</MudText>
+            <button type="button" class="btn btn-primary" @onclick="OpenModal">
+                Add New Case
+            </button>
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudForm Model="newCase" OnValidSubmit="AddNewCase">
-            <MudGrid>
-                <MudItem xs="12" sm="4" md="6">
-                    <MudTextField T="DateTime?" Format="yyyy-MM-dd" Label="Date"  InputType="InputType.Date"
-                         @bind-Value="newCase.StartDate"/>
-                </MudItem>
-            </MudGrid>
-            <MudGrid>
-                <MudItem xs="12" sm="4" md="6">
-                    <MudTextField T="DateTime?" Format="yyyy-MM-dd" Label="Date"  InputType="InputType.Date"
-                         @bind-Value="newCase.EndDate"/>
-                </MudItem>
-            </MudGrid>
-            <MudGrid>
-                <MudItem xs="12" sm="4" md="6">
-                    <MudTextField Label="Petitioner" @bind-Value="newCase.Petitioner" Required="true" />
-                </MudItem>
-            </MudGrid>
-            <MudGrid>
-                <MudItem xs="12" sm="4" md="6">
-                    <MudTextField Label="Defendant" @bind-Value="newCase.Defendant" Required="true" />
-                </MudItem>
-            </MudGrid>
-            <MudGrid>
-                <MudItem xs="12" sm="4" md="6">
-                   <MudSelect Label="Client" @bind-Value="newCase.UserId" Required="true">
-                @foreach (var client in clients)
-                {
-                    <MudSelectItem Value="@client.Id">@client.FirstName @client.LastName</MudSelectItem>
-                }
-            </MudSelect>
-                </MudItem>
-            </MudGrid>
-            <MudGrid>
-                <MudItem xs="12" sm="4" md="6">
-                    <MudSelect T="int" Label="Case Type" @bind-Value="newCase.CaseTypeId" Required="true">
-                @foreach (var caseType in caseTypes)
-                {
-                    <MudSelectItem Value="@caseType.CaseTypeId">@caseType.TypeName</MudSelectItem>
-                }
-            </MudSelect>
-                </MudItem>
-            </MudGrid>
-            
-            <MudSelect T="int" Label="Case Status" @bind-Value="newCase.StatusId" Required="true">
-                @foreach (var caseStatus in caseStatuses)
-                {
-                    <MudSelectItem Value="@caseStatus.StatusId">@caseStatus.StatusName</MudSelectItem>
-                }
-            </MudSelect>
-            <br />
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Add Case</MudButton>
-        </MudForm>
+
+        <div class="modal @modalClass" tabindex="-1" aria-labelledby="addCaseModalLabel" style="display:@modalDisplay">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addCaseModalLabel">Add New Case</h5>
+                        <button type="button" class="btn-close" @onclick="CloseModal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <EditForm Model="newCase" OnValidSubmit="Add">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Desription</label>
+                                <InputText @bind-Value="newCase.Discription" id="description" class="form-control"
+                                    required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="startDate" class="form-label">Date</label>
+                                <InputDate @bind-Value="newCase.StartDate" id="startDate" class="form-control" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <InputDate @bind-Value="newCase.EndDate" id="endDate" class="form-control" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="petitioner" class="form-label">Petitioner</label>
+                                <InputText @bind-Value="newCase.Petitioner" id="petitioner" class="form-control"
+                                    required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="defendant" class="form-label">Court Name</label>
+                                <InputText @bind-Value="newCase.Defendant" id="defendant" class="form-control"
+                                    required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="client" class="form-label">Client</label>
+                                <InputSelect @bind-Value="newCase.UserId" id="client" class="form-select" required>
+                                    @foreach (var client in clients)
+                                    {
+                                        <option value="@client.Id">@client.FirstName @client.LastName</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="mb-3">
+                                <label for="defendant" class="form-label">Court Name</label>
+                                <InputText @bind-Value="newCase.Defendant" id="defendant" class="form-control"
+                                    required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="caseType" class="form-label">Case Type</label>
+                                <InputSelect @bind-Value="newCase.CaseTypeId" id="caseType" class="form-select"
+                                    required>
+                                    @foreach (var caseType in caseTypes)
+                                    {
+                                        <option value="@caseType.CaseTypeId">@caseType.TypeName</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <div class="mb-3">
+                                <label for="caseStatus" class="form-label">Case Status</label>
+                                <InputSelect @bind-Value="newCase.StatusId" id="caseStatus" class="form-select"
+                                    required>
+                                    @foreach (var caseStatus in caseStatuses)
+                                    {
+                                        <option value="@caseStatus.StatusId">@caseStatus.StatusName</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Case</button>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+        </div>
     </MudCardContent>
 </MudCard>
 <br />
@@ -79,52 +105,60 @@
 
     </MudCardHeader>
     <MudCardContent>
-        <MudTable Items="GetAll()" Filter="new Func<Case,bool>(Search)" @bind-newCase="newCase">
+        <MudTable Items="caseList" Filter="new Func<Case,bool>(Search)">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Cases</MudText>
                 <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Large" StartIcon=" @Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Large"
+                    StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
             </ToolBarContent>
             <HeaderContent>
-                
-                <MudTh>ate Started</MudTh>
+                <MudTh>#</MudTh>
                 <MudTh>Next Date</MudTh>
-                <MudTh>Pertitioner</MudTh>
-               
+                <MudTh>Petitioner</MudTh>
                 <MudTh>Court</MudTh>
-                 <MudTh>Status</MudTh>
-                  <MudTh>Actions</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Client</MudTh>
+                <MudTh>Action</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="start">@context.StartDate</MudTd>
-                <MudTd DataLabel="next date">>@context.EndDate</MudTd>
-                <MudTd DataLabel="pertitioner">@context.Petitioner</MudTd>
-                <MudTd DataLabel="defendant">@context.Defendant</MudTd>
+                <MudTd DataLabel="CaseId">@context.CaseId</MudTd>
+                <MudTd DataLabel="EndDate">@context.EndDate</MudTd>
+                <MudTd DataLabel="Petitioner">@context.Petitioner</MudTd>
+                <MudTd DataLabel="Defendant">@context.Defendant</MudTd>
+                <MudTd DataLabel="CaseStatus">@context.CaseStatus.StatusName</MudTd>
+                <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
+
                 <MudTd DataLabel="Actions">
-                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Edit" aria-label="delete" ></MudIconButton>
-                    
+                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(()=>Update(context))" />
                 </MudTd>
             </RowTemplate>
             <PagerContent>
                 <MudTablePager />
             </PagerContent>
         </MudTable>
+
+
     </MudCardContent>
 </MudCard>
 
 
 @code {
-    
+
     private string searchString = "";
     private Case newCase = new Case();
     private List<Case> caseList = new List<Case>();
     private List<ApplicationUser> clients = new List<ApplicationUser>();
     private List<CaseType> caseTypes = new List<CaseType>();
     private List<CaseStatus> caseStatuses = new List<CaseStatus>();
+    private bool isModalVisible = false;
+
+    private string modalClass => isModalVisible ? "show" : "";
+    private string modalDisplay => isModalVisible ? "block" : "none";
 
     protected override async Task OnInitializedAsync()
     {
-        caseList = caseService.GetAll();
+        await GetAllAsync();
         clients = (await _userManager.GetUsersInRoleAsync("Client")).ToList();
         caseTypes = await caseTypeService.GetAllAsync();
         caseStatuses = await caseStatusService.GetAllAsync();
@@ -140,26 +174,71 @@
         return false;
     }
 
-    private async Task AddNewCase()
+    public async Task Add()
     {
-        try
+        if (newCase.CaseId == 0)
         {
-            await Task.Run(() => caseService.Add(newCase));
-            snackbar.Add("Case added successfully", Severity.Success);
-            GetAll();
-            
-            
+            await caseService.AddAsync(newCase);
+            await GetAllAsync();
+            snackbar.Add("the Case was Added ", Severity.Success);
+            CloseModal();
         }
-        catch (Exception ex)
+        else
         {
-            Console.WriteLine(ex.Message);
-            snackbar.Add("Failed to add the case. Please try again.", Severity.Error);
+            caseService.Update(newCase);
+            snackbar.Add("Case Record Updated", Severity.Success);
         }
     }
 
-    private List<Case> GetAll()
+    public void Update(Case caseRecord)
     {
-        caseList = caseService.GetAll();
-        return caseList;
+        OpenModal();
+        newCase = caseRecord;
+        StateHasChanged();
+    }
+
+    private async Task<List<ApplicationUser>> GetUsersAsync()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            return await userManager.Users.ToListAsync();
+        }
+    }
+
+    private async Task<List<Case>> GetCasesWithRelatedDataAsync()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return await context.Cases
+            .Include(c => c.AppUser)
+            .Include(c => c.CaseStatus)
+            .Include(c => c.CaseType)
+            .ToListAsync();
+        }
+    }
+
+    private async Task GetAllAsync()
+    {
+        var cases = await GetCasesWithRelatedDataAsync();
+        var users = await GetUsersAsync();
+
+        foreach (var caseItem in cases)
+        {
+            caseItem.AppUser = users.FirstOrDefault(u => u.Id == caseItem.UserId);
+        }
+
+        caseList = cases;
+    }
+
+    private void OpenModal()
+    {
+        isModalVisible = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalVisible = false;
     }
 }

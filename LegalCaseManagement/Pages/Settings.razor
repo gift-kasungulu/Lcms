@@ -1,5 +1,5 @@
 ﻿@page "/settings"
-@attribute [Authorize(Roles = "Admin")] 
+@*@attribute [Authorize(Roles = "Admin")] *@
 
 @using LegalCaseManagement.Data
 @using LegalCaseManagement.Data.LegalServices
@@ -11,10 +11,11 @@
 
 <PageTitle>Settings</PageTitle>
 
+
 @if (showModal)
 {
     <div class="modal fade show" tabindex="-1" style="display: block;">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Add Case Type/Category</h4>
@@ -22,8 +23,9 @@
                 </div>
                 <div class="modal-body">
                     <EditForm Model="casetype" OnValidSubmit="Add">
+                        
                         <div class="mb-3 mt-3">
-                            <label class="form-label">First Name</label>
+                            <label class="form-label">Type Name</label>
                             <input class="form-control" placeholder="Enter Type Name" @bind-value="casetype.TypeName" />
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
@@ -36,11 +38,12 @@
         </div>
     </div>
 }
+
 <!-- second modal here -->
 @if (showModalsecond)
 {
     <div class="modal fade show" tabindex="-1" style="display: block;">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Add Case Status</h4>
@@ -48,6 +51,7 @@
                 </div>
                 <div class="modal-body">
                     <EditForm Model="casestatus" OnValidSubmit="AddStatus">
+                       
                         <div class="mb-3 mt-3">
                             <label class="form-label">Status Name</label>
                             <input class="form-control" placeholder="Enter Status Name" @bind-value="casestatus.StatusName" />
@@ -72,12 +76,13 @@
     </MudCardHeader>
     <MudCardContent>
         <div class="row">
-    <div class="col-md-6">
-        <MudCard Class="mb-4">
-            <MudCardHeader Class="mud-theme-primary mud-text-white">
-                <h5 class="card-title">Case Type Categories</h5>
-            </MudCardHeader>
-            <MudCardContent>
+            <!-- Case Type Categories -->
+            <div class="col-md-6">
+                <MudCard Class="mb-4">
+                    <MudCardHeader Class="mud-theme-primary mud-text-white">
+                        <h5 class="card-title">Case Type Categories</h5>
+                    </MudCardHeader>
+                    <MudCardContent>
                         <MudTable Items="casetypeList" Dense="true" Hover="true">
                             <HeaderContent>
                                 <MudTh>#</MudTh>
@@ -87,23 +92,23 @@
                             <RowTemplate>
                                 <MudTd DataLabel="Id">@context.CaseTypeId</MudTd>
                                 <MudTd DataLabel="Case Type Name">@context.TypeName</MudTd>
-                                
                                 <MudTd>
-                                    <MudIconButton Color="Color.Info" Icon="@Icons.Material.Filled.Edit" aria-label="edit"  />
-                                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete"  />
+                                    <MudIconButton Color="Color.Info" Icon="@Icons.Material.Filled.Edit" aria-label="edit" />
+                                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>DeleteType(context))" />
                                 </MudTd>
                             </RowTemplate>
                         </MudTable>
-            </MudCardContent>
-        </MudCard>
-    </div>
-    <div class="col-md-6">
-        <MudCard Class="mb-4">
-            <MudCardHeader Class="mud-theme-primary mud-text-white">
-                <h5 class="card-title">Case Status</h5>
-            </MudCardHeader>
-            <MudCardContent>
-                     <MudTable Items="casestatusList" Dense="true" Hover="true">
+                    </MudCardContent>
+                </MudCard>
+            </div>
+            <!-- Case Status -->
+            <div class="col-md-6">
+                <MudCard Class="mb-4">
+                    <MudCardHeader Class="mud-theme-primary mud-text-white">
+                        <h5 class="card-title">Case Status</h5>
+                    </MudCardHeader>
+                    <MudCardContent>
+                        <MudTable Items="casestatusList" Dense="true" Hover="true">
                             <HeaderContent>
                                 <MudTh>#</MudTh>
                                 <MudTh> Name</MudTh>
@@ -112,34 +117,45 @@
                             <RowTemplate>
                                 <MudTd DataLabel="Id">@context.StatusId</MudTd>
                                 <MudTd DataLabel="Status Name">@context.StatusName</MudTd>
-                                
                                 <MudTd>
-                                    <MudIconButton Color="Color.Info" Icon="@Icons.Material.Filled.Edit" aria-label="edit"  />
-                                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete"  />
+                                    <MudIconButton Color="Color.Info" Icon="@Icons.Material.Filled.Edit" aria-label="edit" />
+                                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>DeleteRec(context))" />
                                 </MudTd>
                             </RowTemplate>
-                        </MudTable>   
-            </MudCardContent>
-        </MudCard>
-    </div>
-</div>
+                        </MudTable>
+                    </MudCardContent>
+                </MudCard>
+            </div>
+        </div>
     </MudCardContent>
 </MudCard>
 
-
-@code{
+@code {
     private CaseType casetype = new CaseType();
     private CaseStatus casestatus = new CaseStatus();
     private List<CaseStatus> casestatusList = new List<CaseStatus>();
     private List<CaseType> casetypeList = new List<CaseType>();
     private bool showModal = false;
     private bool showModalsecond = false;
+    private bool isAddingType = false;
+    private bool isAddingStatus = false;
+    private bool isDeletingType = false;
+    private bool isDeletingStatus = false;
 
     protected override async Task OnInitializedAsync()
     {
-        casetypeList = caseTypeService.GetAll();
-        casestatusList = casestatusService.GetAll();
+        await GetAll();
+        await GetAllStatus();
+    }
 
+    private async Task GetAll()
+    {
+        casetypeList = await caseTypeService.GetAllAsync();
+    }
+
+    private async Task GetAllStatus()
+    {
+        casestatusList = await casestatusService.GetAllAsync();
     }
 
     private void ToggleModal()
@@ -152,55 +168,115 @@
         showModalsecond = !showModalsecond;
     }
 
-    public async Task Add()
+   private async Task Add()
+{
+    try
     {
-        try
+        // Check if CaseTypeId is not null or empty
+        if (casetype.CaseTypeId == 0)
         {
-            await Task.Run(() => caseTypeService.Add(casetype));
-            GetAll();
-            snackbar.Add("Case Type Was Added Was Added Successfully", Severity.Success);
+            isAddingType = true;
+            var success = await caseTypeService.AddAsync(casetype);
+            if (success)
+            {
+                await GetAll();
+                snackbar.Add("Case Type Was Added Successfully", Severity.Success);
+            }
+            else
+            {
+                snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+            }
         }
-        catch (Exception ex)
+        else
         {
-            Console.WriteLine(ex.Message);
-            snackbar.Add("Operation Failed Try Again later", Severity.Error);
-        }
-    }
-
-     public async Task AddStatus()
-    {
-        try
-        {
-            await Task.Run(() => casestatusService.Add(casestatus));
-            GetAllStatus();
-            snackbar.Add("Case Status Was Added Was Added Successfully", Severity.Success);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            snackbar.Add("Operation Failed Try Again later", Severity.Error);
+            snackbar.Add("Case Type ID cannot be null or empty.", Severity.Error);
         }
     }
-
-    private async Task DeleteRec(CaseType rec)
+    catch (Exception ex)
     {
-        caseTypeService.Delete(rec);
-        GetAll();
-        snackbar.Add("Type was removed Successfully",Severity.Success);
-
+        Console.WriteLine(ex.Message);
+        snackbar.Add("Operation Failed. Try Again later", Severity.Error);
     }
-
-    private List<CaseType> GetAll()
+    finally
     {
-        casetypeList = caseTypeService.GetAll();
-        return casetypeList;
+        isAddingType = false;
     }
-
-    private List<CaseStatus> GetAllStatus()
-    {
-        casestatusList = casestatusService.GetAll();
-        return casestatusList;
-    }
-    
 }
 
+
+   private async Task AddStatus()
+{
+    try
+    {
+        // Check if StatusId is not null or empty
+        if (casestatus.StatusId == 0)
+        {
+            isAddingStatus = true;
+            var success = await casestatusService.AddAsync(casestatus);
+            if (success)
+            {
+                await GetAllStatus();
+                snackbar.Add("Case Status Was Added Successfully", Severity.Success);
+            }
+            else
+            {
+                snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+            }
+        }
+        else
+        {
+            snackbar.Add("Case Status ID cannot be null or empty.", Severity.Error);
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+    }
+    finally
+    {
+        isAddingStatus = false;
+    }
+}
+
+
+    private async Task DeleteRec(CaseStatus rec)
+    {
+        try
+        {
+            isDeletingStatus = true;
+            await casestatusService.DeleteAsync(rec);
+            await GetAllStatus();
+            snackbar.Add("Status was deleted", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+        }
+        finally
+        {
+            isDeletingStatus = false;
+        }
+    }
+
+    private async Task DeleteType(CaseType typerec)
+    {
+        try
+        {
+            isDeletingType = true;
+            await caseTypeService.DeleteAsync(typerec);
+            await GetAll();
+            snackbar.Add("Type was removed", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+        }
+        finally
+        {
+            isDeletingType = false;
+        }
+    }
+}
