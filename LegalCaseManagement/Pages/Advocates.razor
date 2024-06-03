@@ -101,8 +101,8 @@
                 <MudTd DataLabel="Experience">@context.ExperienceYears</MudTd>
                 <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudIconButton Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" aria-label="edit"></MudIconButton>
-                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(() => DeleteRec(context))"></MudIconButton>
+                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small"/>
+                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(() => DeleteRec(context))" />
                 </MudTd>
             </RowTemplate>
             <PagerContent>

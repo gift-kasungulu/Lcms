@@ -28,6 +28,8 @@ namespace LegalCaseManagement.Data
             }
         }
 
+        
+
         public async Task<bool> AddAsync(T entity)
         {
             try
@@ -87,6 +89,8 @@ namespace LegalCaseManagement.Data
         {
             return myDbContext.Set<T>().Find(id);
         }
+
+        
 
         public bool Update(T entity)
         {

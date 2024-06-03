@@ -66,11 +66,7 @@
                                     }
                                 </InputSelect>
                             </div>
-                            <div class="mb-3">
-                                <label for="defendant" class="form-label">Court Name</label>
-                                <InputText @bind-Value="newCase.Defendant" id="defendant" class="form-control"
-                                    required />
-                            </div>
+                            
                             <div class="mb-3">
                                 <label for="caseType" class="form-label">Case Type</label>
                                 <InputSelect @bind-Value="newCase.CaseTypeId" id="caseType" class="form-select"
@@ -137,8 +133,6 @@
                 <MudTablePager />
             </PagerContent>
         </MudTable>
-
-
     </MudCardContent>
 </MudCard>
 
@@ -174,7 +168,7 @@
         return false;
     }
 
-    public async Task Add()
+    /*public async Task Add()
     {
         if (newCase.CaseId == 0)
         {
@@ -188,7 +182,65 @@
             caseService.Update(newCase);
             snackbar.Add("Case Record Updated", Severity.Success);
         }
+    }*/
+
+    private async Task Add()
+{
+    using (var scope = ServiceScopeFactory.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        // Attach existing CaseType
+        if (newCase.CaseTypeId != 0)
+        {
+            var existingCaseType = await context.CaseType.FindAsync(newCase.CaseTypeId);
+            if (existingCaseType != null)
+            {
+                newCase.CaseType = existingCaseType;
+                context.Entry(existingCaseType).State = EntityState.Unchanged;
+            }
+        }
+
+        // Attach existing CaseStatus
+        if (newCase.StatusId != 0)
+        {
+            var existingCaseStatus = await context.CaseStatus.FindAsync(newCase.StatusId);
+            if (existingCaseStatus != null)
+            {
+                newCase.CaseStatus = existingCaseStatus;
+                context.Entry(existingCaseStatus).State = EntityState.Unchanged;
+            }
+        }
+
+        // Attach existing Client
+       /* if (!string.IsNullOrEmpty(newCase.UserId))
+        {
+            var existingClient = await _userManager.FindByIdAsync(newCase.UserId);
+            if (existingClient != null)
+            {
+                newCase.Client = existingClient;
+                context.Entry(existingClient).State = EntityState.Unchanged;
+            }
+        }*/
+
+        if (newCase.CaseId == 0)
+        {
+            context.Cases.Add(newCase);
+            snackbar.Add("New case added successfully.", Severity.Success);
+        }
+        else
+        {
+            context.Cases.Update(newCase);
+            snackbar.Add("Case updated successfully.", Severity.Success);
+        }
+
+        await context.SaveChangesAsync();
     }
+
+    isModalVisible = false;
+    await GetAllAsync();
+}
+
 
     public void Update(Case caseRecord)
     {

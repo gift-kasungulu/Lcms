@@ -15,14 +15,14 @@
                 <h5 class="card-title">Lawyer Details</h5>
             </MudCardHeader>
             <MudCardContent>
-                <h5 class="card-title">FirstName: @lawyer.LFirstName</h5>
-                <h5 class="card-title">LastName: @lawyer.LLastName</h5>
-                <p class="card-text">Email: @lawyer.Email</p>
-                <p class="card-text">Phone: @lawyer.Phone</p>
-                <p class="card-text">Country: @lawyer.Country</p>
-                <p class="card-text">City: @lawyer.City</p>
-                <p class="card-text">Age: @lawyer.Age</p>
-                <p class="card-text">Case Type: @lawyer.CaseType</p>
+                <p class="card-title">FirstName: @lawyer.LFirstName</p>
+                <p class="card-title">LastName: <b>@lawyer.LLastName</b></p>
+                <p class="card-text">Email:<b> @lawyer.Email</b></p>
+                <p class="card-text">Phone: <b>@lawyer.Phone</b></p>
+                <p class="card-text">Country: <b>@lawyer.Country</b></p>
+                <p class="card-text">City: <b>@lawyer.City</b></p>
+                <p class="card-text">Age: <b>@lawyer.Age</b></p>
+                <p class="card-text">Case Type: <b>@lawyer.CaseType</b></p>
                 <p class="card-text">Experience Years: @lawyer.ExperienceYears</p>
                 <p class="card-text">Win Percentage:</p>
                 <MudProgress Linear Value="@lawyer.CaseWinPercentage" Color="Color.Info" />

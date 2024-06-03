@@ -93,8 +93,8 @@
                                 <MudTd DataLabel="Id">@context.CaseTypeId</MudTd>
                                 <MudTd DataLabel="Case Type Name">@context.TypeName</MudTd>
                                 <MudTd>
-                                    <MudIconButton Color="Color.Info" Icon="@Icons.Material.Filled.Edit" aria-label="edit" />
-                                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>DeleteType(context))" />
+                                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(()=>Update(context))" />
+                                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(()=>DeleteType(context))" />
                                 </MudTd>
                             </RowTemplate>
                         </MudTable>
@@ -118,8 +118,8 @@
                                 <MudTd DataLabel="Id">@context.StatusId</MudTd>
                                 <MudTd DataLabel="Status Name">@context.StatusName</MudTd>
                                 <MudTd>
-                                    <MudIconButton Color="Color.Info" Icon="@Icons.Material.Filled.Edit" aria-label="edit" />
-                                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(()=>DeleteRec(context))" />
+                                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(()=>UpdateStatus(context))"/>
+                                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(()=>DeleteRec(context))" />
                                 </MudTd>
                             </RowTemplate>
                         </MudTable>
@@ -179,13 +179,16 @@
             var success = await caseTypeService.AddAsync(casetype);
             if (success)
             {
-                await GetAll();
-                snackbar.Add("Case Type Was Added Successfully", Severity.Success);
+                //await GetAll();
+                //snackbar.Add("Case Type Was Added Successfully", Severity.Success);
             }
             else
             {
+                caseTypeService.Update(casetype);
                 snackbar.Add("Operation Failed. Try Again later", Severity.Error);
             }
+
+        
         }
         else
         {
@@ -203,7 +206,13 @@
     }
 }
 
-
+    public void Update(CaseType casetypeRecord)
+    {
+        ToggleModal();
+        casetype = casetypeRecord;
+        StateHasChanged();
+    }
+    
    private async Task AddStatus()
 {
     try
@@ -215,17 +224,18 @@
             var success = await casestatusService.AddAsync(casestatus);
             if (success)
             {
-                await GetAllStatus();
-                snackbar.Add("Case Status Was Added Successfully", Severity.Success);
+                //await GetAllStatus();
+                //snackbar.Add("Case Status Was Added Successfully", Severity.Success);
             }
             else
             {
-                snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+                casestatusService.Update(casestatus);
+                snackbar.Add("status updated ", Severity.Error);
             }
         }
         else
         {
-            snackbar.Add("Case Status ID cannot be null or empty.", Severity.Error);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
         }
     }
     catch (Exception ex)
@@ -239,6 +249,12 @@
     }
 }
 
+     public void UpdateStatus(CaseStatus casestatusRecord)
+    {
+        ToggleModal();
+        casestatus = casestatusRecord;
+        StateHasChanged();
+    }
 
     private async Task DeleteRec(CaseStatus rec)
     {

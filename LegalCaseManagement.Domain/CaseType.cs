@@ -9,6 +9,6 @@ namespace LegalCaseManagement.Data
         public string TypeName { get; set; } = string.Empty;
 
         // Navigation property
-        public List<Case> Cases = new List<Case>();
+       // public List<Case> Cases = new List<Case>();
     }
 }
