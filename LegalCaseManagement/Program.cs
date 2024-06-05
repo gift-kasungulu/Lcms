@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Syncfusion.Blazor;
 using MudBlazor.Services;
 using LegalCaseManagement.Data.LegalServices;
+using LegalCaseManagement.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,8 +34,13 @@ builder.Services.AddTransient<RoleService>();
 builder.Services.AddTransient<CaseTypeService>();
 builder.Services.AddTransient<CaseStatusService>();
 builder.Services.AddTransient<CaseService>();
+builder.Services.AddTransient<TaskStatusService>();
+builder.Services.AddTransient<PriorityService>();
+builder.Services.AddTransient<MyTaskService>();
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddMudServices();
+builder.Services.AddSingleton<PdfService>();
+builder.Services.AddSingleton<PdfService>();
 
 var app = builder.Build();
 

@@ -1,0 +1,189 @@
+@page "/assigntask"
+@attribute [Authorize(Roles = "Admin, Team")]
+
+@using Microsoft.EntityFrameworkCore
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Data.LegalServices
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
+@inject MyTaskService myTaskService
+@inject LawyerService lawyerService
+@inject CaseService caseService
+@inject PriorityService priorityService
+@inject TaskStatusService taskStatusService
+@inject IServiceScopeFactory ServiceScopeFactory
+@inject ISnackbar Snackbar
+
+<MudCard>
+    <MudCardContent>
+        <EditForm Model="newTask" OnValidSubmit="AssignTask">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <MudFormRow Class="mb-3">
+                <MudItem xs="12" sm="4">
+                    <label for="description" class="form-label">Description</label>
+                    <InputText @bind-Value="newTask.Description" id="description" class="form-control" />
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <label for="fromDate" class="form-label">From Date</label>
+                    <InputDate @bind-Value="newTask.FromDate" id="fromDate" class="form-control" />
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <label for="dueDate" class="form-label">Due Date</label>
+                    <InputDate @bind-Value="newTask.DueDate" id="dueDate" class="form-control" />
+                </MudItem>
+            </MudFormRow>
+
+            <MudFormRow Class="mb-3">
+                <MudItem xs="12" sm="4">
+                    <label for="priority" class="form-label">Priority</label>
+                    <InputSelect @bind-Value="newTask.PriorityId" id="priority" class="form-select">
+                        @foreach (var priority in priorities)
+                        {
+                            <option value="@priority.PriorityId">@priority.Name</option>
+                        }
+                    </InputSelect>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <label for="status" class="form-label">Task Status</label>
+                    <InputSelect @bind-Value="newTask.StatusId" id="status" class="form-select">
+                        @foreach (var status in taskStatuses)
+                        {
+                            <option value="@status.StatusId">@status.Name</option>
+                        }
+                    </InputSelect>
+                </MudItem>
+                <MudItem xs="12" sm="4">
+                    <label for="lawyer" class="form-label">Assigned Lawyer</label>
+                    <InputSelect @bind-Value="newTask.LawyerId" id="lawyer" class="form-select">
+                        @foreach (var lawyer in lawyers)
+                        {
+                            <option value="@lawyer.LawyerId">@lawyer.LFirstName @lawyer.LLastName</option>
+                        }
+                    </InputSelect>
+                </MudItem>
+            </MudFormRow>
+
+            <MudFormRow Class="mb-3">
+                <MudItem xs="12" sm="6">
+                    <label for="case" class="form-label">Case</label>
+                    <InputSelect @bind-Value="newTask.CaseId" id="case" class="form-select">
+                        @foreach (var legalCase in cases)
+                        {
+                            <option value="@legalCase.CaseId">@legalCase.Discription</option>
+                        }
+                    </InputSelect>
+                </MudItem>
+            </MudFormRow>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Assign Task</button>
+            </div>
+        </EditForm>
+    </MudCardContent>
+</MudCard>
+
+<br />
+<br />
+<MudCard>
+    
+    <MudCardContent>
+        <MudTable Items="tasks">
+             <ToolBarContent>
+        <MudText Typo="Typo.h6">Tasks</MudText>
+        <MudSpacer />
+       
+    </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Due Date</MudTh>
+                <MudTh>Case Description</MudTh>
+                <MudTh>Assigned Lawyer</MudTh>
+                <MudTh>Priority</MudTh>
+                <MudTh>Status</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="DueDate">@context.DueDate</MudTd>
+                <MudTd DataLabel="Description">@context.Case?.Discription</MudTd>
+               <MudTd DataLabel="AssignedLawyer">@context.AssignedLawyer?.LFirstName @context.AssignedLawyer?.LLastName</MudTd>
+                <MudTd DataLabel="Priority">
+                    <span class="@GetPriorityBadgeClass(@context.Priority?.Name)">@context.Priority?.Name</span>
+                </MudTd>
+                <MudTd DataLabel="Status">@context.Status?.Name</MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+
+@code {
+    private List<MyTask> tasks = new List<MyTask>();
+    private MyTask newTask = new MyTask();
+    private List<Lawyers> lawyers = new List<Lawyers>();
+    private List<Case> cases = new List<Case>();
+    private List<Priority> priorities = new List<Priority>();
+    private List<MyTaskStatus> taskStatuses = new List<MyTaskStatus>();
+
+    private string GetPriorityBadgeClass(string priority)
+{
+    Console.WriteLine($"Priority received: {priority}");
+
+    var badgeClass = priority switch
+    {
+        "High" => "badge bg-danger",
+        _ => "badge bg-secondary", // Use a different color for other priority values
+    };
+
+    Console.WriteLine($"Badge class returned: {badgeClass}");
+
+    return badgeClass;
+}
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAllTasksAsync();
+        lawyers = await lawyerService.GetAllAsync();
+        cases = await caseService.GetAllAsync();
+        priorities = await priorityService.GetAllAsync();
+        taskStatuses = await taskStatusService.GetAllAsync();
+    }
+
+   private async Task<List<MyTask>> GetTasksWithRelatedDataAsync()
+{
+    using (var scope = ServiceScopeFactory.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        return await context.MyTasks
+            .Include(t => t.Priority)
+            .Include(t => t.Status)
+            .Include(t => t.AssignedLawyer)
+            .Include(t => t.Case)
+            .ToListAsync();
+    }
+}
+
+private async Task GetAllTasksAsync()
+{
+    tasks = await GetTasksWithRelatedDataAsync();
+    
+
+
+}
+
+    private async Task AssignTask()
+    {
+        var result = await myTaskService.AddAsync(newTask);
+        if (result)
+        {
+            Snackbar.Add("Task assigned successfully", Severity.Success);
+            newTask = new MyTask(); // Reset the form
+            await GetAllTasksAsync();
+        }
+        else
+        {
+            Snackbar.Add("Failed to assign task", Severity.Error);
+        }
+        await GetAllTasksAsync();
+    }
+}

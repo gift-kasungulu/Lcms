@@ -4,6 +4,7 @@ using LegalCaseManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LegalCaseManagement.Domain.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240603220550_mycasetable")]
+    partial class mycasetable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -164,7 +166,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Cases", (string)null);
+                    b.ToTable("Cases");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Data.CaseStatus", b =>
@@ -181,7 +183,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasKey("StatusId");
 
-                    b.ToTable("CaseStatus", (string)null);
+                    b.ToTable("CaseStatus");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Data.CaseType", b =>
@@ -198,7 +200,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasKey("CaseTypeId");
 
-                    b.ToTable("CaseType", (string)null);
+                    b.ToTable("CaseType");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Data.Lawyers", b =>
@@ -248,7 +250,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasKey("LawyerId");
 
-                    b.ToTable("Lawyers", (string)null);
+                    b.ToTable("Lawyers");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Domain.MyTask", b =>
@@ -290,7 +292,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasIndex("StatusId");
 
-                    b.ToTable("MyTasks", (string)null);
+                    b.ToTable("MyTasks");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Domain.MyTaskStatus", b =>
@@ -307,7 +309,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasKey("StatusId");
 
-                    b.ToTable("Statuses", (string)null);
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Domain.Priority", b =>
@@ -324,7 +326,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasKey("PriorityId");
 
-                    b.ToTable("PriorityLevel", (string)null);
+                    b.ToTable("PriorityLevel");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

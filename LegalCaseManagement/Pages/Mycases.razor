@@ -12,6 +12,12 @@
 @inject CaseService caseService
 @inject IServiceScopeFactory ServiceScopeFactory
 @inject UserManager<ApplicationUser> _userManager
+@inject PdfService pdfService
+@inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
 
 <MudCard>
     <MudCardHeader>
@@ -66,7 +72,7 @@
                                     }
                                 </InputSelect>
                             </div>
-                            
+
                             <div class="mb-3">
                                 <label for="caseType" class="form-label">Case Type</label>
                                 <InputSelect @bind-Value="newCase.CaseTypeId" id="caseType" class="form-select"
@@ -95,10 +101,26 @@
         </div>
     </MudCardContent>
 </MudCard>
+
+<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ViewLawyerDetails">
+    View Assigned Cases
+</MudButton>
+
+
 <br />
 <MudCard>
     <MudCardHeader>
-
+        <form>
+            <div class="row">
+                <div class="col-md-8">
+                    <input type="text" class="form-control" placeholder="Enter Next Date" name="nDate">
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </form>
+    
     </MudCardHeader>
     <MudCardContent>
         <MudTable Items="caseList" Filter="new Func<Case,bool>(Search)">
@@ -112,22 +134,71 @@
                 <MudTh>#</MudTh>
                 <MudTh>Next Date</MudTh>
                 <MudTh>Petitioner</MudTh>
-                <MudTh>Court</MudTh>
+                <MudTh>Vs Client</MudTh>
+                <MudTh>Court Name</MudTh>
                 <MudTh>Status</MudTh>
-                <MudTh>Client</MudTh>
                 <MudTh>Action</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="CaseId">@context.CaseId</MudTd>
                 <MudTd DataLabel="EndDate">@context.EndDate</MudTd>
                 <MudTd DataLabel="Petitioner">@context.Petitioner</MudTd>
+                <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
                 <MudTd DataLabel="Defendant">@context.Defendant</MudTd>
                 <MudTd DataLabel="CaseStatus">@context.CaseStatus.StatusName</MudTd>
-                <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
-
                 <MudTd DataLabel="Actions">
-                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(()=>Update(context))" />
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                        <MudMenuItem>
+                            <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(()=>Update(context))" />
+                        </MudMenuItem>
+                        <MudMenuItem>
+                            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" />
+                        </MudMenuItem>
+                        <MudMenuItem>
+                            <MudFab  StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" />
+                        </MudMenuItem>
+                    </MudMenu>
+                    
                 </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+<br />
+
+<MudCard>
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudDatePicker @bind-Date="selectedDate" Label="Select Date" />
+            <br />
+            <MudButton OnClick="SearchCases" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search"
+                Color="Color.Primary">Search</MudButton>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+        <MudTable Items="filteredCaseList" Filter="new Func<Case,bool>(Search)">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Casue List</MudText>
+
+                <MudButton OnClick="@DownloadPdf">Download PDF</MudButton>
+                <MudSpacer />
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Next Date</MudTh>
+                <MudTh>Petitioner</MudTh>
+                <MudTh>Vs Client</MudTh>
+                <MudTh>Court Name</MudTh>
+                <MudTh>Status</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="EndDate">@context.EndDate</MudTd>
+                <MudTd DataLabel="Petitioner">@context.Petitioner</MudTd>
+                <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
+                <MudTd DataLabel="Defendant">@context.Defendant</MudTd>
+                <MudTd DataLabel="CaseStatus">@context.CaseStatus.StatusName</MudTd>
             </RowTemplate>
             <PagerContent>
                 <MudTablePager />
@@ -150,12 +221,35 @@
     private string modalClass => isModalVisible ? "show" : "";
     private string modalDisplay => isModalVisible ? "block" : "none";
 
+    private DateTime? selectedDate;
+    //private List<Case> caseList = new List<Case>();
+    private List<Case> filteredCaseList = new List<Case>();
+    private List<Case> filteredCases = new List<Case>();
+
     protected override async Task OnInitializedAsync()
     {
         await GetAllAsync();
         clients = (await _userManager.GetUsersInRoleAsync("Client")).ToList();
         caseTypes = await caseTypeService.GetAllAsync();
         caseStatuses = await caseStatusService.GetAllAsync();
+    }
+
+   private async Task ViewLawyerDetails()
+    {
+        // Get the ID of the logged-in user
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = _userManager.GetUserId(authState.User);
+
+        // Redirect to the lawyer details page with the user ID as a route parameter
+        NavigationManager.NavigateTo($"/taskDetails/{userId}");
+    }
+
+
+    private async Task DownloadPdf()
+    {
+        byte[] pdfBytes = pdfService.GeneratePdfFromCases(filteredCases);
+        // Provide a file name and trigger download
+        await JSRuntime.InvokeAsync<object>("saveAsFile", $"filtered_cases.pdf", Convert.ToBase64String(pdfBytes));
     }
 
     private bool Search(Case mycase)
@@ -168,78 +262,91 @@
         return false;
     }
 
-    /*public async Task Add()
+    private void SearchCases()
     {
-        if (newCase.CaseId == 0)
+        if (selectedDate.HasValue)
         {
-            await caseService.AddAsync(newCase);
-            await GetAllAsync();
-            snackbar.Add("the Case was Added ", Severity.Success);
-            CloseModal();
+            filteredCaseList = caseList.Where(c => c.EndDate.HasValue && c.EndDate.Value.Date == selectedDate.Value.Date).ToList();
+
         }
         else
         {
-            caseService.Update(newCase);
-            snackbar.Add("Case Record Updated", Severity.Success);
+            filteredCaseList = new List<Case>(); // or caseList if you want to show all cases when no date is selected
         }
+    }
+
+    /*public async Task Add()
+    {
+    if (newCase.CaseId == 0)
+    {
+    await caseService.AddAsync(newCase);
+    await GetAllAsync();
+    snackbar.Add("the Case was Added ", Severity.Success);
+    CloseModal();
+    }
+    else
+    {
+    caseService.Update(newCase);
+    snackbar.Add("Case Record Updated", Severity.Success);
+    }
     }*/
 
     private async Task Add()
-{
-    using (var scope = ServiceScopeFactory.CreateScope())
     {
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        // Attach existing CaseType
-        if (newCase.CaseTypeId != 0)
+        using (var scope = ServiceScopeFactory.CreateScope())
         {
-            var existingCaseType = await context.CaseType.FindAsync(newCase.CaseTypeId);
-            if (existingCaseType != null)
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            // Attach existing CaseType
+            if (newCase.CaseTypeId != 0)
             {
-                newCase.CaseType = existingCaseType;
-                context.Entry(existingCaseType).State = EntityState.Unchanged;
+                var existingCaseType = await context.CaseType.FindAsync(newCase.CaseTypeId);
+                if (existingCaseType != null)
+                {
+                    newCase.CaseType = existingCaseType;
+                    context.Entry(existingCaseType).State = EntityState.Unchanged;
+                }
             }
-        }
 
-        // Attach existing CaseStatus
-        if (newCase.StatusId != 0)
-        {
-            var existingCaseStatus = await context.CaseStatus.FindAsync(newCase.StatusId);
-            if (existingCaseStatus != null)
+            // Attach existing CaseStatus
+            if (newCase.StatusId != 0)
             {
-                newCase.CaseStatus = existingCaseStatus;
-                context.Entry(existingCaseStatus).State = EntityState.Unchanged;
+                var existingCaseStatus = await context.CaseStatus.FindAsync(newCase.StatusId);
+                if (existingCaseStatus != null)
+                {
+                    newCase.CaseStatus = existingCaseStatus;
+                    context.Entry(existingCaseStatus).State = EntityState.Unchanged;
+                }
             }
-        }
 
-        // Attach existing Client
-       /* if (!string.IsNullOrEmpty(newCase.UserId))
-        {
+            // Attach existing Client
+            /* if (!string.IsNullOrEmpty(newCase.UserId))
+            {
             var existingClient = await _userManager.FindByIdAsync(newCase.UserId);
             if (existingClient != null)
             {
-                newCase.Client = existingClient;
-                context.Entry(existingClient).State = EntityState.Unchanged;
+            newCase.Client = existingClient;
+            context.Entry(existingClient).State = EntityState.Unchanged;
             }
-        }*/
+            }*/
 
-        if (newCase.CaseId == 0)
-        {
-            context.Cases.Add(newCase);
-            snackbar.Add("New case added successfully.", Severity.Success);
-        }
-        else
-        {
-            context.Cases.Update(newCase);
-            snackbar.Add("Case updated successfully.", Severity.Success);
+            if (newCase.CaseId == 0)
+            {
+                context.Cases.Add(newCase);
+                snackbar.Add("New case added successfully.", Severity.Success);
+            }
+            else
+            {
+                context.Cases.Update(newCase);
+                snackbar.Add("Case updated successfully.", Severity.Success);
+            }
+
+            await context.SaveChangesAsync();
         }
 
-        await context.SaveChangesAsync();
+        isModalVisible = false;
+        await GetAllAsync();
     }
-
-    isModalVisible = false;
-    await GetAllAsync();
-}
 
 
     public void Update(Case caseRecord)

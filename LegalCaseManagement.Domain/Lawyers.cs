@@ -16,5 +16,12 @@ namespace LegalCaseManagement.Data
         public string CaseType { get; set; } = string.Empty;
         public int ExperienceYears { get; set; } 
         public int Age { get; set; }
+
+        //public string? Password { get; set;}
+
+        // List of tasks associated with the lawyer ( User with Team member Role)
+        public List<Task> TodoTask { get; set; }
+
+
     }
 }

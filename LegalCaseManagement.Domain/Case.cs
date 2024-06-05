@@ -47,5 +47,9 @@ namespace LegalCaseManagement.Data
 
         [ForeignKey("UserId")]
         public ApplicationUser? AppUser { get; set; }  // Navigation property for the related ApplicationUser
+
+         // Foreign key for Lawyer
+        public int LawyerId { get; set; }
+        public Lawyers? AssignedLawyer { get; set; } // Navigation property for Lawyer
     }
 }

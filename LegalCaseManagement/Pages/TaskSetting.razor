@@ -1,0 +1,190 @@
+@page "/tasksetting"
+
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Data.LegalServices
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
+@inject LawyerService lawyerService
+@inject IJSRuntime jstRuntime
+@inject ISnackbar snackbar
+@inject PriorityService priorityservice
+@inject TaskStatusService taskstatusService
+@inject MyTaskService mytaskservice
+
+<PageTitle>Task Settings</PageTitle>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Task Status</MudButton>
+<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModalSecond">Priority levels</MudButton>
+
+@if (showModal)
+{
+    <div class="modal fade show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Case Type/Category</h4>
+                    <button type="button" class="btn-close" @onclick="ToggleModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="taskstatus" OnValidSubmit="Add">
+
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">Task Name</label>
+                            <input class="form-control" placeholder="Enter Task Name" @bind-value="taskstatus.Name" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="ToggleModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showModalsecond)
+{
+    <div class="modal fade show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Case Status</h4>
+                    <button type="button" class="btn-close" @onclick="ToggleModalSecond"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="priority" OnValidSubmit="AddStatus">
+
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">Priority Name</label>
+                            <input class="form-control" placeholder="Enter Priority Name" @bind-value="priority.Name" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="ToggleModalSecond">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+@code
+{
+    private MyTask mytask = new MyTask();
+    private MyTaskStatus taskstatus = new MyTaskStatus();
+    private Priority priority = new Priority();
+    private List<MyTaskStatus> taskStatusList = new List<MyTaskStatus>();
+    private List<Priority> priorityList = new List<Priority>();
+    private bool showModal = false;
+    private bool showModalsecond = false;
+    private bool isAddingType = false;
+    private bool isAddingStatus = false;
+    private bool isDeletingType = false;
+    private bool isDeletingStatus = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetAll();
+        await GetAllPriority();
+    }
+
+    private async Task GetAll()
+    {
+        taskStatusList = await taskstatusService.GetAllAsync();
+    }
+
+    private async Task GetAllPriority()
+    {
+        priorityList = await priorityservice.GetAllAsync();
+    }
+
+    private void ToggleModal()
+    {
+        showModal = !showModal;
+    }
+
+    private void ToggleModalSecond()
+    {
+        showModalsecond = !showModalsecond;
+    }
+
+    // add a Taskstatus
+    private async Task Add()
+    {
+        try
+        {
+            // Check if CaseTypeId is not null or empty
+            if (taskstatus.StatusId == 0)
+            {
+                isAddingType = true;
+                var success = await taskstatusService.AddAsync(taskstatus);
+                if (success)
+                {
+                    await GetAll();
+                    snackbar.Add("Task Status was added", Severity.Success);
+                }
+                else
+                {
+                    taskstatusService.Update(taskstatus);
+                    snackbar.Add("Task Updated ", Severity.Info);
+                }
+
+
+            }
+            else
+            {
+                snackbar.Add("an operatipn faie please try again.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+        }
+        finally
+        {
+            isAddingType = false;
+        }
+    }
+    // Add piority
+    private async Task AddStatus()
+    {
+        try
+        {
+            // Check if priority is not null or empty
+            if (priority.PriorityId == 0)
+            {
+                isAddingStatus = true;
+                var success = await priorityservice.AddAsync(priority);
+                if (success)
+                {
+                    await GetAllPriority();
+                    snackbar.Add("Case Status Was Added Successfully", Severity.Success);
+                }
+                else
+                {
+                    priorityservice.Update(priority);
+                    snackbar.Add("priority updated ", Severity.Info);
+                }
+            }
+            else
+            {
+                snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+        }
+        finally
+        {
+            isAddingStatus = false;
+        }
+    }
+
+
+}

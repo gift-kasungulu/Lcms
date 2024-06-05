@@ -1,5 +1,5 @@
 ﻿@page "/settings"
-@*@attribute [Authorize(Roles = "Admin")] *@
+@attribute [Authorize(Roles = "Admin")] 
 
 @using LegalCaseManagement.Data
 @using LegalCaseManagement.Data.LegalServices
@@ -179,8 +179,8 @@
             var success = await caseTypeService.AddAsync(casetype);
             if (success)
             {
-                //await GetAll();
-                //snackbar.Add("Case Type Was Added Successfully", Severity.Success);
+                await GetAll();
+                snackbar.Add("Case Type Was Added Successfully", Severity.Success);
             }
             else
             {
@@ -224,8 +224,8 @@
             var success = await casestatusService.AddAsync(casestatus);
             if (success)
             {
-                //await GetAllStatus();
-                //snackbar.Add("Case Status Was Added Successfully", Severity.Success);
+                await GetAllStatus();
+                snackbar.Add("Case Status Was Added Successfully", Severity.Success);
             }
             else
             {

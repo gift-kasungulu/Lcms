@@ -1,0 +1,57 @@
+@page "/taskDetails/{lawyerId:int}"
+@attribute [Authorize(Roles = "Team")]
+
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Service
+@inject LawyerService lawyerService
+@inject CaseService caseService
+@inject MyTaskService taskService
+@inject ISnackbar Snackbar
+
+<MudContainer>
+    <MudPaper Class="p-4">
+        <h1 class="mb-4">Lawyer Details</h1>
+        @if (lawyer != null)
+        {
+            <h2>@lawyer.LFirstName @lawyer.LLastName</h2>
+            <h3>Tasks Assigned</h3>
+            <ul>
+                @foreach (var task in tasks)
+                {
+                    <li>@task.Description</li>
+                }
+            </ul>
+            <h3>Cases Associated</h3>
+            <ul>
+                @foreach (var legalCase in cases)
+                {
+                    <li>@legalCase.Discription</li>
+                }
+            </ul>
+        }
+        else
+        {
+            <p>No lawyer found with the specified ID.</p>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public int lawyerId { get; set; }
+
+    private Lawyers lawyer;
+    private List<MyTask> tasks = new List<MyTask>();
+    private List<Case> cases = new List<Case>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        lawyer = await lawyerService.GetByIdAsync(lawyerId);
+        if (lawyer != null)
+        {
+            tasks = await taskService.GetTasksByLawyerIdAsync(lawyerId);
+            cases = await caseService.GetCasesByLawyerIdAsync(lawyerId);
+        }
+    }
+}

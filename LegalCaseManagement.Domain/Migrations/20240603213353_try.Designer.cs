@@ -4,6 +4,7 @@ using LegalCaseManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LegalCaseManagement.Domain.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240603213353_try")]
+    partial class @try
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -164,7 +166,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Cases", (string)null);
+                    b.ToTable("Cases");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Data.CaseStatus", b =>
@@ -181,7 +183,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasKey("StatusId");
 
-                    b.ToTable("CaseStatus", (string)null);
+                    b.ToTable("CaseStatus");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Data.CaseType", b =>
@@ -198,7 +200,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasKey("CaseTypeId");
 
-                    b.ToTable("CaseType", (string)null);
+                    b.ToTable("CaseType");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Data.Lawyers", b =>
@@ -248,49 +250,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasKey("LawyerId");
 
-                    b.ToTable("Lawyers", (string)null);
-                });
-
-            modelBuilder.Entity("LegalCaseManagement.Domain.MyTask", b =>
-                {
-                    b.Property<int>("TaskId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TaskId"), 1L, 1);
-
-                    b.Property<int>("CaseId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("DueDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("FromDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("LawyerId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PriorityId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StatusId")
-                        .HasColumnType("int");
-
-                    b.HasKey("TaskId");
-
-                    b.HasIndex("CaseId");
-
-                    b.HasIndex("LawyerId");
-
-                    b.HasIndex("PriorityId");
-
-                    b.HasIndex("StatusId");
-
-                    b.ToTable("MyTasks", (string)null);
+                    b.ToTable("Lawyers");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Domain.MyTaskStatus", b =>
@@ -307,7 +267,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasKey("StatusId");
 
-                    b.ToTable("Statuses", (string)null);
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Domain.Priority", b =>
@@ -324,7 +284,7 @@ namespace LegalCaseManagement.Domain.Migrations
 
                     b.HasKey("PriorityId");
 
-                    b.ToTable("PriorityLevel", (string)null);
+                    b.ToTable("PriorityLevel");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -495,41 +455,6 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.Navigation("CaseStatus");
 
                     b.Navigation("CaseType");
-                });
-
-            modelBuilder.Entity("LegalCaseManagement.Domain.MyTask", b =>
-                {
-                    b.HasOne("LegalCaseManagement.Data.Case", "Case")
-                        .WithMany()
-                        .HasForeignKey("CaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LegalCaseManagement.Data.Lawyers", "AssignedLawyer")
-                        .WithMany()
-                        .HasForeignKey("LawyerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LegalCaseManagement.Domain.Priority", "Priority")
-                        .WithMany()
-                        .HasForeignKey("PriorityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LegalCaseManagement.Domain.MyTaskStatus", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("AssignedLawyer");
-
-                    b.Navigation("Case");
-
-                    b.Navigation("Priority");
-
-                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

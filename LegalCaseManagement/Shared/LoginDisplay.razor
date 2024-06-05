@@ -1,15 +1,31 @@
 ﻿<AuthorizeView>
     <Authorized>
-        <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
-        <form method="post" action="Identity/Account/LogOut">
 
-            <button type="submit" class="nav-link btn btn-link">Sign out</button> 
-           
+        <MudMenu FullWidth="true">
+            <ActivatorContent>
+                <MudChip Icon="@Icons.Material.Filled.Person" Color="Color.Primary">Account</MudChip>
+            </ActivatorContent>
+            <ChildContent>
+                <MudMenuItem>
+                    <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
+                </MudMenuItem>
+                <MudMenuItem>
 
-        </form>
+                    <form method="post" action="Identity/Account/LogOut">
+                        <button type="submit" class="nav-link btn btn-link">Sign out</button>
+                    </form>
+
+                </MudMenuItem>
+
+            </ChildContent>
+        </MudMenu>
     </Authorized>
+
+
     <NotAuthorized>
-        
-        <a href="Identity/Account/Login">Log in</a>
+
+
+
+        <a href="Identity/Account/Login" Icon="@Icons.Material.Filled.Login">Log in</a>
     </NotAuthorized>
 </AuthorizeView>

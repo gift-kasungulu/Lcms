@@ -1,9 +1,12 @@
 ﻿@page "/advocates"
 @attribute [Authorize(Roles = "Admin, Team")] 
 @using LegalCaseManagement.Data
+@using Microsoft.AspNetCore.Identity
 @inject LawyerService lawyerService
 @inject IJSRuntime jsRuntime
 @inject ISnackbar snackbar
+@inject UserManager<ApplicationUser> _userManager
+@inject RoleManager<IdentityRole> _roleManager
 
 <PageTitle>Advocates</PageTitle>
 
@@ -57,6 +60,10 @@
                         <div class="mb-3">
                             <label class="form-label">Win Percentage</label>
                             <input type="number" class="form-control" placeholder="Enter Win Percentage" @bind-value="lawyers.CaseWinPercentage" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" class="form-control" placeholder="Enter Password" @bind-value="password" />
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </EditForm>
@@ -117,6 +124,7 @@
     private List<Lawyers> lawyersList = new List<Lawyers>();
     private bool showModal = false;
     private string searchString = "";
+    private string password = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -140,15 +148,43 @@
     {
         try
         {
-            if (await lawyerService.AddAsync(lawyers))
+            var user = new ApplicationUser
             {
-                lawyersList = await lawyerService.GetAllAsync();
-                snackbar.Add("Lawyer Was Added Successfully", Severity.Success);
-                ToggleModal(); // Close the modal after adding
+                UserName = lawyers.Email,
+                Email = lawyers.Email,
+                EmailConfirmed = true,
+            };
+
+            var passwordHash = _userManager.PasswordHasher.HashPassword(user, password);
+
+            var result = await _userManager.CreateAsync(user);
+
+            if (result.Succeeded)
+            {
+                user.PasswordHash = passwordHash;
+                await _userManager.UpdateAsync(user);
+
+                // Assign the "Team" role
+                await _userManager.AddToRoleAsync(user, "Team");
+
+                // Save the lawyer details in the database
+                if (await lawyerService.AddAsync(lawyers))
+                {
+                    lawyersList = await lawyerService.GetAllAsync();
+                    snackbar.Add("Lawyer Was Added Successfully", Severity.Success);
+                    ToggleModal(); // Close the modal after adding
+                }
+                else
+                {
+                    snackbar.Add("Failed to add lawyer to database", Severity.Error);
+                }
             }
             else
             {
-                snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+                foreach (var error in result.Errors)
+                {
+                    snackbar.Add(error.Description, Severity.Error);
+                }
             }
         }
         catch (Exception ex)
@@ -164,17 +200,17 @@
         if (!showModal)
         {
             lawyers = new Lawyers(); // Reset the form when closing the modal
+            password = string.Empty; // Reset the password field
         }
     }
 
     private bool Searchrec(Lawyers lawyers)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
-        return lawyers.LFirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-               lawyers.LLastName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-               lawyers.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-               lawyers.Phone.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-               lawyers.City.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||
-               lawyers.Country.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+        if (lawyers.LFirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (lawyers.LLastName.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (lawyers.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (lawyers.Phone.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        return false;
     }
 }

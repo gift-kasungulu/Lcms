@@ -14,5 +14,7 @@ namespace LegalCaseManagement.Data
         // Navigation property
         public List<Case> Cases = new List<Case>();
 
+        
+
     }
 }
