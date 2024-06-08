@@ -1,5 +1,6 @@
 ﻿@page "/cases"
-@attribute [Authorize(Roles = "Admin")]
+@attribute [Authorize(Roles = "Team, Admin")]
+<PageTitle>Cases</PageTitle>
 
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Identity
@@ -12,18 +13,17 @@
 @inject CaseService caseService
 @inject IServiceScopeFactory ServiceScopeFactory
 @inject UserManager<ApplicationUser> _userManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject PdfService pdfService
 @inject IJSRuntime JSRuntime
-@inject NavigationManager NavigationManager
-@inject AuthenticationStateProvider AuthenticationStateProvider
-
-
+@inject NavigationManager NavManager
+@inject IHttpContextAccessor HttpContextAccessor
 
 <MudCard>
     <MudCardHeader>
         <CardHeaderContent>
             <button type="button" class="btn btn-primary" @onclick="OpenModal">
-                Add New Case
+                Create Case
             </button>
         </CardHeaderContent>
     </MudCardHeader>
@@ -101,26 +101,28 @@
         </div>
     </MudCardContent>
 </MudCard>
+<br />
 
-<MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ViewLawyerDetails">
-    View Assigned Cases
-</MudButton>
 
 
 <br />
 <MudCard>
     <MudCardHeader>
-        <form>
-            <div class="row">
-                <div class="col-md-8">
-                    <input type="text" class="form-control" placeholder="Enter Next Date" name="nDate">
+     <div class="d-flex justify-content-between align-items-center w-100">
+            <form class="d-flex w-75">
+                <div class="row w-100">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" placeholder="Update Next Date" name="nDate">
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </div>
-        </form>
-    
+            </form>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="NavigateToAssignedCases" class="ml-auto">
+                View Assigned Cases
+            </MudButton>
+        </div
     </MudCardHeader>
     <MudCardContent>
         <MudTable Items="caseList" Filter="new Func<Case,bool>(Search)">
@@ -149,16 +151,17 @@
                 <MudTd DataLabel="Actions">
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert">
                         <MudMenuItem>
-                            <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(()=>Update(context))" />
+                            <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                OnClick="@(()=>Update(context))" />
                         </MudMenuItem>
                         <MudMenuItem>
                             <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" />
                         </MudMenuItem>
                         <MudMenuItem>
-                            <MudFab  StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" />
+                            <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" />
                         </MudMenuItem>
                     </MudMenu>
-                    
+
                 </MudTd>
             </RowTemplate>
             <PagerContent>
@@ -232,18 +235,20 @@
         clients = (await _userManager.GetUsersInRoleAsync("Client")).ToList();
         caseTypes = await caseTypeService.GetAllAsync();
         caseStatuses = await caseStatusService.GetAllAsync();
+
+        selectedDate = DateTime.Today;
     }
 
-   private async Task ViewLawyerDetails()
+     private async void NavigateToAssignedCases()
     {
-        // Get the ID of the logged-in user
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var userId = _userManager.GetUserId(authState.User);
+        var user = await _userManager.GetUserAsync(authState.User);
 
-        // Redirect to the lawyer details page with the user ID as a route parameter
-        NavigationManager.NavigateTo($"/taskDetails/{userId}");
+        if (user != null)
+        {
+            NavManager.NavigateTo($"/assignedcases/{user.Id}");
+        }
     }
-
 
     private async Task DownloadPdf()
     {

@@ -1,0 +1,100 @@
+@page "/casedetails/{caseId:int}"
+@attribute [Authorize(Roles = "Client")]
+
+@using LegalCaseManagement.Service
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Data.LegalServices
+@using Microsoft.EntityFrameworkCore
+@inject IServiceScopeFactory ServiceScopeFactory
+
+<h3>Case Details</h3>
+
+@if (caseDetails == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <MudCard>
+        <MudCardHeader>
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <MudText Typo="Typo.h5" GutterBottom="true">Case Details</MudText>
+                </div>
+                <div>
+                    <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Primary" />
+                    <MudIconButton Icon="@Icons.Material.Filled.FileDownload" Color="Color.Primary" />
+                </div>
+            </div>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTabs Elevation="1" Rounded="true" PanelClass="pa-6">
+                <MudTabPanel Text="Details" ToolTip="ToolTip One">
+                    <MudPaper Class="p-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <MudText Typo="Typo.h6" GutterBottom="true">Case Detail</MudText>
+                                <div>
+
+                                    <p><strong>Case Type:</strong> @caseDetails.CaseType</p>
+                                    @* <p><strong>Filing No:</strong> @caseDetails.FilingNo</p>
+                                <p><strong>Filing Date:</strong> @caseDetails.FilingDate?.ToString("dd-MM-yyyy")</p>
+                                <p><strong>Registration No:</strong> @caseDetails.RegistrationNo</p>
+                                <p><strong>Registration Date:</strong>
+                                @caseDetails.RegistrationDate?.ToString("dd-MM-yyyy")</p>
+                                <p><strong>CNR Number:</strong> @caseDetails.CnrNumber</p>*@
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-end mb-3">
+                                    <MudButton Variant="Variant.Filled" Color="Color.Primary">
+                                        View Assigned Cases
+                                    </MudButton>
+                                </div>
+                                <div>
+                                    <p><strong>First Hearing Date:</strong> @caseDetails.StartDate?.ToString("dd-MM-yyyy")
+                                    </p>
+                                    <p><strong>Next Hearing Date:</strong> @caseDetails.EndDate?.ToString("dd MMM yyyy")</p>
+                                    <p><strong>Case Status:</strong> @caseDetails.CaseStatus.StatusName</p>
+                                    @*<p><strong>Court No:</strong> @caseDetails.CourtNo</p>*@
+                                    @*<p><strong>Judge:</strong> @caseDetails.Judge</p>*@
+                                </div>
+                            </div>
+                        </div>
+                    </MudPaper>
+                </MudTabPanel>
+                <MudTabPanel Text="History" ToolTip="ToolTip Two">
+                    <MudText>Item Two</MudText>
+                </MudTabPanel>
+
+            </MudTabs>
+
+
+
+
+
+        </MudCardContent>
+    </MudCard>
+}
+
+@code {
+    [Parameter] public int CaseId { get; set; }
+    private Case caseDetails;
+
+    protected override async Task OnInitializedAsync()
+    {
+        caseDetails = await GetCaseDetailsAsync(CaseId);
+    }
+
+    private async Task<Case> GetCaseDetailsAsync(int caseId)
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return await context.Cases
+            .Include(c => c.CaseStatus)
+            .FirstOrDefaultAsync(c => c.CaseId == caseId);
+        }
+    }
+}

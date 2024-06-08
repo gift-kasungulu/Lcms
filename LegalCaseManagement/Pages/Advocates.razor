@@ -167,12 +167,18 @@
                 // Assign the "Team" role
                 await _userManager.AddToRoleAsync(user, "Team");
 
+                //lawyers.LawyerId = int.Parse(user.Id); 
+
                 // Save the lawyer details in the database
                 if (await lawyerService.AddAsync(lawyers))
                 {
                     lawyersList = await lawyerService.GetAllAsync();
                     snackbar.Add("Lawyer Was Added Successfully", Severity.Success);
                     ToggleModal(); // Close the modal after adding
+
+                    // Reset the lawyers object
+                    lawyers = new Lawyers();
+                    password = string.Empty; // Reset the password field
                 }
                 else
                 {

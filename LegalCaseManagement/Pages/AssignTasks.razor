@@ -16,70 +16,53 @@
 
 <MudCard>
     <MudCardContent>
+        <MudText Typo="Typo.h6" Class="mb-4">Assign Task</MudText>
         <EditForm Model="newTask" OnValidSubmit="AssignTask">
             <DataAnnotationsValidator />
-            <ValidationSummary />
-
-            <MudFormRow Class="mb-3">
-                <MudItem xs="12" sm="4">
-                    <label for="description" class="form-label">Description</label>
-                    <InputText @bind-Value="newTask.Description" id="description" class="form-control" />
+            <MudGrid>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudTextField @bind-Value="newTask.Description" Label="Description" Required="true" />
                 </MudItem>
-                <MudItem xs="12" sm="4">
-                    <label for="fromDate" class="form-label">From Date</label>
-                    <InputDate @bind-Value="newTask.FromDate" id="fromDate" class="form-control" />
+                <MudItem xs="12" sm="6" md="4">
+                    <MudDatePicker @bind-Date="newTask.FromDate" Label="From Date" />
                 </MudItem>
-                <MudItem xs="12" sm="4">
-                    <label for="dueDate" class="form-label">Due Date</label>
-                    <InputDate @bind-Value="newTask.DueDate" id="dueDate" class="form-control" />
+                <MudItem xs="12" sm="6" md="4">
+                    <MudDatePicker @bind-Date="newTask.DueDate" Label="Due Date" />
                 </MudItem>
-            </MudFormRow>
-
-            <MudFormRow Class="mb-3">
-                <MudItem xs="12" sm="4">
-                    <label for="priority" class="form-label">Priority</label>
-                    <InputSelect @bind-Value="newTask.PriorityId" id="priority" class="form-select">
+                <MudItem xs="12" sm="6" md="4">
+                    <MudSelect @bind-Value="newTask.PriorityId" Label="Priority" Required="true">
                         @foreach (var priority in priorities)
                         {
-                            <option value="@priority.PriorityId">@priority.Name</option>
+                            <MudSelectItem Value="@priority.PriorityId">@priority.Name</MudSelectItem>
                         }
-                    </InputSelect>
+                    </MudSelect>
                 </MudItem>
-                <MudItem xs="12" sm="4">
-                    <label for="status" class="form-label">Task Status</label>
-                    <InputSelect @bind-Value="newTask.StatusId" id="status" class="form-select">
+                <MudItem xs="12" sm="6" md="4">
+                    <MudSelect @bind-Value="newTask.StatusId" Label="Task Status" Required="true">
                         @foreach (var status in taskStatuses)
                         {
-                            <option value="@status.StatusId">@status.Name</option>
+                            <MudSelectItem Value="@status.StatusId">@status.Name</MudSelectItem>
                         }
-                    </InputSelect>
+                    </MudSelect>
                 </MudItem>
-                <MudItem xs="12" sm="4">
-                    <label for="lawyer" class="form-label">Assigned Lawyer</label>
-                    <InputSelect @bind-Value="newTask.LawyerId" id="lawyer" class="form-select">
+                <MudItem xs="12" sm="6" md="4">
+                    <MudSelect @bind-Value="newTask.LawyerId" Label="Assigned Lawyer" Required="true">
                         @foreach (var lawyer in lawyers)
                         {
-                            <option value="@lawyer.LawyerId">@lawyer.LFirstName @lawyer.LLastName</option>
+                            <MudSelectItem Value="@lawyer.LawyerId">@lawyer.LFirstName @lawyer.LLastName</MudSelectItem>
                         }
-                    </InputSelect>
+                    </MudSelect>
                 </MudItem>
-            </MudFormRow>
-
-            <MudFormRow Class="mb-3">
-                <MudItem xs="12" sm="6">
-                    <label for="case" class="form-label">Case</label>
-                    <InputSelect @bind-Value="newTask.CaseId" id="case" class="form-select">
+                <MudItem xs="12" md="6">
+                    <MudSelect @bind-Value="newTask.CaseId" Label="Case" Required="true">
                         @foreach (var legalCase in cases)
                         {
-                            <option value="@legalCase.CaseId">@legalCase.Discription</option>
+                            <MudSelectItem Value="@legalCase.CaseId">@legalCase.Discription</MudSelectItem>
                         }
-                    </InputSelect>
+                    </MudSelect>
                 </MudItem>
-            </MudFormRow>
-
-            <div class="text-center">
-                <button type="submit" class="btn btn-primary">Assign Task</button>
-            </div>
+            </MudGrid>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="mt-4">Assign Task</MudButton>
         </EditForm>
     </MudCardContent>
 </MudCard>
@@ -172,18 +155,22 @@ private async Task GetAllTasksAsync()
 }
 
     private async Task AssignTask()
+{
+    // Set the AssignedLawyerId of the newTask object to the selected lawyer's Id
+    //newTask.AssignedLawyerId = newTask.LawyerId;
+
+    var result = await myTaskService.AddAsync(newTask);
+    if (result)
     {
-        var result = await myTaskService.AddAsync(newTask);
-        if (result)
-        {
-            Snackbar.Add("Task assigned successfully", Severity.Success);
-            newTask = new MyTask(); // Reset the form
-            await GetAllTasksAsync();
-        }
-        else
-        {
-            Snackbar.Add("Failed to assign task", Severity.Error);
-        }
+        Snackbar.Add("Task assigned successfully", Severity.Success);
+        newTask = new MyTask(); // Reset the form
         await GetAllTasksAsync();
     }
+    else
+    {
+        Snackbar.Add("Failed to assign task", Severity.Error);
+    }
+    await GetAllTasksAsync();
+}
+
 }

@@ -1,57 +1,91 @@
-@page "/taskDetails/{lawyerId:int}"
+@page "/myassignedtasks"
 @attribute [Authorize(Roles = "Team")]
 
+@using LegalCaseManagement.Service
 @using LegalCaseManagement.Domain
 @using LegalCaseManagement.Data
-@using LegalCaseManagement.Service
-@inject LawyerService lawyerService
-@inject CaseService caseService
-@inject MyTaskService taskService
-@inject ISnackbar Snackbar
+@using LegalCaseManagement.Data.LegalServices
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject UserManager<ApplicationUser> UserManager
+@inject IServiceScopeFactory ServiceScopeFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudContainer>
-    <MudPaper Class="p-4">
-        <h1 class="mb-4">Lawyer Details</h1>
-        @if (lawyer != null)
-        {
-            <h2>@lawyer.LFirstName @lawyer.LLastName</h2>
-            <h3>Tasks Assigned</h3>
-            <ul>
-                @foreach (var task in tasks)
-                {
-                    <li>@task.Description</li>
-                }
-            </ul>
-            <h3>Cases Associated</h3>
-            <ul>
-                @foreach (var legalCase in cases)
-                {
-                    <li>@legalCase.Discription</li>
-                }
-            </ul>
-        }
-        else
-        {
-            <p>No lawyer found with the specified ID.</p>
-        }
-    </MudPaper>
-</MudContainer>
+<h3>My Assigned Tasks</h3>
+
+@if (assignedTasks == null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (assignedTasks.Count == 0)
+{
+    <p>No tasks assigned yet.</p>
+}
+else
+{
+    <MudTable Items="assignedTasks" Hover="true">
+        <ColGroup>
+            <col style="width: 100px;" />
+            <col />
+            <col />
+            <col />
+            <col style="width: 100px;" />
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>Due Date</MudTh>
+            <MudTh>Description</MudTh>
+            <MudTh>Case</MudTh>
+            <MudTh>Priority</MudTh>
+            <MudTh>Status</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.DueDate?.ToString("dd MMM yyyy")</MudTd>
+            <MudTd>@context.Description</MudTd>
+            <MudTd>@context.Case?.Discription</MudTd>
+            <MudTd>
+                <MudTd>@context.Priority?.Name</MudTd>
+                
+            </MudTd>
+            <MudTd>@context.Status?.Name</MudTd>
+        </RowTemplate>
+    </MudTable>
+}
 
 @code {
-    [Parameter]
-    public int lawyerId { get; set; }
-
-    private Lawyers lawyer;
-    private List<MyTask> tasks = new List<MyTask>();
-    private List<Case> cases = new List<Case>();
+    private List<MyTask> assignedTasks;
 
     protected override async Task OnInitializedAsync()
     {
-        lawyer = await lawyerService.GetByIdAsync(lawyerId);
-        if (lawyer != null)
-        {
-            tasks = await taskService.GetTasksByLawyerIdAsync(lawyerId);
-            cases = await caseService.GetCasesByLawyerIdAsync(lawyerId);
-        }
+        var user = await GetCurrentUserAsync();
+        assignedTasks = await GetAssignedTasksAsync(user?.Id);
     }
+
+    private async Task<ApplicationUser> GetCurrentUserAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            return await UserManager.GetUserAsync(user);
+        }
+
+        return null;
+    }
+
+    private async Task<List<MyTask>> GetAssignedTasksAsync(string userId)
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+    {
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        return await context.MyTasks
+            .Include(t => t.Priority)
+            .Include(t => t.Status)
+            .Include(t => t.Case)
+            .Where(t => t.LawyerId.ToString() == userId)
+            .ToListAsync();
+    }
+    }
+
+    
 }

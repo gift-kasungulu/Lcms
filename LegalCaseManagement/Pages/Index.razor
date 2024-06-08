@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @inject LawyerService lawyerService
+@inject CaseService caseService
 @inject IJSRuntime jstRuntime
 @inject ISnackbar snackbar
 <PageTitle>Home</PageTitle>
@@ -18,10 +19,10 @@
         <br />
         <MudGrid>
             <MudItem xs="12">
-            <MudPaper Class="d-flex align-center justify-center mud-width-full py-8" Color="Color.Primary">
-                <b>Welcome to our legal case management system. Here you can manage your cases and track lawyer
-                performance.</b>
-            </MudPaper>
+                <MudPaper Class="d-flex align-center justify-center mud-width-full py-8" Color="Color.Primary">
+                    <b>Welcome to our legal case management system. Here you can manage your cases and track lawyer
+                        performance.</b>
+                </MudPaper>
 
             </MudItem>
 
@@ -75,18 +76,16 @@
                         <MudListSubheader>
                             Recent cases
                         </MudListSubheader>
-                        <MudListItem Avatar="@Icons.Material.Filled.Work">
-                            First case
-                        </MudListItem>
-                        <MudListItem Avatar="@Icons.Material.Filled.Work">
-                            second case
-                        </MudListItem>
-                        <MudListItem Avatar="@Icons.Material.Filled.Work">
-                            third case
-                        </MudListItem>
-                        <MudListItem Avatar="@Icons.Material.Filled.Work">
-                            another case
-                        </MudListItem>
+                        @foreach (var recentCase in GetRecentCases())
+                        {
+                            <MudListItem Avatar="@Icons.Material.Filled.Work">
+                                @recentCase.Discription
+                                @if (IsCaseNew(recentCase))
+                                {
+                                    <MudBadge Color="Color.Secondary">New</MudBadge>
+                                }
+                            </MudListItem>
+                        }
                     </MudList>
                 </MudPaper>
             </MudTabPanel>
@@ -99,19 +98,20 @@
 
 
 @code {
-
+      private List<Case> caseList = new List<Case>();
     private Lawyers lawyers = new Lawyers();
     private List<Lawyers> lawyersList = new List<Lawyers>();
     private bool showModal = false;
     private string searchString = " ";
     public bool BasicSwitch2 { get; set; } = false;
-     private string userName;
+    private string userName;
 
     protected override async Task OnInitializedAsync()
     {
         lawyersList = lawyerService.GetAll();
+        caseList = await caseService.GetAllAsync();
 
-         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         var user = authState.User;
         var isAuthenticated = user.Identity.IsAuthenticated;
@@ -124,6 +124,24 @@
         {
             Nav.NavigateTo("/Identity/Account/Login", forceLoad: true);
         }
+    }
+
+    private List<Case> GetRecentCases()
+    {
+        // Filter caseList to get recent cases (e.g., within the last 48 hours)
+        return caseList.Where(c => IsCaseRecent(c)).ToList();
+    }
+
+    private bool IsCaseRecent(Case myCase)
+    {
+        // Determine if the case is recent (e.g., within the last 48 hours)
+        return myCase.StartDate >= DateTime.Now.AddDays(-2);
+    }
+
+    private bool IsCaseNew(Case myCase)
+    {
+        // Determine if the case is new (based on Case Type, assuming Case Type ID 1 represents "New")
+        return myCase.CaseTypeId == 1;
     }
 
     private void ViewLawyerDetails(Lawyers lawyerId)

@@ -1,0 +1,105 @@
+@page "/myassignedcases"
+@attribute [Authorize(Roles = "Client")]
+
+@using LegalCaseManagement.Service
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Data.LegalServices
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject IServiceScopeFactory ServiceScopeFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<h3>My Cases</h3>
+
+@if (assignedCases == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+<MudCard Elevation="25">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h6">Cases</MudText>
+        </CardHeaderContent>
+    </MudCardHeader>
+    <MudCardContent>
+    <MudTable Items="assignedCases" Hover="true">
+        <ToolBarContent>
+                @*<MudTextField  Placeholder="Search Here"  Class="mt-0"></MudTextField>*@
+            </ToolBarContent>
+        <ColGroup>
+            <col style="width: 50px;" />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col style="width: 100px;" />
+        </ColGroup>
+        <HeaderContent>
+            <MudTh>#</MudTh>
+            <MudTh>Petitioner</MudTh>
+            <MudTh>Court Name</MudTh>
+            <MudTh>Start Date</MudTh>
+            <MudTh>End Date</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh>Action</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.CaseId</MudTd>
+            <MudTd>@context.Petitioner</MudTd>
+            <MudTd>@context.Defendant</MudTd>
+            <MudTd>@context.StartDate?.ToString("dd MMM yyyy")</MudTd>
+            <MudTd>@context.EndDate?.ToString("dd MMM yyyy")</MudTd>
+            <MudTd>@context.CaseStatus.StatusName</MudTd>
+             <MudTd>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigateToDetails(context.CaseId))">View</MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+    </MudCardContent>
+</MudCard>
+}
+
+@code {
+    private List<Case> assignedCases;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await GetCurrentUserAsync();
+        assignedCases = await GetAssignedCasesAsync(user.Id);
+    }
+
+    private async Task<ApplicationUser> GetCurrentUserAsync()
+{
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    var user = authState.User;
+
+    if (user.Identity.IsAuthenticated)
+    {
+        return await UserManager.GetUserAsync(user);
+    }
+
+    return null;
+}
+
+    private async Task<List<Case>> GetAssignedCasesAsync(string userId)
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return await context.Cases
+                .Include(c => c.CaseStatus)
+                .Where(c => c.UserId == userId)
+                .ToListAsync();
+        }
+    }
+
+     private void NavigateToDetails(int caseId)
+    {
+        NavigationManager.NavigateTo($"/casedetails/{caseId}");
+    }
+}
