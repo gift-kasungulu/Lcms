@@ -6,3 +6,10 @@ function saveAsFile(filename, bytesBase64) {
     link.click();
     document.body.removeChild(link);
 }
+function focusDatePicker(datePickerId) {
+    // Focus on the MudDatePicker with the provided ID
+    var datePicker = document.getElementById(datePickerId);
+    if (datePicker) {
+        datePicker.focus();
+    }
+}

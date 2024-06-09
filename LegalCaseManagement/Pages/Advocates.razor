@@ -133,7 +133,10 @@
 
     private async Task DeleteRec(Lawyers rec)
     {
-        if (await lawyerService.DeleteAsync(rec))
+        bool comfirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you wnt to Delete");
+        if(comfirmed)
+        {
+            if (await lawyerService.DeleteAsync(rec))
         {
             lawyersList = await lawyerService.GetAllAsync();
             snackbar.Add("Lawyer was removed Successfully", Severity.Info);
@@ -142,6 +145,8 @@
         {
             snackbar.Add("Operation Failed. Try Again later", Severity.Error);
         }
+        }
+        
     }
 
     public async Task Add()

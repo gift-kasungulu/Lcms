@@ -155,11 +155,11 @@
                                 OnClick="@(()=>Update(context))" />
                         </MudMenuItem>
                         <MudMenuItem>
-                            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" />
+                            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.DateRange" Size="Size.Small" />
                         </MudMenuItem>
-                        <MudMenuItem>
+                        @*<MudMenuItem>
                             <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" />
-                        </MudMenuItem>
+                        </MudMenuItem>*@
                     </MudMenu>
 
                 </MudTd>
@@ -280,22 +280,6 @@
         }
     }
 
-    /*public async Task Add()
-    {
-    if (newCase.CaseId == 0)
-    {
-    await caseService.AddAsync(newCase);
-    await GetAllAsync();
-    snackbar.Add("the Case was Added ", Severity.Success);
-    CloseModal();
-    }
-    else
-    {
-    caseService.Update(newCase);
-    snackbar.Add("Case Record Updated", Severity.Success);
-    }
-    }*/
-
     private async Task Add()
     {
         using (var scope = ServiceScopeFactory.CreateScope())
@@ -324,16 +308,6 @@
                 }
             }
 
-            // Attach existing Client
-            /* if (!string.IsNullOrEmpty(newCase.UserId))
-            {
-            var existingClient = await _userManager.FindByIdAsync(newCase.UserId);
-            if (existingClient != null)
-            {
-            newCase.Client = existingClient;
-            context.Entry(existingClient).State = EntityState.Unchanged;
-            }
-            }*/
 
             if (newCase.CaseId == 0)
             {

@@ -67,7 +67,7 @@ public class EmailService
 
         email.To.Add(MailboxAddress.Parse(toEmail));
         email.Subject = "Welcome to our App! ";
-        email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = "Thank you for signing up! Your Email Account has been registered with DICT's HelpDesk System. Use the link below to log in and use the app. Click <a href='#'>here</a> to log in to our app." };
+        email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = "Thank you for signing up! Your Email Account has been registered with Us, you can login using the provided password: <strong>{password}</strong>" };
 
         using var smtp = new SmtpClient();
         await smtp.ConnectAsync(_configuration["Email:Host"], int.Parse(_configuration["Email:Port"]), SecureSocketOptions.StartTls);

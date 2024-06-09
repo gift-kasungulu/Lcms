@@ -12,6 +12,7 @@
 @inject ISnackbar snackbar
 @inject AppUserService userService
 @inject IServiceScopeFactory ServiceScopeFactory
+@inject EmailService emailService
 
 <PageTitle>Counter</PageTitle>
 
@@ -136,8 +137,10 @@
                                 <MudTd DataLabel="Role Name">@context.Name</MudTd>
                                 
                                 <MudTd>
-                                    <MudIconButton Color="Color.Info" Icon="@Icons.Material.Filled.Edit" aria-label="edit" OnClick="@(() => EditRole(context))" />
-                                    <MudIconButton Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" aria-label="delete" OnClick="@(() => DeleteRole(context))" />
+                                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => EditRole(context))" />
+                                    
+                                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small"  OnClick="@(() => DeleteRole(context))" />
+                                    
                                 </MudTd>
                             </RowTemplate>
                         </MudTable>
@@ -227,9 +230,14 @@
     //delete method
     private async Task DeleteRec(ApplicationUser rec)
     {
-        userService.Delete(rec);
-        GetAll();
-        await jstRuntime.InvokeVoidAsync("alert", "User Removed succefully");
+        bool confimUserRemoval = await jstRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to Remove user ?");
+        if(confimUserRemoval)
+        {
+            userService.Delete(rec);
+            GetAll();
+            await jstRuntime.InvokeVoidAsync("alert", "User Removed succefully");
+        }
+        
 
     }
 
@@ -356,9 +364,10 @@
 
     private async Task DeleteRole(IdentityRole role)
     {
-        try
+        bool comfirmDelete = await jstRuntime.InvokeAsync<bool>("comfirm", "Are you sure you want to delete rRole ?");
+        if(comfirmDelete)
         {
-            using (var scope = ServiceScopeFactory.CreateScope())
+           using (var scope = ServiceScopeFactory.CreateScope())
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 var result = await roleManager.DeleteAsync(role);
@@ -373,11 +382,7 @@
                 }
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception in DeleteRole: {ex}");
-            throw;
-        }
+       
     }
 
     public async void AddNewUserWithRoles(EditContext context)
@@ -413,6 +418,7 @@
 
                 if (roleAddedResult.Succeeded)
                 {
+                   await emailService.SendDefaultWelcomeEmailAsync(newUser.LoginPassword); // Send welcome email with password
                     snackbar.Add("User was Addedd Successfuly with Role", Severity.Success);
                     
                     return;

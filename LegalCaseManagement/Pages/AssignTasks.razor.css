@@ -1,0 +1,35 @@
+.cause-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+}
+
+.cause-list-table th,
+.cause-list-table td {
+    padding: 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.cause-list-table th {
+    background-color: #f2f2f2;
+}
+
+.cause-list-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.cause-list-table tbody td {
+    vertical-align: top;
+}
+
+.cause-list-table thead th:first-child {
+    text-align: center;
+    background-color: #333;
+    color: #fff;
+    font-weight: bold;
+}
+
+.cause-list-table .btn {
+    margin-right: 5px;
+}

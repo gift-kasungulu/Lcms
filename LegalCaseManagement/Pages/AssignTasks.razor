@@ -86,14 +86,16 @@
                 <MudTh>Status</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="DueDate">@context.DueDate</MudTd>
-                <MudTd DataLabel="Description">@context.Case?.Discription</MudTd>
-               <MudTd DataLabel="AssignedLawyer">@context.AssignedLawyer?.LFirstName @context.AssignedLawyer?.LLastName</MudTd>
-                <MudTd DataLabel="Priority">
-                    <span class="@GetPriorityBadgeClass(@context.Priority?.Name)">@context.Priority?.Name</span>
-                </MudTd>
-                <MudTd DataLabel="Status">@context.Status?.Name</MudTd>
-            </RowTemplate>
+    <MudTd DataLabel="DueDate">@context.DueDate</MudTd>
+    <MudTd DataLabel="Description">@context.Case?.Discription</MudTd>
+    <MudTd DataLabel="AssignedLawyer">@context.AssignedLawyer?.LFirstName @context.AssignedLawyer?.LLastName</MudTd>
+    <MudTd DataLabel="Priority">
+        <span class="@GetPriorityBadgeClass(context.Priority?.Name)">@context.Priority?.Name</span>
+    </MudTd>
+    <MudTd DataLabel="Status">
+        <span class="@GetStatusBadgeClass(context.Status?.Name)">@context.Status?.Name</span>
+    </MudTd>
+</RowTemplate>
         </MudTable>
     </MudCardContent>
 </MudCard>
@@ -107,21 +109,30 @@
     private List<Priority> priorities = new List<Priority>();
     private List<MyTaskStatus> taskStatuses = new List<MyTaskStatus>();
 
-    private string GetPriorityBadgeClass(string priority)
+private string GetPriorityBadgeClass(string priority)
 {
-    Console.WriteLine($"Priority received: {priority}");
-
-    var badgeClass = priority switch
+    var badgeClass = priority.ToLower() switch
     {
-        "High" => "badge bg-danger",
-        _ => "badge bg-secondary", // Use a different color for other priority values
+        "high" => "badge bg-danger",
+        "low" => "badge bg-success",
+        _ => "badge bg-warning", // Use a different color for other priority values
     };
-
-    Console.WriteLine($"Badge class returned: {badgeClass}");
 
     return badgeClass;
 }
 
+private string GetStatusBadgeClass(string status)
+{
+    var badgeClass = status.ToLower() switch
+    {
+        "completed" => "badge bg-success",
+        "pending" => "badge bg-warning",
+        "in progress" => "badge bg-primary",
+        _ => "badge bg-secondary", // Use a different color for other status values
+    };
+
+    return badgeClass;
+}
 
     protected override async Task OnInitializedAsync()
     {
