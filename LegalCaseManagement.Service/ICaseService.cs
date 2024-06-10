@@ -7,6 +7,8 @@ namespace LegalCaseManagement.Service
 {
     public interface ICaseService
     {
-        Task<List<Case>> GetCasesByLawyerIdAsync(int lawyerId);
+        Task<List<Case>> GetCasesByLawyerIdAsync(string  lawyerId);
+
+        Task<Case> GetByIdAsync(int id);
     }
 }

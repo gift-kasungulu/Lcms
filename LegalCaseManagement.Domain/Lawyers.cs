@@ -1,11 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LegalCaseManagement.Data
 {
-    public class Lawyers
+    public enum Gender
     {
-        [Key]
-        public int LawyerId { get; set; }
+        Male,
+        Female,
+        Other
+    }
+    public class Lawyers : ApplicationUser
+    {
+       
         public string LFirstName { get; set; } = string.Empty;
         public string LLastName { get; set; } = string.Empty;
         public string City { get; set; } = string.Empty;
@@ -17,9 +23,9 @@ namespace LegalCaseManagement.Data
         public int ExperienceYears { get; set; } 
         public int Age { get; set; }
 
-        //public string? Password { get; set;}
+        [Required]
+        public Gender Gender { get; set; } // Adding the Gender field using enum
 
-        // List of tasks associated with the lawyer ( User with Team member Role)
         public List<Task> TodoTask { get; set; }
 
 

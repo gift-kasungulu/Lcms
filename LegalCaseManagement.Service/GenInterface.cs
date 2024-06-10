@@ -10,6 +10,6 @@
 
         Task<bool> AddAsync(T entity);
         Task<List<T>> GetAllAsync();
-        Task<T> GetByIdAsync(int id);
+        Task<T> GetByIdAsync(string id);
     }
 }

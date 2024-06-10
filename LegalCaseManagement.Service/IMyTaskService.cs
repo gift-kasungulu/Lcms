@@ -6,6 +6,6 @@ namespace LegalCaseManagement.Service
 {
     public interface IMyTaskService
     {
-        Task<List<MyTask>> GetTasksByLawyerIdAsync(int lawyerId);
+        Task<List<MyTask>> GetTasksByLawyerIdAsync(string  lawyerId);
     }
 }

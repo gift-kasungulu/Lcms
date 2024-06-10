@@ -1,5 +1,5 @@
 ﻿@page "/advocates"
-@attribute [Authorize(Roles = "Admin, Team")] 
+@attribute [Authorize(Roles = "Admin, Team")]
 @using LegalCaseManagement.Data
 @using Microsoft.AspNetCore.Identity
 @inject LawyerService lawyerService
@@ -21,6 +21,8 @@
                 </div>
                 <div class="modal-body">
                     <EditForm Model="lawyers" OnValidSubmit="Add">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
                         <div class="mb-3 mt-3">
                             <label class="form-label">First Name</label>
                             <input class="form-control" placeholder="Enter First Name" @bind-value="lawyers.LFirstName" />
@@ -35,7 +37,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Email</label>
-                            <input class="form-control" placeholder="Enter Email" @bind-value="lawyers.Email" maxlength="255" />
+                            <input class="form-control" placeholder="Enter Email" @bind-value="lawyers.Email"
+                                maxlength="255" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Country</label>
@@ -51,19 +54,32 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Case Type</label>
-                            <input type="text" class="form-control" placeholder="Enter Case Type" @bind-value="lawyers.CaseType" />
+                            <input type="text" class="form-control" placeholder="Enter Case Type"
+                                @bind-value="lawyers.CaseType" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Experience Years</label>
-                            <input type="number" class="form-control" placeholder="Enter Experience Years" @bind-value="lawyers.ExperienceYears" />
+                            <input type="number" class="form-control" placeholder="Enter Experience Years"
+                                @bind-value="lawyers.ExperienceYears" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Win Percentage</label>
-                            <input type="number" class="form-control" placeholder="Enter Win Percentage" @bind-value="lawyers.CaseWinPercentage" />
+                            <input type="number" class="form-control" placeholder="Enter Win Percentage"
+                                @bind-value="lawyers.CaseWinPercentage" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Gender</label>
+                            <select class="form-control" @bind="lawyers.Gender">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
-                            <input type="password" class="form-control" placeholder="Enter Password" @bind-value="password" />
+                            <input type="password" class="form-control" placeholder="Enter Password"
+                                @bind-value="password" />
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </EditForm>
@@ -83,14 +99,16 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudTable Items="lawyersList" Filter="new Func<Lawyers, bool>(Searchrec)" @bind-lawyersList="lawyersList">
+        <MudTable Items="lawyersList" Filter="new Func<Lawyers,bool>(Searchrec)" @bind-lawyersList="lawyersList">
+
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Advocates</MudText>
                 <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium"
+                    StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
             </ToolBarContent>
             <HeaderContent>
-                <MudTh>#</MudTh>
+
                 <MudTh>FIRST NAME</MudTh>
                 <MudTh>Last Name</MudTh>
                 <MudTh>Email</MudTh>
@@ -100,7 +118,7 @@
                 <MudTh>Actions</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Phone">@context.LawyerId</MudTd>
+
                 <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
                 <MudTd DataLabel="LastName">@context.LLastName</MudTd>
                 <MudTd DataLabel="Email">@context.Email</MudTd>
@@ -108,8 +126,9 @@
                 <MudTd DataLabel="Experience">@context.ExperienceYears</MudTd>
                 <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small"/>
-                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(() => DeleteRec(context))" />
+                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                        OnClick="@(() => DeleteRec(context))" />
                 </MudTd>
             </RowTemplate>
             <PagerContent>
@@ -129,36 +148,47 @@
     protected override async Task OnInitializedAsync()
     {
         lawyersList = await lawyerService.GetAllAsync();
+        
     }
 
     private async Task DeleteRec(Lawyers rec)
     {
-        bool comfirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you wnt to Delete");
-        if(comfirmed)
+        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete?");
+        if (confirmed)
         {
             if (await lawyerService.DeleteAsync(rec))
-        {
-            lawyersList = await lawyerService.GetAllAsync();
-            snackbar.Add("Lawyer was removed Successfully", Severity.Info);
+            {
+                lawyersList = await lawyerService.GetAllAsync();
+                snackbar.Add("Lawyer was removed successfully", Severity.Info);
+            }
+            else
+            {
+                snackbar.Add("Operation failed. Try again later", Severity.Error);
+            }
         }
-        else
-        {
-            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
-        }
-        }
-        
     }
 
     public async Task Add()
     {
         try
         {
-            var user = new ApplicationUser
-            {
-                UserName = lawyers.Email,
-                Email = lawyers.Email,
-                EmailConfirmed = true,
-            };
+            // Create a new ApplicationUser object for the lawyer
+            var user = new Lawyers
+                {
+                    UserName = lawyers.Email,
+                    Email = lawyers.Email,
+                    LFirstName = lawyers.LFirstName,
+                    LLastName = lawyers.LLastName,
+                    City = lawyers.City,
+                    Country = lawyers.Country,
+                    Phone = lawyers.Phone,
+                    CaseWinPercentage = lawyers.CaseWinPercentage,
+                    CaseType = lawyers.CaseType,
+                    ExperienceYears = lawyers.ExperienceYears,
+                    Age = lawyers.Age,
+                    Gender = lawyers.Gender,
+                    EmailConfirmed = true
+                };
 
             var passwordHash = _userManager.PasswordHasher.HashPassword(user, password);
 
@@ -172,13 +202,11 @@
                 // Assign the "Team" role
                 await _userManager.AddToRoleAsync(user, "Team");
 
-                //lawyers.LawyerId = int.Parse(user.Id); 
-
                 // Save the lawyer details in the database
-                if (await lawyerService.AddAsync(lawyers))
+                if (await lawyerService.AddAsync(user))
                 {
                     lawyersList = await lawyerService.GetAllAsync();
-                    snackbar.Add("Lawyer Was Added Successfully", Severity.Success);
+                    snackbar.Add("Lawyer was added successfully", Severity.Success);
                     ToggleModal(); // Close the modal after adding
 
                     // Reset the lawyers object
@@ -187,7 +215,8 @@
                 }
                 else
                 {
-                    snackbar.Add("Failed to add lawyer to database", Severity.Error);
+                    
+                    snackbar.Add("Lawyer Update ", Severity.Success);
                 }
             }
             else
@@ -201,7 +230,7 @@
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+            snackbar.Add("Operation failed. Try again later", Severity.Error);
         }
     }
 

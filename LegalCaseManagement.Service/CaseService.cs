@@ -17,14 +17,24 @@ namespace LegalCaseManagement.Data
             _context = context;
         }
 
-        public async Task<List<Case>> GetCasesByLawyerIdAsync(int lawyerId)
+        public async Task<List<Case>> GetCasesByLawyerIdAsync(string lawyerId)
         {
             return await _context.Cases
-                .Where(c => c.LawyerId == lawyerId)
+                .Where(c => c.UserId == lawyerId)
                 .Include(c => c.AppUser)
                 .Include(c => c.CaseStatus)
                 .Include(c => c.CaseType)
                 .ToListAsync();
         }
+
+         public async Task<Case> GetByIdAsync(int id) // Adjust the return type to Task<Case>
+    {
+        return await _context.Cases
+            .Include(c => c.CaseType)
+            .Include(c => c.CaseStatus)
+            .Include(c => c.AppUser)
+            .FirstOrDefaultAsync(c => c.CaseId == id);
+    }
+
     }
 }

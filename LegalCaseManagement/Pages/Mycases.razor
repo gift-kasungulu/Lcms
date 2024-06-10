@@ -46,6 +46,21 @@
                                     required />
                             </div>
                             <div class="mb-3">
+                                <label for="registrationDate" class="form-label">Registration Date</label>
+                                <InputDate @bind-Value="newCase.RegistrationDate" id="registrationDate"
+                                    class="form-control" />
+                            </div>
+                            <div class="mb-3">
+                                <label for="registrationNo" class="form-label">Registration Number</label>
+                                <InputText @bind-Value="newCase.RegistrationNo" id="registrationNo" class="form-control"
+                                    required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="fileAttachment" class="form-label">File Attachment</label>
+                                <InputFile @bind-Value="newCase.FileAttachment" id="fileAttachment"
+                                    class="form-control" />
+                            </div>
+                            <div class="mb-3">
                                 <label for="startDate" class="form-label">Date</label>
                                 <InputDate @bind-Value="newCase.StartDate" id="startDate" class="form-control" />
                             </div>
@@ -108,7 +123,7 @@
 <br />
 <MudCard>
     <MudCardHeader>
-     <div class="d-flex justify-content-between align-items-center w-100">
+        <div class="d-flex justify-content-between align-items-center w-100">
             <form class="d-flex w-75">
                 <div class="row w-100">
                     <div class="col-md-8">
@@ -119,56 +134,57 @@
                     </div>
                 </div>
             </form>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="NavigateToAssignedCases" class="ml-auto">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="NavigateToAssignedCases"
+                class="ml-auto">
                 View Assigned Cases
             </MudButton>
-        </div
-    </MudCardHeader>
-    <MudCardContent>
-        <MudTable Items="caseList" Filter="new Func<Case,bool>(Search)">
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Cases</MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Large"
-                    StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
-            </ToolBarContent>
-            <HeaderContent>
-                <MudTh>#</MudTh>
-                <MudTh>Next Date</MudTh>
-                <MudTh>Petitioner</MudTh>
-                <MudTh>Vs Client</MudTh>
-                <MudTh>Court Name</MudTh>
-                <MudTh>Status</MudTh>
-                <MudTh>Action</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="CaseId">@context.CaseId</MudTd>
-                <MudTd DataLabel="EndDate">@context.EndDate</MudTd>
-                <MudTd DataLabel="Petitioner">@context.Petitioner</MudTd>
-                <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
-                <MudTd DataLabel="Defendant">@context.Defendant</MudTd>
-                <MudTd DataLabel="CaseStatus">@context.CaseStatus.StatusName</MudTd>
-                <MudTd DataLabel="Actions">
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                        <MudMenuItem>
-                            <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small"
-                                OnClick="@(()=>Update(context))" />
-                        </MudMenuItem>
-                        <MudMenuItem>
-                            <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.DateRange" Size="Size.Small" />
-                        </MudMenuItem>
+        </div </MudCardHeader>
+        <MudCardContent>
+            <MudTable Items="caseList" Filter="new Func<Case,bool>(Search)">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Cases</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Large"
+                        StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh>#</MudTh>
+                    <MudTh>Next Date</MudTh>
+                    <MudTh>Petitioner</MudTh>
+                    <MudTh>Vs Client</MudTh>
+                    <MudTh>Court Name</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh>Action</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="CaseId">@context.CaseId</MudTd>
+                    <MudTd DataLabel="EndDate">@context.EndDate</MudTd>
+                    <MudTd DataLabel="Petitioner">@context.Petitioner</MudTd>
+                    <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
+                    <MudTd DataLabel="Defendant">@context.Defendant</MudTd>
+                    <MudTd DataLabel="CaseStatus">@context.CaseStatus.StatusName</MudTd>
+                    <MudTd DataLabel="Actions">
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                            <MudMenuItem>
+                                <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                    OnClick="@(()=>Update(context))" />
+                            </MudMenuItem>
+                            <MudMenuItem>
+                                <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.DateRange"
+                                    Size="Size.Small" />
+                            </MudMenuItem>
                         @*<MudMenuItem>
                             <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" />
-                        </MudMenuItem>*@
-                    </MudMenu>
+                            </MudMenuItem>*@
+                        </MudMenu>
 
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
-        </MudTable>
-    </MudCardContent>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+        </MudCardContent>
 </MudCard>
 <br />
 
@@ -239,7 +255,7 @@
         selectedDate = DateTime.Today;
     }
 
-     private async void NavigateToAssignedCases()
+    private async void NavigateToAssignedCases()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = await _userManager.GetUserAsync(authState.User);

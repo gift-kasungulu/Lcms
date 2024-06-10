@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LegalCaseManagement.Domain.Migrations
 {
-    public partial class tryall : Migration
+    public partial class Legalcsemanagement : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -33,6 +33,15 @@ namespace LegalCaseManagement.Domain.Migrations
                     Address = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LFirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LLastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CaseWinPercentage = table.Column<double>(type: "float", nullable: true),
+                    CaseType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ExperienceYears = table.Column<int>(type: "int", nullable: true),
+                    Age = table.Column<int>(type: "int", nullable: true),
+                    Gender = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -80,25 +89,29 @@ namespace LegalCaseManagement.Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Lawyers",
+                name: "PriorityLevel",
                 columns: table => new
                 {
-                    LawyerId = table.Column<int>(type: "int", nullable: false)
+                    PriorityId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    LFirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LLastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    City = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Country = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CaseWinPercentage = table.Column<double>(type: "float", nullable: false),
-                    CaseType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ExperienceYears = table.Column<int>(type: "int", nullable: false),
-                    Age = table.Column<int>(type: "int", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Lawyers", x => x.LawyerId);
+                    table.PrimaryKey("PK_PriorityLevel", x => x.PriorityId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Statuses",
+                columns: table => new
+                {
+                    StatusId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Statuses", x => x.StatusId);
                 });
 
             migrationBuilder.CreateTable(
@@ -215,12 +228,15 @@ namespace LegalCaseManagement.Domain.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    RegistrationNo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Petitioner = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Defendant = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Discription = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     CaseTypeId = table.Column<int>(type: "int", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FileAttachment = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -242,6 +258,49 @@ namespace LegalCaseManagement.Domain.Migrations
                         column: x => x.CaseTypeId,
                         principalTable: "CaseType",
                         principalColumn: "CaseTypeId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MyTasks",
+                columns: table => new
+                {
+                    TaskId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FromDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    PriorityId = table.Column<int>(type: "int", nullable: false),
+                    StatusId = table.Column<int>(type: "int", nullable: false),
+                    LawyerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    CaseId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MyTasks", x => x.TaskId);
+                    table.ForeignKey(
+                        name: "FK_MyTasks_AspNetUsers_LawyerId",
+                        column: x => x.LawyerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MyTasks_Cases_CaseId",
+                        column: x => x.CaseId,
+                        principalTable: "Cases",
+                        principalColumn: "CaseId",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MyTasks_PriorityLevel_PriorityId",
+                        column: x => x.PriorityId,
+                        principalTable: "PriorityLevel",
+                        principalColumn: "PriorityId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MyTasks_Statuses_StatusId",
+                        column: x => x.StatusId,
+                        principalTable: "Statuses",
+                        principalColumn: "StatusId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -298,6 +357,26 @@ namespace LegalCaseManagement.Domain.Migrations
                 name: "IX_Cases_UserId",
                 table: "Cases",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MyTasks_CaseId",
+                table: "MyTasks",
+                column: "CaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MyTasks_LawyerId",
+                table: "MyTasks",
+                column: "LawyerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MyTasks_PriorityId",
+                table: "MyTasks",
+                column: "PriorityId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MyTasks_StatusId",
+                table: "MyTasks",
+                column: "StatusId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -318,13 +397,19 @@ namespace LegalCaseManagement.Domain.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Cases");
-
-            migrationBuilder.DropTable(
-                name: "Lawyers");
+                name: "MyTasks");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Cases");
+
+            migrationBuilder.DropTable(
+                name: "PriorityLevel");
+
+            migrationBuilder.DropTable(
+                name: "Statuses");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

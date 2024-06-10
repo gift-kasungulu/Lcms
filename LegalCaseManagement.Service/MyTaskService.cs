@@ -10,27 +10,22 @@ namespace LegalCaseManagement.Service
 {
     public class MyTaskService : GenService<MyTask>, IMyTaskService
     {
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly ApplicationDbContext _context;
 
-        public MyTaskService(ApplicationDbContext context, IServiceScopeFactory serviceScopeFactory) : base(context)
+        public MyTaskService(ApplicationDbContext context) : base(context)
         {
-            _serviceScopeFactory = serviceScopeFactory;
+            _context = context;
         }
 
         // Implement the interface method
-        public async Task<List<MyTask>> GetTasksByLawyerIdAsync(int lawyerId)
+        public async Task<List<MyTask>> GetTasksByLawyerIdAsync(string lawyerId)
         {
-            using (var scope = _serviceScopeFactory.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                return await context.MyTasks
-                    .Where(t => t.LawyerId == lawyerId)
-                    .Include(t => t.Priority)
-                    .Include(t => t.Status)
-                    .Include(t => t.AssignedLawyer)
-                    .Include(t => t.Case)
-                    .ToListAsync();
-            }
+            return await _context.MyTasks
+                .Where(t => t.LawyerId == lawyerId)
+                .Include(t => t.Priority)
+                .Include(t => t.Status)
+                .Include(t => t.Case)
+                .ToListAsync();
         }
     }
 }

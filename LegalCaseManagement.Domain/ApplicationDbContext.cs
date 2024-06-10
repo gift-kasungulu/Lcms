@@ -29,7 +29,19 @@ namespace LegalCaseManagement.Data
             // Explicitly exclude System.Threading.Tasks.Task
             builder.Ignore<System.Threading.Tasks.Task>();
 
-           
+            builder.Entity<MyTask>()
+                .HasOne(t => t.Case)
+                .WithMany() // Assuming there's no collection navigation property in Case for MyTask
+                .HasForeignKey(t => t.CaseId)
+                .OnDelete(DeleteBehavior.Restrict); // Specify Restrict or NoAction
+
+            builder.Entity<MyTask>()
+                .HasOne(t => t.LawyerInfo)
+                .WithMany() // Assuming there's no collection navigation property in Lawyers for MyTask
+                .HasForeignKey(t => t.LawyerId)
+                .OnDelete(DeleteBehavior.Restrict); // Specify Restrict or NoAction
+
+
         }
 
     }

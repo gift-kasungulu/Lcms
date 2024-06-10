@@ -29,17 +29,11 @@ namespace LegalCaseManagement.Domain
         [ForeignKey("StatusId")]
         public MyTaskStatus? Status { get; set; } // Navigation property for TaskStatus
 
-        public int LawyerId { get; set; } // Foreign key for Lawyer
 
+        [Required]
+        public string LawyerId { get; set; } // Foreign key for Lawyers, referencing the Id property from IdentityUser
         [ForeignKey("LawyerId")]
-        public Lawyers? AssignedLawyer { get; set; } // Navigation property for Lawyer
-
-        // Foreign key for ApplicationUser
-        //[Required(ErrorMessage = "Client is required.")]
-        //public string? UserId { get; set; }  // This is the foreign key property referencing ApplicationUser.Id
-
-        //[ForeignKey("UserId")]
-        //public ApplicationUser? AppUser { get; set; }  // Navigation property for the related ApplicationUser
+        public virtual Lawyers LawyerInfo { get; set; } // Navigation property for Lawyers
 
         public int CaseId { get; set; }
 

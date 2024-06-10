@@ -37,16 +37,20 @@ else
             <MudTh>Case</MudTh>
             <MudTh>Priority</MudTh>
             <MudTh>Status</MudTh>
+            
         </HeaderContent>
         <RowTemplate>
             <MudTd>@context.DueDate?.ToString("dd MMM yyyy")</MudTd>
             <MudTd>@context.Description</MudTd>
             <MudTd>@context.Case?.Discription</MudTd>
-            <MudTd>
-                <MudTd>@context.Priority?.Name</MudTd>
-                
-            </MudTd>
+            <MudTd>@context.Priority?.Name</MudTd>
             <MudTd>@context.Status?.Name</MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" >
+                    View Details
+                </MudButton>
+            </MudTd>
+
         </RowTemplate>
     </MudTable>
 }
@@ -57,7 +61,10 @@ else
     protected override async Task OnInitializedAsync()
     {
         var user = await GetCurrentUserAsync();
-        assignedTasks = await GetAssignedTasksAsync(user?.Id);
+        if (user != null)
+        {
+            assignedTasks = await GetAssignedTasksAsync(user.Id);
+        }
     }
 
     private async Task<ApplicationUser> GetCurrentUserAsync()
@@ -76,16 +83,19 @@ else
     private async Task<List<MyTask>> GetAssignedTasksAsync(string userId)
     {
         using (var scope = ServiceScopeFactory.CreateScope())
-    {
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        return await context.MyTasks
-            .Include(t => t.Priority)
-            .Include(t => t.Status)
-            .Include(t => t.Case)
-            .Where(t => t.LawyerId.ToString() == userId)
-            .ToListAsync();
-    }
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return await context.MyTasks
+                .Include(t => t.Priority)
+                .Include(t => t.Status)
+                .Include(t => t.Case)
+                .Where(t => t.LawyerId == userId) // No need to convert userId to string as it's already a string
+                .ToListAsync();
+        }
     }
 
-    
+   /* private void ViewCaseDetails(int caseId)
+    {
+        Navigation.NavigateTo($"/casedetails/{caseId}");
+    }*/
 }

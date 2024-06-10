@@ -1,0 +1,53 @@
+@*@page "/casedetails/{CaseId:int}"
+@using LegalCaseManagement.Service
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Data
+@inject CaseService caseService
+@inject NavigationManager Navigation
+
+<h3>Case Details</h3>
+
+@if (caseDetails == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div>
+        <p><strong>Case ID:</strong> @caseDetails.CaseId</p>
+        <p><strong>Start Date:</strong> @caseDetails.StartDate?.ToString("dd MMM yyyy")</p>
+        <p><strong>Next Hearing Date:</strong> @caseDetails.EndDate?.ToString("dd MMM yyyy")</p>
+        <p><strong>Registration Date:</strong> @caseDetails.RegistrationDate?.ToString("dd MMM yyyy")</p>
+        <p><strong>Registration Number:</strong> @caseDetails.RegistrationNo</p>
+        <p><strong>Petitioner:</strong> @caseDetails.Petitioner</p>
+        <p><strong>Defendant:</strong> @caseDetails.Defendant</p>
+        <p><strong>Description:</strong> @caseDetails.Discription</p>
+        <p><strong>Case Type:</strong> @caseDetails.CaseType?.TypeName</p>
+        <p><strong>Status:</strong> @caseDetails.CaseStatus?.StatusName</p>
+        <p><strong>Client:</strong> @caseDetails.AppUser?.UserName</p>
+        @if (!string.IsNullOrEmpty(caseDetails.FileAttachment))
+        {
+            <p><strong>File Attachment:</strong> <a href="@caseDetails.FileAttachment" target="_blank">View Attachment</a></p>
+        }
+    </div>
+}
+
+<button class="btn btn-primary mt-4" @onclick="GoBack">Back</button>
+
+@code {
+    [Parameter]
+    public int CaseId { get; set; }
+
+    private Case caseDetails;
+
+    protected override async Task OnInitializedAsync()
+    {
+        caseDetails = await caseService.GetByIdAsync(CaseId);
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/myassignedtasks");
+    }
+}
+*@

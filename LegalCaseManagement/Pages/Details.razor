@@ -67,9 +67,9 @@ else
     private Lawyers lawyer;
     private RequestModel request = new RequestModel();
 
-    protected override void OnInitialized()
+     protected override async Task OnInitializedAsync()
     {
-        lawyer = lawyerService.GetById(int.Parse(LawyerId));
+        lawyer = await lawyerService.GetByIdAsync(LawyerId);
     }
 
     private async Task HandleValidSubmit()
