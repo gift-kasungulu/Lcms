@@ -17,13 +17,7 @@
         </MudText>
         <br />
         <MudGrid>
-            <MudItem xs="12">
-                <MudPaper Class="d-flex align-center justify-center mud-width-full py-8" Color="Color.Primary">
-                    <b>Welcome to our legal case management system. Here you can manage your cases and track lawyer
-                        performance.</b>
-                </MudPaper>
-
-            </MudItem>
+            
 
 
         </MudGrid>
@@ -52,7 +46,7 @@
                         
                         <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
                         <MudTd DataLabel="LastName">@context.LLastName</MudTd>
-                        <MudTd DataLabel="Email">@context.Email</MudTd>
+                        <MudTd DataLabel="Email">@context.UserName</MudTd>
                         <MudTd DataLabel="Phone">@context.Phone</MudTd>
                         <MudTd DataLabel="Experince">@context.ExperienceYears</MudTd>
                         <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
@@ -79,7 +73,7 @@
                                 @recentCase.Discription
                                 @if (IsCaseNew(recentCase))
                                 {
-                                    <MudBadge Color="Color.Secondary">New</MudBadge>
+                                    <MudBadge Color="Color.Secondary">.                          New</MudBadge>
                                 }
                             </MudListItem>
                         }

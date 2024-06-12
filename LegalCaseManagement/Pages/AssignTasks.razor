@@ -46,7 +46,7 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="12" sm="6" md="4">
-                    <MudSelect @bind-Value="newTask.LawyerId" Label="Assigned Lawyer" Required="true">
+                    <MudSelect @bind-Value="newTask.LawyerId" Label="Assign To Lwyer" Required="true">
                         @foreach (var lawyer in lawyers)
                         {
                             <MudSelectItem Value="@lawyer.Id">@lawyer.LFirstName @lawyer.LLastName</MudSelectItem> <!-- Use lawyer.Id for ApplicationUser's Id -->
@@ -125,7 +125,7 @@
             "completed" => "badge bg-success",
             "pending" => "badge bg-warning",
             "in progress" => "badge bg-primary",
-            _ => "badge bg-secondary", // Use a different color for other status values
+            _ => "badge bg-secondary", 
         };
 
         return badgeClass;

@@ -95,41 +95,34 @@
                 </div>
             </Authorized>
         </AuthorizeView>
+        <AuthorizeView Roles=" Admin">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="settings">
+                        <i class="bi bi-gear-fill mr-4" aria-hidden="true"></i> Settings
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
         <AuthorizeView Roles="Team, Admin">
             <Authorized>
+        <MudNavGroup Title="Settings" Expanded="true">
+                  
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="settings">
-                        <i class="bi bi-gear-fill mr-4" aria-hidden="true"></i> Settings
+                        <i class="bi bi-gear-fill mr-4" aria-hidden="true"></i>Case Settings
                     </NavLink>
                 </div>
-            </Authorized>
-        </AuthorizeView>
-        <MudMenu Color="Color.Primary" Label="More" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.KeyboardArrowDown"
-            IconColor="Color.Secondary">
-          
-            <MudMenuItem>
-                  <AuthorizeView Roles="Team, Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="settings">
-                        <i class="bi bi-gear-fill mr-4" aria-hidden="true"></i> Settings
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-            </MudMenuItem>
-            <MudMenuItem>
-                  <AuthorizeView Roles="Team, Admin">
-            <Authorized>
+            
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="tasksetting" EndIcon="@Icons.Material.Filled.AddTask" >
                          Task setting
                     </NavLink>
                 </div>
-            </Authorized>
+        </MudNavGroup>
+         </Authorized>
         </AuthorizeView>
-            </MudMenuItem>
-        </MudMenu>
+       
     </nav>
 </div>
 

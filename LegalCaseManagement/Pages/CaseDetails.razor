@@ -21,35 +21,34 @@ else
                     <MudText Typo="Typo.h5" GutterBottom="true">Case Details</MudText>
                 </div>
                 <div>
-                    <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Primary" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Primary" Size="Size.Medium"/>
                     <MudIconButton Icon="@Icons.Material.Filled.FileDownload" Color="Color.Primary" />
                 </div>
             </div>
         </MudCardHeader>
         <MudCardContent>
             <MudTabs Elevation="1" Rounded="true" PanelClass="pa-6">
-                <MudTabPanel Text="Details" ToolTip="ToolTip One">
+                <MudTabPanel Text="Details" ToolTip="Case etails">
                     <MudPaper Class="p-3">
                         <div class="row">
                             <div class="col-md-6">
                                 <MudText Typo="Typo.h6" GutterBottom="true">Case Detail</MudText>
                                 <div>
 
-                                    <p><strong>Case Type:</strong> @caseDetails.CaseType</p>
+                                    <p><strong>Case Type:</strong> @caseDetails.CaseType.TypeName</p>
+                                    <p><strong>Registration Date:</strong>
+                                         @caseDetails.RegistrationDate?.ToString("dd-MM-yyyy")
+                                    </p>
+                                <p><strong>Registration No:</strong> @caseDetails.RegistrationNo</p>
                                     @* <p><strong>Filing No:</strong> @caseDetails.FilingNo</p>
                                 <p><strong>Filing Date:</strong> @caseDetails.FilingDate?.ToString("dd-MM-yyyy")</p>
-                                <p><strong>Registration No:</strong> @caseDetails.RegistrationNo</p>
-                                <p><strong>Registration Date:</strong>
-                                @caseDetails.RegistrationDate?.ToString("dd-MM-yyyy")</p>
+                                
+                                
                                 <p><strong>CNR Number:</strong> @caseDetails.CnrNumber</p>*@
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="d-flex justify-content-end mb-3">
-                                    <MudButton Variant="Variant.Filled" Color="Color.Primary">
-                                        View Assigned Cases
-                                    </MudButton>
-                                </div>
+                               
                                 <div>
                                     <p><strong>First Hearing Date:</strong> @caseDetails.StartDate?.ToString("dd-MM-yyyy")
                                     </p>
@@ -62,11 +61,17 @@ else
                         </div>
                     </MudPaper>
                 </MudTabPanel>
-                <MudTabPanel Text="History" ToolTip="ToolTip Two">
-                    <MudText>Item Two</MudText>
+                <MudTabPanel Text="History" ToolTip="History">
+                    <MudText>History</MudText>
                 </MudTabPanel>
-
+                
+                
             </MudTabs>
+            <MudSpacer></MudSpacer>
+            <div class="mb-3">
+                <label for="fileAttachment" class="form-label">Attach File To Lawyer</label>
+                    <InputFile  id="fileAttachment" class="form-control" />
+            </div>
 
 
 

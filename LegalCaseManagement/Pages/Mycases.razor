@@ -134,7 +134,7 @@
                     </div>
                 </div>
             </form>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="NavigateToAssignedCases"
+            <MudButton Disabled="true" Variant="Variant.Filled" Color="Color.Primary" @onclick="NavigateToAssignedCases"
                 class="ml-auto">
                 View Assigned Cases
             </MudButton>
@@ -225,9 +225,11 @@
         </MudTable>
     </MudCardContent>
 </MudCard>
-
+<div id="calendar"></div>
 
 @code {
+    private IJSObjectReference? calendarInstance;
+    private IJSObjectReference? module;
 
     private string searchString = "";
     private Case newCase = new Case();
@@ -254,6 +256,33 @@
 
         selectedDate = DateTime.Today;
     }
+
+   protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+             module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./site.js");
+             await InitializeCalendar();
+        }
+    }
+    
+    private async Task InitializeCalendar()
+{
+    // Retrieve cases from the database
+    var cases = await GetCasesWithRelatedDataAsync();
+
+    // Create a list of calendar events
+    var events = cases.Select(c => new
+    {
+        title = $"Case {c.RegistrationNo}: {c.Petitioner} vs {c.Defendant}",
+        start = c.EndDate?.ToString("yyyy-MM-dd"), // Correct usage of ToString with format string
+        // Add any other relevant case properties
+    });
+
+    await module.InvokeVoidAsync("renderCalendar", "calendar", events);
+    calendarInstance = await module.InvokeAsync<IJSObjectReference>("getCalendarInstance");
+}
+
 
     private async void NavigateToAssignedCases()
     {

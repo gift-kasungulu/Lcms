@@ -13,3 +13,17 @@ function focusDatePicker(datePickerId) {
         datePicker.focus();
     }
 }
+
+let calendar;
+
+export function renderCalendar(calendarElement, events) {
+    calendar = new FullCalendar.Calendar(document.getElementById(calendarElement), {
+        events: events,
+        // Add other FullCalendar options as needed
+    });
+    calendar.render();
+}
+
+export function getCalendarInstance() {
+    return calendar;
+}
