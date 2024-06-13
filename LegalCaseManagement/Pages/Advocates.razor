@@ -3,10 +3,12 @@
 @using LegalCaseManagement.Data
 @using Microsoft.AspNetCore.Identity
 @inject LawyerService lawyerService
-@inject IJSRuntime jsRuntime
+@inject IJSRuntime jsRuntime 
+@using MailKit.Net.Smtp
 @inject ISnackbar snackbar
 @inject UserManager<ApplicationUser> _userManager
 @inject RoleManager<IdentityRole> _roleManager
+@inject EmailService emailService
 
 <PageTitle>Advocates</PageTitle>
 
@@ -135,6 +137,19 @@
                 <MudTablePager />
             </PagerContent>
         </MudTable>
+        <br />
+        <EditForm Model="request" OnValidSubmit="HandleValidSubmit">
+                    <div class="mb-3">
+                        <label class="form-label">Your Email</label>
+                        <MudTextField @bind-Value="request.Email" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Message</label>
+                        <MudTextField @bind-Value="request.Message" TextArea="true" />
+                    </div>
+                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
+                   
+                </EditForm>
     </MudCardContent>
 </MudCard>
 
@@ -144,11 +159,39 @@
     private bool showModal = false;
     private string searchString = "";
     private string password = "";
+    private RequestModel request = new RequestModel();
 
     protected override async Task OnInitializedAsync()
     {
         lawyersList = await lawyerService.GetAllAsync();
         
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await emailService.SendEmailAsync(request.Email, "Law Master Legal Case Management", request.Message, null);
+            await jsRuntime.InvokeVoidAsync("alert", "Email sent successfully!");
+        }
+        catch (SmtpCommandException smtpEx)
+        {
+            await jsRuntime.InvokeVoidAsync("alert", $"SMTP error: {smtpEx.Message}");
+        }
+        catch (SmtpProtocolException protocolEx)
+        {
+            await jsRuntime.InvokeVoidAsync("alert", $"SMTP protocol error: {protocolEx.Message}");
+        }
+        catch (Exception ex)
+        {
+            await jsRuntime.InvokeVoidAsync("alert", $"An error occurred: {ex.Message}");
+        }
+    }
+
+     private class RequestModel
+    {
+        public string Email { get; set; }
+        public string Message { get; set; }
     }
 
     private async Task DeleteRec(Lawyers rec)
@@ -169,70 +212,72 @@
     }
 
     public async Task Add()
+{
+    try
     {
-        try
+        // Create a new ApplicationUser object for the lawyer
+        var user = new Lawyers
         {
-            // Create a new ApplicationUser object for the lawyer
-            var user = new Lawyers
-                {
-                    UserName = lawyers.Email,
-                    Email = lawyers.Email,
-                    LFirstName = lawyers.LFirstName,
-                    LLastName = lawyers.LLastName,
-                    City = lawyers.City,
-                    Country = lawyers.Country,
-                    Phone = lawyers.Phone,
-                    CaseWinPercentage = lawyers.CaseWinPercentage,
-                    CaseType = lawyers.CaseType,
-                    ExperienceYears = lawyers.ExperienceYears,
-                    Age = lawyers.Age,
-                    Gender = lawyers.Gender,
-                    EmailConfirmed = true
-                };
+            UserName = lawyers.Email,
+            Email = lawyers.Email,
+            LFirstName = lawyers.LFirstName,
+            LLastName = lawyers.LLastName,
+            City = lawyers.City,
+            Country = lawyers.Country,
+            Phone = lawyers.Phone,
+            CaseWinPercentage = lawyers.CaseWinPercentage,
+            CaseType = lawyers.CaseType,
+            ExperienceYears = lawyers.ExperienceYears,
+            Age = lawyers.Age,
+            Gender = lawyers.Gender,
+            EmailConfirmed = true
+        };
 
-            var passwordHash = _userManager.PasswordHasher.HashPassword(user, password);
+        var passwordHash = _userManager.PasswordHasher.HashPassword(user, password);
 
-            var result = await _userManager.CreateAsync(user);
+        var result = await _userManager.CreateAsync(user);
 
-            if (result.Succeeded)
+        if (result.Succeeded)
+        {
+            user.PasswordHash = passwordHash;
+            await _userManager.UpdateAsync(user);
+
+            // Assign the "Team" role
+            await _userManager.AddToRoleAsync(user, "Team");
+
+            // Save the lawyer details in the database
+            if (await lawyerService.AddAsync(user))
             {
-                user.PasswordHash = passwordHash;
-                await _userManager.UpdateAsync(user);
+                lawyersList = await lawyerService.GetAllAsync();
+                snackbar.Add("Lawyer was added successfully", Severity.Success);
+                ToggleModal(); // Close the modal after adding
 
-                // Assign the "Team" role
-                await _userManager.AddToRoleAsync(user, "Team");
+                // Send email with password
+                await emailService.SendEmailAsync(user.Email, "Welcome to our App!", $"Thank you for signing up! Your Email Account has been registered with Us, you can login using the provided password: <strong>{password}</strong>", null);
 
-                // Save the lawyer details in the database
-                if (await lawyerService.AddAsync(user))
-                {
-                    lawyersList = await lawyerService.GetAllAsync();
-                    snackbar.Add("Lawyer was added successfully", Severity.Success);
-                    ToggleModal(); // Close the modal after adding
-
-                    // Reset the lawyers object
-                    lawyers = new Lawyers();
-                    password = string.Empty; // Reset the password field
-                }
-                else
-                {
-                    
-                    snackbar.Add("Lawyer Update ", Severity.Success);
-                }
+                // Reset the lawyers object
+                lawyers = new Lawyers();
+                password = string.Empty; // Reset the password field
             }
             else
             {
-                foreach (var error in result.Errors)
-                {
-                    snackbar.Add(error.Description, Severity.Error);
-                }
+                snackbar.Add("Lawyer Update ", Severity.Success);
             }
         }
-        catch (Exception ex)
+        else
         {
-            Console.WriteLine(ex.Message);
-            snackbar.Add("Operation failed. Try again later", Severity.Error);
+            foreach (var error in result.Errors)
+            {
+                snackbar.Add(error.Description, Severity.Error);
+            }
         }
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine(ex.Message);
+        snackbar.Add("Operation failed. Try again later", Severity.Error);
+    }
+}
 
     private void ToggleModal()
     {

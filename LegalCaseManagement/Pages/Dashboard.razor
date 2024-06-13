@@ -106,7 +106,8 @@
         </MudPaper>
     </MudItem>
 </MudGrid>
-
+<br />
+<div id="calendar"></div>
 
 
 @code {
@@ -123,11 +124,12 @@
     private List<Case> newCases = new List<Case>();
     private List<Case> abandonedCases = new List<Case>();
     private List<Case> highPriorityCases = new List<Case>();
-
     private DateTime? selectedDate;
     //private List<Case> caseList = new List<Case>();
     private List<Case> filteredCaseList = new List<Case>();
     private List<Case> filteredCases = new List<Case>();
+    private IJSObjectReference? calendarInstance;
+    private IJSObjectReference? module;
 
     protected override async Task OnInitializedAsync()
     {
@@ -142,6 +144,32 @@
         abandonedCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "abandoned").ToList();
         highPriorityCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "high").ToList();
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+             module = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./site.js");
+             await InitializeCalendar();
+        }
+    }
+
+       private async Task InitializeCalendar()
+{
+    // Retrieve cases from the database
+    var cases = await GetCasesWithRelatedDataAsync();
+
+    // Create a list of calendar events
+    var events = cases.Select(c => new
+    {
+        title = $"Case {c.RegistrationNo}: {c.Petitioner} vs {c.Defendant}",
+        start = c.EndDate?.ToString("yyyy-MM-dd"), // Correct usage of ToString with format string
+        // Add any other relevant case properties
+    });
+
+    await module.InvokeVoidAsync("renderCalendar", "calendar", events);
+    calendarInstance = await module.InvokeAsync<IJSObjectReference>("getCalendarInstance");
+}
 
     private async void NavigateToAssignedCases()
     {

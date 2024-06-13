@@ -10,6 +10,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IServiceScopeFactory ServiceScopeFactory
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
 
 <h3>My Assigned Tasks</h3>
 
@@ -46,7 +47,7 @@ else
             <MudTd>@context.Priority?.Name</MudTd>
             <MudTd>@context.Status?.Name</MudTd>
             <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" >
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => ViewTaskDetails(context.TaskId)">
                     View Details
                 </MudButton>
             </MudTd>
@@ -94,8 +95,8 @@ else
         }
     }
 
-   /* private void ViewCaseDetails(int caseId)
+    private void ViewTaskDetails(int taskId)
     {
-        Navigation.NavigateTo($"/casedetails/{caseId}");
-    }*/
+        Navigation.NavigateTo($"/taskdetails/{taskId}");
+    }
 }

@@ -1,6 +1,8 @@
 ﻿@page "/counter"
 @*@attribute [Authorize(Roles = "Admin")] *@
 
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
 @using LegalCaseManagement.Data
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using Microsoft.AspNetCore.Identity
@@ -13,6 +15,7 @@
 @inject AppUserService userService
 @inject IServiceScopeFactory ServiceScopeFactory
 @inject EmailService emailService
+@inject LawyerService lawyerService
 
 <PageTitle>Counter</PageTitle>
 
@@ -92,7 +95,9 @@
         </CardHeaderContent>
     </MudCardHeader>
     <MudCardContent>
-        <MudTable Items="GetAll()" Filter="new Func<ApplicationUser,bool>(Search)" @bind-appUsers="appUsers">
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+            <MudTabPanel Text="Clients">
+                 <MudTable Items="userList" Filter="new Func<ApplicationUser,bool>(Search)" @bind-userList="userList">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">System Users</MudText>
                 <MudSpacer />
@@ -119,6 +124,47 @@
                 <MudTablePager />
             </PagerContent>
         </MudTable>
+            </MudTabPanel>
+            <MudTabPanel Text="Team Members">
+                <MudTable  Items="lawyersList" Filter="new Func<Lawyers,bool>(Searchrec)" @bind-lawyersList="lawyersList">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Advocates</MudText>
+                        <MudSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium"
+                            StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        
+                        <MudTh>FIRST NAME</MudTh>
+                        <MudTh>Last Name</MudTh>
+                        <MudTh>Email</MudTh>
+                        <MudTh>Phone</MudTh>
+                        <MudTh>Experience</MudTh>
+                        <MudTh>Win %</MudTh>
+                        
+                        <MudTh>Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        
+                        <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
+                        <MudTd DataLabel="LastName">@context.LLastName</MudTd>
+                        <MudTd DataLabel="Email">@context.UserName</MudTd>
+                        <MudTd DataLabel="Phone">@context.Phone</MudTd>
+                        <MudTd DataLabel="Experince">@context.ExperienceYears</MudTd>
+                        <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
+                        
+                        <MudTd DataLabel="Actions">
+                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small"  />
+                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small"   />
+                </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
+                </MudTable>
+            </MudTabPanel>
+        </MudTabs>
+       
         <br />
         <div class="row">
     <div class="col-md-6">
@@ -198,11 +244,22 @@
     private IdentityRole editRole;
     private MudForm form;
     private bool isEditDialogOpen = false;
+    private List<Lawyers> lawyersList = new List<Lawyers>();
 
     private bool Search(ApplicationUser applicationUser)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
         if(applicationUser.UserName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private bool Searchrec(Lawyers lawyer)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (lawyer.LFirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
@@ -234,7 +291,7 @@
         if(confimUserRemoval)
         {
             userService.Delete(rec);
-            GetAll();
+            userList = await GetAllClients();
             await jstRuntime.InvokeVoidAsync("alert", "User Removed succefully");
         }
         
@@ -244,7 +301,9 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadUsersAndRoles();
-        userList = userService.GetAll();
+        userList = await GetAllClients();
+        lawyersList = await lawyerService.GetAllAsync();
+        
         
 
         rolesList = new List<Role>()
@@ -253,6 +312,16 @@
             new Role(){RoleName = "Team", ID = "2"},
             new Role(){RoleName = "Client", ID = "3"}
         };
+
+        foreach (var role in rolesList)
+    {
+        selectList.Add(new SelectListItem()
+        {
+            Text = role.RoleName,
+            Value = role.ID,
+            Selected = role.RoleName == "Client"
+        });
+    }
 
         // userList = _userManager.Users.ToList();
         foreach (var role in rolesList)
@@ -280,6 +349,23 @@
         }
 
     }
+
+    private async Task<List<ApplicationUser>> GetAllClients()
+{
+    var allUsers = await userService.GetAllAsync();
+    var clients = new List<ApplicationUser>();
+
+    foreach (var user in allUsers)
+    {
+        if (await _userManager.IsInRoleAsync(user, "Client"))
+        {
+            clients.Add(user);
+        }
+    }
+
+    return clients;
+}
+
 
     private async Task LoadUsersAndRoles()
     {

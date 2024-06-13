@@ -1,0 +1,95 @@
+@page "/taskdetails/{taskId:int}"
+@attribute [Authorize(Roles = "Team")]
+
+@using LegalCaseManagement.Service
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Data.LegalServices
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@inject UserManager<ApplicationUser> UserManager
+@inject IServiceScopeFactory ServiceScopeFactory
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+@inject ISnackbar snackbar
+
+<h3>Task Details</h3>
+
+@if (task == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <EditForm Model="task" OnValidSubmit="UpdateTask">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <InputText @bind-Value="task.Description" id="description" class="form-control" required />
+        </div>
+        
+        <div class="mb-3">
+            <label for="dueDate" class="form-label">Due Date</label>
+            <InputDate @bind-Value="task.DueDate" id="dueDate" class="form-control" required />
+        </div>
+        
+        <div class="mb-3">
+            <label for="priority" class="form-label">Priority</label>
+            <InputSelect @bind-Value="task.PriorityId" id="priority" class="form-select" required>
+                @foreach (var priority in priorities)
+                {
+                    <option value="@priority.PriorityId">@priority.Name</option>
+                }
+            </InputSelect>
+        </div>
+        
+        <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <InputSelect @bind-Value="task.StatusId" id="status" class="form-select" required>
+                @foreach (var status in statuses)
+                {
+                    <option value="@status.StatusId">@status.Name</option>
+                }
+            </InputSelect>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Update Task</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter] public int taskId { get; set; }
+    private MyTask task;
+    private List<Priority> priorities = new List<Priority>();
+    private List<MyTaskStatus> statuses = new List<MyTaskStatus>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            task = await context.MyTasks
+                .Include(t => t.Priority)
+                .Include(t => t.Status)
+                .FirstOrDefaultAsync(t => t.TaskId == taskId);
+
+            priorities = await context.PriorityLevel.ToListAsync();
+            statuses = await context.Statuses.ToListAsync();
+        }
+    }
+
+    private async Task UpdateTask()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            context.MyTasks.Update(task);
+            await context.SaveChangesAsync();
+            snackbar.Add("the task update completed ", Severity.Success);
+        }
+
+        Navigation.NavigateTo("/myassignedtasks");
+    }
+}
