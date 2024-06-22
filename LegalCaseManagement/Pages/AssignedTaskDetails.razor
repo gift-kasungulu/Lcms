@@ -1,5 +1,5 @@
 @page "/taskdetails/{taskId:int}"
-@attribute [Authorize(Roles = "Team")]
+@attribute [Authorize(Roles = "Admin, Team")]
 
 @using LegalCaseManagement.Domain
 @using LegalCaseManagement.Data

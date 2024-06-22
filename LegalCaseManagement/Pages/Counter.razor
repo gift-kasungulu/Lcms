@@ -20,26 +20,22 @@
 <PageTitle>Counter</PageTitle>
 
 @if (showModal)
-
-
-
 {
     <div class="modal fade show" tabindex="-1" style="display: block;">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Add Student</h4>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content custom-modal-content">
+                <div class="modal-header custom-modal-header">
+                    <h5 class="modal-title">Add User</h5>
                     <button type="button" class="btn-close" @onclick="ToggleModal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body custom-modal-body">
                     <EditForm Model="newUser" OnValidSubmit="AddNewUserWithRoles">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
 
-                        <div class="mb-3 mt-3">
-                            <label class="form-label">Frst Name</label>
-                            <input class="form-control" placeholder="Enter First Name"
-                                @bind-value="newUser.FirstNameUser" />
+                        <div class="mb-3">
+                            <label class="form-label">First Name</label>
+                            <input class="form-control" placeholder="Enter First Name" @bind-value="newUser.FirstNameUser" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Last Name</label>
@@ -63,38 +59,33 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Address</label>
-                            <input class="form-control" placeholder="Enter Adress" @bind-value="newUser.AddressUser" />
+                            <input class="form-control" placeholder="Enter Address" @bind-value="newUser.AddressUser" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
-                            <input type="password" class="form-control" placeholder="Enter Password"
-                                @bind-value="newUser.LoginPassword" />
+                            <input type="password" class="form-control" placeholder="Enter Password" @bind-value="newUser.LoginPassword" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Role</label>
                             <InputSelect class="form-control" @bind-Value="newUser.UserRole" placeholder="Select Role">
                                 @foreach (var role in selectList)
-
-
-
                                 {
                                     <option value="@role.Value" selected="@role.Selected">@role.Text</option>
-
                                 }
                             </InputSelect>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="submit" class="btn btn-primary w-100">Submit</button>
                     </EditForm>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @onclick="ToggleModal">Close</button>
+                <div class="modal-footer custom-modal-footer">
+                    <button type="button" class="btn btn-danger w-100" @onclick="ToggleModal">Close</button>
                 </div>
             </div>
         </div>
     </div>
-
 }
+
 
 <MudCard Elevation="25">
     <MudCardHeader>
@@ -316,7 +307,13 @@
     private void ToggleModal()
     {
         showModal = !showModal;
+        if (!showModal)
+        {
+            newUser = new User(); // Reset the form fields when am done
+        }
     }
+
+
     //delete method
     private async Task DeleteRec(ApplicationUser rec)
     {
@@ -449,48 +446,29 @@
 
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-
             var role = await roleManager.FindByIdAsync(editRole.Id);
-
             if (role != null)
-
-
             {
-
                 role.Name = editRole.Name;
-
                 var result = await roleManager.UpdateAsync(role);
-
                 if (result.Succeeded)
-
-
                 {
-
                     var roleIndex = roles.FindIndex(r => r.Id == role.Id);
 
                     if (roleIndex != -1)
 
                     {
-
-
                         roles[roleIndex].Name = role.Name;
 
                         roles[roleIndex].NormalizedName = role.NormalizedName;
 
 
                     }
-
-
                     isEditDialogOpen = false;
-
                     editRole = null;
 
-
                 }
-
                 else
-
-
                 {
                     Console.WriteLine("Error updating role.");
                 }
@@ -556,7 +534,12 @@
                 if (roleAddedResult.Succeeded)
                 {
                     snackbar.Add("User was Addedd Successfuly with Role", Severity.Success);
+                    
+                    newUser = new User(); 
+                    ToggleModal();
+                    StateHasChanged();
                     return;
+                   
                 }
                 else
                 {

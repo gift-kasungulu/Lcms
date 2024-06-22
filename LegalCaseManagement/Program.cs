@@ -37,7 +37,7 @@ builder.Services.AddTransient<CaseService>();
 builder.Services.AddTransient<TaskStatusService>();
 builder.Services.AddTransient<PriorityService>();
 builder.Services.AddTransient<MyTaskService>();
-builder.Services.AddScoped<AppointmentService>();
+builder.Services.AddTransient<AppointmentService>();
 builder.Services.AddSyncfusionBlazor();
 builder.Services.AddMudServices();
 builder.Services.AddSingleton<PdfService>();

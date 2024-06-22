@@ -15,5 +15,6 @@ namespace LegalCaseManagement.Service
         Task<IEnumerable<Appointment>> GetAppointmentsByDateRange(DateTime? fromDate, DateTime? toDate);
         Task<IEnumerable<ApplicationUser>> GetClients();
         Task DeleteAppointment(int id);
+        Task<Appointment> GetAppointmentById(int id);
     }
 }

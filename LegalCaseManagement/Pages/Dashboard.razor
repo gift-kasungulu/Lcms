@@ -18,52 +18,49 @@
 @inject NavigationManager NavManager
 @inject IHttpContextAccessor HttpContextAccessor
 
-
-<PageTitle>Dashboad</PageTitle>
-
-
+<PageTitle>Dashboard</PageTitle>
 
 <div class="container-fluid">
-    <MudText Typo="Typo.h6" Class="mb-4">Dashboad</MudText>
+    <MudText Typo="Typo.h6" Class="mb-4">Dashboard</MudText>
     <br />
-  <div class="row">
-    <div class="col-md-3">
-      <div class="card bg-info text-white">
-        <div class="card-body">
-          <h5 class="card-title">New Cases</h5>
-          <h1 class="card-text">@newCases.Count</h1>
-          <a href="#" class="btn btn-light">More info</a>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Clients</h5>
+                    <h1 class="card-text">@clients.Count</h1>
+                    <i class="bi bi-people-fill card-icon"></i>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-success text-white">
-        <div class="card-body">
-          <h5 class="card-title">Total Cases</h5>
-          <h1 class="card-text">@caseList.Count</h1>
-          <a href="#" class="btn btn-light">More info</a>
+        <div class="col-md-3">
+            <div class="card bg-secondary text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Cases</h5>
+                    <h1 class="card-text">@caseList.Count</h1>
+                    <i class="bi bi-folder-fill card-icon"></i>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-warning text-white">
-        <div class="card-body">
-          <h5 class="card-title">Abandoned Cases</h5>
-          <h1 class="card-text">@abandonedCases.Count</h1>
-          <a href="#" class="btn btn-light">More info</a>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5 class="card-title">High-Priority Cases</h5>
+                    <h1 class="card-text">@highPriorityCases.Count</h1>
+                    <i class="bi bi-exclamation-circle-fill card-icon"></i>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-danger text-white">
-        <div class="card-body">
-          <h5 class="card-title">High-Priority Cases</h5>
-          <h1 class="card-text">@highPriorityCases.Count</h1>
-          <a href="#" class="btn btn-light">More info</a>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5 class="card-title">Decided Cases</h5>
+                    <h1 class="card-text">@decidedCases.Count</h1>
+                    <i class="bi bi-check-circle-fill card-icon"></i>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
 <br />
 <MudGrid>
@@ -73,7 +70,7 @@
             <MudDatePicker @bind-Date="selectedDate" Label="Select Date" />
             <br />
             <MudButton OnClick="SearchCases" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search"
-                Color="Color.Primary" Class="ml-4">Search</MudButton>
+                       Color="Color.Primary" Class="ml-4">Search</MudButton>
             <MudTable Items="filteredCaseList" Filter="new Func<Case,bool>(Search)" Class="mt-4">
                 <HeaderContent>
                     <MudTh>No</MudTh>
@@ -93,11 +90,11 @@
                         <MudMenu Icon="@Icons.Material.Filled.MoreVert">
                             <MudMenuItem>
                                 <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.DateRange"
-                                    Size="Size.Small" />
+                                        Size="Size.Small" />
                             </MudMenuItem>
                             <MudMenuItem>
                                 <MudFab Color="Color.Error" StartIcon="@Icons.Material.Filled.SwapHoriz"
-                                    Size="Size.Small" />
+                                        Size="Size.Small" />
                             </MudMenuItem>
                         </MudMenu>
                     </MudTd>
@@ -108,10 +105,7 @@
 </MudGrid>
 <br />
 
-
-
 @code {
-
     private string searchString = "";
     private Case newCase = new Case();
     private List<Case> caseList = new List<Case>();
@@ -124,8 +118,8 @@
     private List<Case> newCases = new List<Case>();
     private List<Case> abandonedCases = new List<Case>();
     private List<Case> highPriorityCases = new List<Case>();
+    private List<Case> decidedCases = new List<Case>();
     private DateTime? selectedDate;
-    //private List<Case> caseList = new List<Case>();
     private List<Case> filteredCaseList = new List<Case>();
     private List<Case> filteredCases = new List<Case>();
     private IJSObjectReference? calendarInstance;
@@ -137,12 +131,11 @@
         clients = (await _userManager.GetUsersInRoleAsync("Client")).ToList();
         caseTypes = await caseTypeService.GetAllAsync();
         caseStatuses = await caseStatusService.GetAllAsync();
-
         selectedDate = DateTime.Today;
-         // Filter cases based on CaseType
         newCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "new").ToList();
         abandonedCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "abandoned").ToList();
         highPriorityCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "high").ToList();
+        decidedCases = caseList.Where(c => c.CaseStatus.StatusName.ToLower() == "decided").ToList();
     }
 
     private async void NavigateToAssignedCases()
@@ -159,7 +152,6 @@
     private async Task DownloadPdf()
     {
         byte[] pdfBytes = pdfService.GeneratePdfFromCases(filteredCases);
-        // Provide a file name and trigger download
         await JSRuntime.InvokeAsync<object>("saveAsFile", $"filtered_cases.pdf", Convert.ToBase64String(pdfBytes));
     }
 
@@ -178,37 +170,18 @@
         if (selectedDate.HasValue)
         {
             filteredCaseList = caseList.Where(c => c.EndDate.HasValue && c.EndDate.Value.Date == selectedDate.Value.Date).ToList();
-
         }
         else
         {
-            filteredCaseList = new List<Case>(); // or caseList if you want to show all cases when no date is selected
+            filteredCaseList = new List<Case>();
         }
     }
-
-    /*public async Task Add()
-    {
-    if (newCase.CaseId == 0)
-    {
-    await caseService.AddAsync(newCase);
-    await GetAllAsync();
-    snackbar.Add("the Case was Added ", Severity.Success);
-    CloseModal();
-    }
-    else
-    {
-    caseService.Update(newCase);
-    snackbar.Add("Case Record Updated", Severity.Success);
-    }
-    }*/
 
     private async Task Add()
     {
         using (var scope = ServiceScopeFactory.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-            // Attach existing CaseType
             if (newCase.CaseTypeId != 0)
             {
                 var existingCaseType = await context.CaseType.FindAsync(newCase.CaseTypeId);
@@ -218,8 +191,6 @@
                     context.Entry(existingCaseType).State = EntityState.Unchanged;
                 }
             }
-
-            // Attach existing CaseStatus
             if (newCase.StatusId != 0)
             {
                 var existingCaseStatus = await context.CaseStatus.FindAsync(newCase.StatusId);
@@ -229,18 +200,6 @@
                     context.Entry(existingCaseStatus).State = EntityState.Unchanged;
                 }
             }
-
-            // Attach existing Client
-            /* if (!string.IsNullOrEmpty(newCase.UserId))
-            {
-            var existingClient = await _userManager.FindByIdAsync(newCase.UserId);
-            if (existingClient != null)
-            {
-            newCase.Client = existingClient;
-            context.Entry(existingClient).State = EntityState.Unchanged;
-            }
-            }*/
-
             if (newCase.CaseId == 0)
             {
                 context.Cases.Add(newCase);
@@ -251,14 +210,11 @@
                 context.Cases.Update(newCase);
                 snackbar.Add("Case updated successfully.", Severity.Success);
             }
-
             await context.SaveChangesAsync();
         }
-
         isModalVisible = false;
         await GetAllAsync();
     }
-
 
     public void Update(Case caseRecord)
     {
@@ -282,10 +238,10 @@
         {
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             return await context.Cases
-            .Include(c => c.AppUser)
-            .Include(c => c.CaseStatus)
-            .Include(c => c.CaseType)
-            .ToListAsync();
+                .Include(c => c.AppUser)
+                .Include(c => c.CaseStatus)
+                .Include(c => c.CaseType)
+                .ToListAsync();
         }
     }
 
@@ -293,12 +249,10 @@
     {
         var cases = await GetCasesWithRelatedDataAsync();
         var users = await GetUsersAsync();
-
         foreach (var caseItem in cases)
         {
             caseItem.AppUser = users.FirstOrDefault(u => u.Id == caseItem.UserId);
         }
-
         caseList = cases;
     }
 

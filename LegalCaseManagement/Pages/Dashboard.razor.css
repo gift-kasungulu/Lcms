@@ -1,12 +1,22 @@
 .card {
     margin-bottom: 1rem;
-  }
-  
-  .card-title {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-title {
     font-size: 1.2rem;
-  }
-  
-  .card-text {
+}
+
+.card-text {
     font-size: 2rem;
     font-weight: bold;
-  }
+}
+
+.card-icon {
+    font-size: 3rem;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    opacity: 0.2;
+}

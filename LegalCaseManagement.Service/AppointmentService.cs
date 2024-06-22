@@ -21,9 +21,16 @@ namespace LegalCaseManagement.Service
 
         public async Task AddAppointment(Appointment appointment)
         {
+            // Ensure ClientName is not null before saving
+            if (string.IsNullOrEmpty(appointment.ClientName))
+            {
+                throw new ArgumentException("ClientName must be set before saving the appointment.");
+            }
+
             _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
         }
+
 
         public async Task<IEnumerable<Appointment>> GetAppointments()
         {
@@ -54,6 +61,13 @@ namespace LegalCaseManagement.Service
             if (toDate.HasValue)
                 query = query.Where(a => a.Date <= toDate.Value);
             return await query.Include(a => a.User).ToListAsync();
+        }
+
+        public async Task<Appointment> GetAppointmentById(int id)
+        {
+            return await _context.Appointments
+                .Include(a => a.User)
+                .FirstOrDefaultAsync(a => a.Id == id);
         }
 
 

@@ -14,10 +14,10 @@ namespace LegalCaseManagement.Domain
         [Key]
         public int Id { get; set; }
 
-        [Required]
+        
         public string? ClientName { get; set; }
 
-        [Required]
+        
         public string? MobileNo { get; set; }
 
         [Required]
@@ -28,7 +28,7 @@ namespace LegalCaseManagement.Domain
 
         public string? Note { get; set; }
 
-        [Required]
+        
         public string? Email { get; set; }
 
         [ForeignKey("ApplicationUser")]

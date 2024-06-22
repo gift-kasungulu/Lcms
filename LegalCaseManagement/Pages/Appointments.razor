@@ -15,61 +15,69 @@
 <PageTitle>Appointments</PageTitle>
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
-    <MudCard Elevation="0">
-        <MudCardHeader>
-            <MudText Typo="Typo.h5">Appointment</MudText>
-            <MudSpacer />
-            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => Navigation.NavigateTo("/fetchdata"))">Add Appointment</MudButton>
-        </MudCardHeader>
-        <MudCardContent>
-            <MudGrid>
-                <MudItem xs="12" sm="3">
-                    <MudDatePicker Label="From Date" @bind-Date="fromDate" />
-                </MudItem>
-                <MudItem xs="12" sm="3">
-                    <MudDatePicker Label="To Date" @bind-Date="toDate" />
-                </MudItem>
-                <MudItem xs="12" sm="3">
-                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@ClearFilters">Clear</MudButton>
-                </MudItem>
-                <MudItem xs="12" sm="3">
-                    <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="@SearchAppointments">Search</MudButton>
-                </MudItem>
-            </MudGrid>
+    <MudPaper Elevation="0" Class="pa-4">
+        <MudGrid>
+            <MudItem xs="6">
+                <MudText Typo="Typo.h5">Appointments</MudText>
+            </MudItem>
+            <MudItem xs="6" Class="d-flex justify-end">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => Navigation.NavigateTo("/fetchdata"))">CREATE APPOINTMENT</MudButton>
+            </MudItem>
+        </MudGrid>
 
-            <MudTable Items="@appointments" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading" LoadingProgressColor="Color.Info">
-                <ToolBarContent>
-                    <MudText Typo="Typo.h6">Appointments</MudText>
-                    <MudSpacer />
-                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-                </ToolBarContent>
-                <HeaderContent>
-                    <MudTh>No</MudTh>
-                    <MudTh>Client Name</MudTh>
-                    <MudTh>Mobile</MudTh>
-                    <MudTh>Date</MudTh>
-                    <MudTh>Time</MudTh>
-                    <MudTh>Action</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="No">@context.Id</MudTd>
-                    <MudTd DataLabel="Client Name">@context.ClientName</MudTd>
-                    <MudTd DataLabel="Mobile">@context.MobileNo</MudTd>
-                    <MudTd DataLabel="Date">@context.Date.ToShortDateString()</MudTd>
-                    <MudTd DataLabel="Time">@context.Time.ToString(@"hh\:mm tt")</MudTd>
-                    <MudTd DataLabel="Action">
-                        <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                            <MudMenuItem OnClick="@(() => EditAppointment(context.Id))">Edit</MudMenuItem>
-                            <MudMenuItem OnClick="@(() => DeleteAppointment(context.Id))">Delete</MudMenuItem>
-                        </MudMenu>
-                    </MudTd>
-                </RowTemplate>
-                <PagerContent>
-                    <MudTablePager />
-                </PagerContent>
-            </MudTable>
-        </MudCardContent>
-    </MudCard>
+        <MudGrid Class="mt-4">
+            <MudItem xs="12" sm="4">
+                <MudDatePicker Label="From Date" @bind-Date="fromDate" />
+            </MudItem>
+            <MudItem xs="12" sm="4">
+                <MudDatePicker Label="To Date" @bind-Date="toDate" />
+            </MudItem>
+            <MudItem xs="12" sm="2">
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" FullWidth="true" OnClick="@ClearFilters">CLEAR</MudButton>
+            </MudItem>
+            <MudItem xs="12" sm="2">
+                <MudButton Variant="Variant.Outlined" Color="Color.Info" FullWidth="true" OnClick="@SearchAppointments">SEARCH</MudButton>
+            </MudItem>
+        </MudGrid>
+
+        <MudTable Items="@appointments" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading" LoadingProgressColor="Color.Info" Class="mt-4">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Appointments</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>No</MudTh>
+                <MudTh>Client Name</MudTh>
+                <MudTh>Mobile</MudTh>
+                <MudTh>Date</MudTh>
+                <MudTh>Time</MudTh>
+                <MudTh>Action</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="No">@context.Id</MudTd>
+                <MudTd DataLabel="Client Name">@context.ClientName</MudTd>
+                <MudTd DataLabel="Mobile">@context.MobileNo</MudTd>
+                <MudTd DataLabel="Date">@context.Date.ToShortDateString()</MudTd>
+                <MudTd DataLabel="Time">@context.Time.ToString(@"hh\:mm")</MudTd>
+                <MudTd DataLabel="Action">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                        <MudMenuItem OnClick="@(() => ViewAppointmentsDetails(context.Id))">
+                            <i class="bi bi-eye"></i> <!-- You can use an eye icon for "View" -->
+                            View
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => DeleteAppointment(context.Id))">
+                            <i class="bi bi-trash-fill"></i>
+                            Delete
+                        </MudMenuItem>
+                    </MudMenu>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudPaper>
 </MudContainer>
 
 @code {
@@ -83,6 +91,12 @@
     {
         await LoadAppointments();
     }
+    
+    private void ViewAppointmentsDetails(int id)
+    {
+        Navigation.NavigateTo($"/viewappointment/{id}");
+    }
+
 
     private async Task LoadAppointments()
     {
@@ -124,4 +138,6 @@
             await LoadAppointments();
         }
     }
+
+
 }

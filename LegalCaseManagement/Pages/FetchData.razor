@@ -6,86 +6,57 @@
 @using LegalCaseManagement.Service
 @using Microsoft.AspNetCore.Identity
 @using MudBlazor
-@inject IAppointmentService AppointmentService
+@inject AppointmentService AppointmentService
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager Navigation
 @inject EmailService EmailService
-@inject AppointmentService AppointmentService
 @inject ISnackbar Snackbar
 
 <PageTitle>Appointments</PageTitle>
 
 <MudContainer>
     <MudGrid>
+        <MudItem xs="6">
+            <MudText Typo="Typo.h5">Create Appointments</MudText>
+        </MudItem>
         <MudItem xs="12">
             <MudPaper>
-                <MudTabs>
-                    <MudTabPanel Text="New Client">
-                        <EditForm Model="newAppointment" OnValidSubmit="HandleValidSubmit">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary />
+                <EditForm Model="newAppointment" OnValidSubmit="HandleValidSubmit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
 
-                            <MudGrid>
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="newAppointment.ClientName" Label="New Client Name" Required="true" />
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="newAppointment.MobileNo" Label="Mobile No" Required="true" />
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="newAppointment.Email" Label="Email" Required="true" />
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudDatePicker @bind-Value="newAppointment.Date" Label="Date" Required="true" />
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudTimePicker @bind-Value="newAppointment.Time" Label="Time" Required="true" />
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="newAppointment.Note" Label="Note" />
-                                </MudItem>
-                            </MudGrid>
+                    <MudGrid>
+                        <MudItem xs="12" sm="6">
+                            <MudSelect T="ApplicationUser" @bind-Value="selectedClient" Required="true" Label="Select Client">
+                                @foreach (var client in clients)
+                                {
+                                    <MudSelectItem T="ApplicationUser" Value="@client">@($"{client.FirstName} {client.LastName}")</MudSelectItem>
+                                }
+                            </MudSelect>
 
-                            <MudButton Type="submit" Color="Color.Primary">Save</MudButton>
-                            <MudButton @onclick="Cancel" Color="Color.Secondary">Cancel</MudButton>
-                        </EditForm>
-                    </MudTabPanel>
-                    <MudTabPanel Text="Existing Client">
-                        <EditForm Model="newAppointment" OnValidSubmit="HandleValidSubmit">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary />
-
-                            <MudGrid>
-                                <MudItem xs="12" sm="6">
-                                    <MudSelect T="ApplicationUser" Label="Select Client" @bind-Value="selectedClient" Required="true">
-                                        @foreach (var client in clients)
-                                        {
-                                            <MudSelectItem T="ApplicationUser" Value="@client">@($"{client.FirstName} {client.LastName}")</MudSelectItem>
-                                        }
-                                    </MudSelect>
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="newAppointment.MobileNo" Label="Mobile No" Required="true" Disabled="true" />
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="newAppointment.Email" Label="Email" Required="true" Disabled="true" />
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudDatePicker @bind-Value="newAppointment.Date" Label="Date" Required="true" />
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudTimePicker @bind-Value="newAppointment.Time" Label="Time" Required="true" />
-                                </MudItem>
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField @bind-Value="newAppointment.Note" Label="Note" />
-                                </MudItem>
-                            </MudGrid>
-
-                            <MudButton Type="submit" Color="Color.Primary">Save</MudButton>
-                            <MudButton @onclick="Cancel" Color="Color.Secondary">Cancel</MudButton>
-                        </EditForm>
-                    </MudTabPanel>
-                </MudTabs>
+                
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="newAppointment.MobileNo" Label="Mobile No" Required="true" Disabled="true" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="newAppointment.Email" Label="Email" Required="true" Disabled="true" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudDatePicker @bind-Value="newAppointment.Date" Label="Date" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTimePicker @bind-Value="newAppointment.Time" Label="Time" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudTextField @bind-Value="newAppointment.Note" Label="Note" />
+                        </MudItem>
+                    </MudGrid>
+                    <MudSpacer />
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
+                    <MudButton @onclick="Cancel" Variant="Variant.Filled" Color="Color.Secondary">Cancel</MudButton>
+                </EditForm>
+                <MudSpacer />
             </MudPaper>
         </MudItem>
     </MudGrid>
@@ -98,17 +69,49 @@
 
     protected override async Task OnInitializedAsync()
     {
-        clients = (await AppointmentService.GetClients()).ToList();
+        clients = (await AppointmentService.GetClients())?.ToList() ?? new List<ApplicationUser>();
+        newAppointment = new Appointment
+            {
+                Date = DateTime.Today,
+                Time = DateTime.Now.TimeOfDay
+            };
     }
+
+    private void OnClientSelected(ApplicationUser client)
+    {
+        selectedClient = client;
+        if (client != null)
+        {
+            newAppointment.ClientName = $"{client.FirstName} {client.LastName}";
+            newAppointment.MobileNo = client.PhoneNumber;
+            newAppointment.Email = client.Email;
+            newAppointment.UserId = client.Id;
+        }
+        StateHasChanged();
+    }
+
+
 
     private async Task HandleValidSubmit()
     {
-        if (selectedClient != null)
+        if (selectedClient == null)
         {
-            newAppointment.ClientName = $"{selectedClient.FirstName} {selectedClient.LastName}";
-            newAppointment.MobileNo = selectedClient.PhoneNumber;
-            newAppointment.Email = selectedClient.Email;
-            newAppointment.UserId = selectedClient.Id;
+            Snackbar.Add("Please select a client.", Severity.Warning);
+            return;
+        }
+
+        OnClientSelected(selectedClient);
+
+        if (newAppointment.Date == default || newAppointment.Time == default)
+        {
+            Snackbar.Add("Please select a date and time for the appointment.", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrEmpty(newAppointment.ClientName))
+        {
+            Snackbar.Add("Client name is not set.", Severity.Error);
+            return;
         }
 
         await AppointmentService.AddAppointment(newAppointment);
@@ -119,8 +122,10 @@
         Navigation.NavigateTo("/appointments");
     }
 
+
+
     private void Cancel()
     {
-        Navigation.NavigateTo("/apntmnts");
+        Navigation.NavigateTo("/appointments");
     }
 }
