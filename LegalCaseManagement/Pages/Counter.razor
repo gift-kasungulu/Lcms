@@ -19,7 +19,10 @@
 
 <PageTitle>Counter</PageTitle>
 
-   @if (showModal)
+@if (showModal)
+
+
+
 {
     <div class="modal fade show" tabindex="-1" style="display: block;">
         <div class="modal-dialog">
@@ -35,7 +38,8 @@
 
                         <div class="mb-3 mt-3">
                             <label class="form-label">Frst Name</label>
-                            <input class="form-control" placeholder="Enter First Name" @bind-value="newUser.FirstNameUser" />
+                            <input class="form-control" placeholder="Enter First Name"
+                                @bind-value="newUser.FirstNameUser" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Last Name</label>
@@ -63,12 +67,16 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Password</label>
-                            <input type="password" class="form-control" placeholder="Enter Password" @bind-value="newUser.LoginPassword" />
+                            <input type="password" class="form-control" placeholder="Enter Password"
+                                @bind-value="newUser.LoginPassword" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Role</label>
                             <InputSelect class="form-control" @bind-Value="newUser.UserRole" placeholder="Select Role">
                                 @foreach (var role in selectList)
+
+
+
                                 {
                                     <option value="@role.Value" selected="@role.Selected">@role.Text</option>
 
@@ -97,36 +105,46 @@
     <MudCardContent>
         <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
             <MudTabPanel Text="Clients">
-                 <MudTable Items="userList" Filter="new Func<ApplicationUser,bool>(Search)" @bind-userList="userList">
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">System Users</MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
-            </ToolBarContent>
-            <HeaderContent>
-                <MudTh>FIRST NAME</MudTh>
-                <MudTh>Last Name</MudTh>
-                <MudTh>Email</MudTh>
-                <MudTh>Phone</MudTh>
-                <MudTh>Actions</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="First fName">@context.FirstName</MudTd>
-                <MudTd DataLabel="lName">@context.LastName</MudTd>
-                <MudTd DataLabel="Email">@context.Email</MudTd>
-                <MudTd DataLabel="Phone">@context.PhoneNumber</MudTd>
-                <MudTd DataLabel="Actions">
-                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(()=>Update(context))" />
-                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small"  OnClick="@(()=>DeleteRec(context))" />
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
-        </MudTable>
+                <MudTable Items="userList" Filter="new Func<ApplicationUser,bool>(Search)" @bind-userList="userList">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">System Users</MudText>
+                        <MudSpacer />
+                        <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium"
+                            StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                    </ToolBarContent>
+                    <HeaderContent>
+                        <MudTh>FIRST NAME</MudTh>
+                        <MudTh>Last Name</MudTh>
+                        <MudTh>Email</MudTh>
+                        <MudTh>Phone</MudTh>
+                        <MudTh>Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="First fName">@context.FirstName</MudTd>
+                        <MudTd DataLabel="lName">@context.LastName</MudTd>
+                        <MudTd DataLabel="Email">@context.Email</MudTd>
+                        <MudTd DataLabel="Phone">@context.PhoneNumber</MudTd>
+                        <MudTd DataLabel="Actions">
+                            <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                            <MudMenuItem>
+                                <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                        OnClick="@(()=>Update(context))" /> Update
+                            </MudMenuItem>
+                            <MudMenuItem>
+                                <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                        OnClick="@(()=>DeleteRec(context))" /> Delete
+                            </MudMenuItem>
+                        </MudMenu>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager />
+                    </PagerContent>
+                </MudTable>
             </MudTabPanel>
             <MudTabPanel Text="Team Members">
-                <MudTable  Items="lawyersList" Filter="new Func<Lawyers,bool>(Searchrec)" @bind-lawyersList="lawyersList">
+                <MudTable Items="lawyersList" Filter="new Func<Lawyers,bool>(Searchrec)"
+                    @bind-lawyersList="lawyersList">
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Advocates</MudText>
                         <MudSpacer />
@@ -134,29 +152,38 @@
                             StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
                     </ToolBarContent>
                     <HeaderContent>
-                        
+
                         <MudTh>FIRST NAME</MudTh>
                         <MudTh>Last Name</MudTh>
                         <MudTh>Email</MudTh>
                         <MudTh>Phone</MudTh>
                         <MudTh>Experience</MudTh>
                         <MudTh>Win %</MudTh>
-                        
+
                         <MudTh>Actions</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        
+
                         <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
                         <MudTd DataLabel="LastName">@context.LLastName</MudTd>
                         <MudTd DataLabel="Email">@context.UserName</MudTd>
                         <MudTd DataLabel="Phone">@context.Phone</MudTd>
                         <MudTd DataLabel="Experince">@context.ExperienceYears</MudTd>
                         <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
-                        
+
                         <MudTd DataLabel="Actions">
-                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small"  />
-                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small"   />
-                </MudTd>
+
+                            <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                            <MudMenuItem>
+                                <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit"
+                                            Size="Size.Small" />
+                            </MudMenuItem>
+                            <MudMenuItem>
+                                <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete"
+                                            Size="Size.Small" />
+                            </MudMenuItem>
+                        </MudMenu>
+                        </MudTd>
                     </RowTemplate>
                     <PagerContent>
                         <MudTablePager />
@@ -164,55 +191,61 @@
                 </MudTable>
             </MudTabPanel>
         </MudTabs>
-       
+
         <br />
         <div class="row">
-    <div class="col-md-6">
-        <MudCard Class="mb-4">
-            <MudCardHeader Class=" mud-text-dark">
-                <h5 class="card-title">Roles</h5>
-            </MudCardHeader>
-            <MudCardContent>
+            <div class="col-md-6">
+                <MudCard Class="mb-4">
+                    <MudCardHeader Class=" mud-text-dark">
+                        <h5 class="card-title">Roles</h5>
+                    </MudCardHeader>
+                    <MudCardContent>
                         <MudTable Items="roles" Dense="true" Hover="true">
                             <HeaderContent>
                                 <MudTh>Role Name</MudTh>
                                 <MudTh>Actions</MudTh>
                             </HeaderContent>
                             <RowTemplate>
-                                
+
                                 <MudTd DataLabel="Role Name">@context.Name</MudTd>
-                                
+
                                 <MudTd>
-                                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => EditRole(context))" />
-                                    
-                                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small"  OnClick="@(() => DeleteRole(context))" />
-                                    
+                                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                        OnClick="@(() => EditRole(context))" />
+
+                                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete"
+                                        Size="Size.Small" OnClick="@(() => DeleteRole(context))" />
+
                                 </MudTd>
                             </RowTemplate>
                         </MudTable>
                     </MudCardContent>
-        </MudCard>
-    </div>
-    <div class="col-md-6">
-        <MudCard Class="mb-4">
-            <MudCardHeader Class=" mud-text-dark">
-                <h5 class="card-title">Add Role</h5>
-            </MudCardHeader>
-            <MudCardContent>
+                </MudCard>
+            </div>
+            <div class="col-md-6">
+                <MudCard Class="mb-4">
+                    <MudCardHeader Class=" mud-text-dark">
+                        <h5 class="card-title">Add Role</h5>
+                    </MudCardHeader>
+                    <MudCardContent>
                         <EditForm Model="newRole" OnValidSubmit="SubmitForm">
                             <div class="mb-3">
-                        <label class="form-label">Role Name</label>
+                                <label class="form-label">Role Name</label>
                                 <MudTextField Label="Role Name" @bind-Value="newRole.Name" Required="true" />
                             </div>
 
-                            <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled">Add Role</MudButton>
+                            <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary" Variant="Variant.Filled">Add
+                                Role</MudButton>
 
                         </EditForm>
-            </MudCardContent>
-        </MudCard>
-    </div>
-</div>
+                    </MudCardContent>
+                </MudCard>
+            </div>
+        </div>
         @if (editRole != null)
+
+
+
         {
             <MudDialog @bind-Open="isEditDialogOpen">
                 <DialogContent>
@@ -220,7 +253,8 @@
                     <MudTextField Label="Role Name" @bind-Value="editRole.Name" Required="true" />
                 </DialogContent>
                 <DialogActions>
-                    <MudButton Color="Color.Info" Variant="Variant.Filled" OnClick="@(async () => await SaveEdit())">Save</MudButton>
+                    <MudButton Color="Color.Info" Variant="Variant.Filled" OnClick="@(async () => await SaveEdit())">Save
+                    </MudButton>
                     <MudButton Color="Color.Default" Variant="Variant.Outlined" OnClick="CloseEditDialog">Cancel</MudButton>
                 </DialogActions>
             </MudDialog>
@@ -249,7 +283,7 @@
     private bool Search(ApplicationUser applicationUser)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
-        if(applicationUser.UserName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (applicationUser.UserName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
@@ -283,28 +317,23 @@
     {
         showModal = !showModal;
     }
-
     //delete method
     private async Task DeleteRec(ApplicationUser rec)
     {
         bool confimUserRemoval = await jstRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to Remove user ?");
-        if(confimUserRemoval)
+        if (confimUserRemoval)
         {
             userService.Delete(rec);
             userList = await GetAllClients();
             await jstRuntime.InvokeVoidAsync("alert", "User Removed succefully");
+
         }
-        
-
     }
-
     protected override async Task OnInitializedAsync()
     {
         await LoadUsersAndRoles();
         userList = await GetAllClients();
         lawyersList = await lawyerService.GetAllAsync();
-        
-        
 
         rolesList = new List<Role>()
         {
@@ -314,21 +343,22 @@
         };
 
         foreach (var role in rolesList)
-    {
-        selectList.Add(new SelectListItem()
         {
-            Text = role.RoleName,
-            Value = role.ID,
-            Selected = role.RoleName == "Client"
-        });
-    }
+            selectList.Add(new SelectListItem()
+                {
+                    Text = role.RoleName,
+                    Value = role.ID,
+                    Selected = role.RoleName == "Client"
 
+                });
+        }
         // userList = _userManager.Users.ToList();
         foreach (var role in rolesList)
         {
             if (rolesList.Count < 1)
             {
                 selectList.Add(new SelectListItem()
+
                     {
                         Text = role.RoleName,
                         Value = role.ID,
@@ -336,14 +366,15 @@
 
                     });
             }
+
             else
+
             {
                 selectList.Add(new SelectListItem()
                     {
                         Text = role.RoleName,
                         Value = role.ID,
                         Selected = false
-
                     });
             }
         }
@@ -351,21 +382,20 @@
     }
 
     private async Task<List<ApplicationUser>> GetAllClients()
-{
-    var allUsers = await userService.GetAllAsync();
-    var clients = new List<ApplicationUser>();
-
-    foreach (var user in allUsers)
     {
-        if (await _userManager.IsInRoleAsync(user, "Client"))
+        var allUsers = await userService.GetAllAsync();
+
+        var clients = new List<ApplicationUser>();
+        foreach (var user in allUsers)
+
         {
-            clients.Add(user);
+            if (await _userManager.IsInRoleAsync(user, "Client"))
+            {
+                clients.Add(user);
+            }
         }
+        return clients;
     }
-
-    return clients;
-}
-
 
     private async Task LoadUsersAndRoles()
     {
@@ -374,7 +404,6 @@
             using (var scope = ServiceScopeFactory.CreateScope())
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
                 // Fetch roles here
                 roles = roleManager.Roles.ToList();
             }
@@ -409,31 +438,59 @@
     {
         editRole = role;
         isEditDialogOpen = true;
-    }
 
+    }
     private async Task SaveEdit()
     {
+
         using (var scope = ServiceScopeFactory.CreateScope())
+
         {
+
             var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
+
             var role = await roleManager.FindByIdAsync(editRole.Id);
+
             if (role != null)
+
+
             {
+
                 role.Name = editRole.Name;
+
                 var result = await roleManager.UpdateAsync(role);
+
                 if (result.Succeeded)
+
+
                 {
+
                     var roleIndex = roles.FindIndex(r => r.Id == role.Id);
+
                     if (roleIndex != -1)
+
                     {
+
+
                         roles[roleIndex].Name = role.Name;
+
                         roles[roleIndex].NormalizedName = role.NormalizedName;
+
+
                     }
+
+
                     isEditDialogOpen = false;
+
                     editRole = null;
+
+
                 }
+
                 else
+
+
                 {
                     Console.WriteLine("Error updating role.");
                 }
@@ -447,13 +504,12 @@
         editRole = null;
     }
 
-
     private async Task DeleteRole(IdentityRole role)
     {
         bool comfirmDelete = await jstRuntime.InvokeAsync<bool>("comfirm", "Are you sure you want to delete rRole ?");
-        if(comfirmDelete)
+        if (comfirmDelete)
         {
-           using (var scope = ServiceScopeFactory.CreateScope())
+            using (var scope = ServiceScopeFactory.CreateScope())
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
                 var result = await roleManager.DeleteAsync(role);
@@ -468,15 +524,13 @@
                 }
             }
         }
-       
     }
 
     public async void AddNewUserWithRoles(EditContext context)
+
     {
         var usermodel = context.Model as User;
-
         var passwordHash = _userManager.PasswordHasher.HashPassword(null, usermodel.LoginPassword);
-
         var user = new ApplicationUser
             {
                 UserName = usermodel.LoginName,
@@ -490,39 +544,35 @@
                 LastName = usermodel.LastNameUser,
                 PasswordHash = passwordHash
 
-                
             };
-
         try
         {
             var result = await _userManager.CreateAsync(user, usermodel.LoginPassword);
-
             if (result.Succeeded)
             {
                 var getRoleFromList = rolesList.FirstOrDefault(x => x.ID == usermodel?.UserRole);
                 var roleAddedResult = await _userManager.AddToRoleAsync(user, getRoleFromList?.RoleName ?? "Client");
                 await emailService.SendDefaultWelcomeEmailAsync(newUser.LoginPassword); // Send welcome email with password
-
                 if (roleAddedResult.Succeeded)
                 {
-                   
                     snackbar.Add("User was Addedd Successfuly with Role", Severity.Success);
                     return;
                 }
                 else
                 {
-                    
+                    snackbar.Add("Operation Failed ", Severity.Error);
                 }
             }
             snackbar.Add("User creation failed. Please check the input data.", Severity.Error);
-            
+
         }
         catch (Exception ex)
+
         {
             await jstRuntime.InvokeVoidAsync("console.error", ex.Message);
             await jstRuntime.InvokeVoidAsync("alert", "An error occurred during user creation. Please try again later.");
         }
-    }
 
+    }
 
 }

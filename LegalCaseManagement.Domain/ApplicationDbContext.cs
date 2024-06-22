@@ -19,8 +19,10 @@ namespace LegalCaseManagement.Data
         public DbSet<Priority> PriorityLevel { get; set; }
         public DbSet<MyTaskStatus> Statuses { get; set; }
         public DbSet<MyTask> MyTasks { get; set; }
+        public DbSet<Appointment> Appointments { get; set; }
 
-        
+
+
 
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -41,6 +43,10 @@ namespace LegalCaseManagement.Data
                 .HasForeignKey(t => t.LawyerId)
                 .OnDelete(DeleteBehavior.Restrict); // Specify Restrict or NoAction
 
+            builder.Entity<Appointment>()
+               .HasOne(a => a.User)
+               .WithMany(u => u.Appointments)
+               .HasForeignKey(a => a.UserId);
 
         }
 

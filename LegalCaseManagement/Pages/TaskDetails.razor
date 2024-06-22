@@ -11,6 +11,7 @@
 @inject IServiceScopeFactory ServiceScopeFactory
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager Navigation
+@inject MyTaskService mytskService
 
 <h3>My Assigned Tasks</h3>
 
@@ -24,7 +25,7 @@ else if (assignedTasks.Count == 0)
 }
 else
 {
-    <MudTable Items="assignedTasks" Hover="true">
+    <MudTable Items="assignedTasks">
         <ColGroup>
             <col style="width: 100px;" />
             <col />
@@ -48,7 +49,7 @@ else
             <MudTd>@context.Status?.Name</MudTd>
             <MudTd>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => ViewTaskDetails(context.TaskId)">
-                    View Details
+                    View
                 </MudButton>
             </MudTd>
 
@@ -96,7 +97,8 @@ else
     }
 
     private void ViewTaskDetails(int taskId)
-    {
-        Navigation.NavigateTo($"/taskdetails/{taskId}");
-    }
+{
+    Navigation.NavigateTo($"/taskdetails/{taskId}");
+}
+
 }

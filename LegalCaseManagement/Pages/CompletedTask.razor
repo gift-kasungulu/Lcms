@@ -1,0 +1,83 @@
+@page "/completedtasks"
+@attribute [Authorize(Roles = "Admin")]
+
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
+@using LegalCaseManagement.Data
+@using Microsoft.EntityFrameworkCore
+@inject IServiceScopeFactory ServiceScopeFactory
+
+<MudCard>
+    <MudCardContent>
+        <MudText Typo="Typo.h6" Class="mb-4">Completed Tasks</MudText>
+        <MudTable Items="completedTasks">
+            <HeaderContent>
+                <MudTh>Due Date</MudTh>
+                <MudTh>Case Description</MudTh>
+                <MudTh>Assigned Lawyer</MudTh>
+                <MudTh>Priority</MudTh>
+                <MudTh>Status</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="DueDate">@context.DueDate</MudTd>
+                <MudTd DataLabel="Description">@context.Case?.Discription</MudTd>
+                <MudTd DataLabel="AssignedLawyer">@context.LawyerInfo?.LFirstName @context.LawyerInfo?.LLastName</MudTd>
+                <MudTd DataLabel="Priority">
+                    <span class="@GetPriorityBadgeClass(@context.Priority?.Name)">@context.Priority?.Name</span>
+                </MudTd>
+                <MudTd DataLabel="Status">
+                    <span class="@GetStatusBadgeClass(@context.Status?.Name)">@context.Status?.Name</span>
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    </MudCardContent>
+</MudCard>
+
+@code {
+    private List<MyTask> completedTasks = new List<MyTask>();
+
+    private string GetPriorityBadgeClass(string priority)
+    {
+        var badgeClass = priority.ToLower() switch
+        {
+            "high" => "badge bg-danger",
+            "low" => "badge bg-success",
+            _ => "badge bg-danger", // Use a different color for other priority values
+        };
+
+        return badgeClass;
+    }
+
+    private string GetStatusBadgeClass(string status)
+    {
+        var badgeClass = status.ToLower() switch
+        {
+            "completed" => "badge bg-success",
+            "pending" => "badge bg-warning",
+            "in progress" => "badge bg-primary",
+            _ => "badge bg-secondary", 
+        };
+
+        return badgeClass;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCompletedTasksAsync();
+    }
+
+    private async Task GetCompletedTasksAsync()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            completedTasks = await context.MyTasks
+                .Include(t => t.Priority)
+                .Include(t => t.Status)
+                .Include(t => t.LawyerInfo)
+                .Include(t => t.Case)
+                .Where(t => t.Status.Name.ToLower() == "completed")
+                .ToListAsync();
+        }
+    }
+}

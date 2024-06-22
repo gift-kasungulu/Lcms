@@ -1,31 +1,35 @@
 ﻿<AuthorizeView>
     <Authorized>
-
         <MudMenu FullWidth="true">
             <ActivatorContent>
                 <MudChip Icon="@Icons.Material.Filled.Person" Color="Color.Primary">Account</MudChip>
             </ActivatorContent>
             <ChildContent>
                 <MudMenuItem>
-                    <a href="Identity/Account/Manage">Hello, @context.User.Identity?.Name!</a>
+                    <MudIcon Icon="@Icons.Material.Filled.Person" /> @context.User.Identity?.Name
                 </MudMenuItem>
                 <MudMenuItem>
-
-                    <form method="post" action="Identity/Account/LogOut">
-                        <button type="submit" class="nav-link btn btn-link">Sign out</button>
+                    <form method="post" action="Identity/Account/LogOut" style="display: inline;">
+                        <button type="submit" class="nav-link btn btn-link" style="padding: 0; border: none; background: none; cursor: pointer;">
+                            <MudIcon Icon="@Icons.Material.Filled.Logout" />
+                        </button>
                     </form>
-
                 </MudMenuItem>
-
             </ChildContent>
         </MudMenu>
     </Authorized>
-
-
     <NotAuthorized>
-
-
-
-        <a href="Identity/Account/Login" Icon="@Icons.Material.Filled.Login">Log in</a>
+        <MudMenu FullWidth="true">
+            <ActivatorContent>
+                <MudChip Icon="@Icons.Material.Filled.Login" Color="Color.Primary">Login</MudChip>
+            </ActivatorContent>
+            <ChildContent>
+                <MudMenuItem>
+                    <a href="Identity/Account/Login" class="nav-link">
+                        <MudIcon Icon="@Icons.Material.Filled.Login" /> Log in
+                    </a>
+                </MudMenuItem>
+            </ChildContent>
+        </MudMenu>
     </NotAuthorized>
 </AuthorizeView>

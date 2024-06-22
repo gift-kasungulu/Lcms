@@ -19,15 +19,15 @@ namespace LegalCaseManagement.Domain
 
         public DateTime? DueDate { get; set; }
 
-        public int PriorityId { get; set; } // Foreign key for Priority
+        public int PriorityId { get; set; } // Foreign key for Priority for the prority level
 
         [ForeignKey("PriorityId")]
-        public Priority? Priority { get; set; } // Navigation property for Priority
+        public Priority? Priority { get; set; } // Navigation property to my  Priority class 
 
-        public int StatusId { get; set; } // Foreign key for TaskStatus
+        public int StatusId { get; set; } // Foreign key for the  Task Status
 
         [ForeignKey("StatusId")]
-        public MyTaskStatus? Status { get; set; } // Navigation property for TaskStatus
+        public MyTaskStatus? Status { get; set; } // Navigation property to my Task Status class
 
 
         [Required]

@@ -1,68 +1,107 @@
 @page "/taskdetails/{taskId:int}"
 @attribute [Authorize(Roles = "Team")]
 
-@using LegalCaseManagement.Service
 @using LegalCaseManagement.Domain
 @using LegalCaseManagement.Data
-@using LegalCaseManagement.Data.LegalServices
-@using Microsoft.AspNetCore.Identity
+@using LegalCaseManagement.Service
 @using Microsoft.EntityFrameworkCore
-@inject UserManager<ApplicationUser> UserManager
+@using MudBlazor
 @inject IServiceScopeFactory ServiceScopeFactory
-@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager Navigation
 @inject ISnackbar snackbar
+@inject MyTaskService myTaskService
 
-<h3>Task Details</h3>
+    @if (task == null)
+    {
+        <div class="centered">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else
+    {
+        <h3>Task Details</h3>
+        <br />
+        <MudPaper Elevation="2">
+            <MudTable Items="new List<MyTask> { task }">
+                <HeaderContent>
+                    <MudTh>Description</MudTh>
+                    <MudTh>Due Date</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh>Case</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.Description</MudTd>
+                    <MudTd>@context.DueDate?.ToString("dd MMM yyyy")</MudTd>
+                    <MudTd>@context.Status?.Name</MudTd>
+                    <MudTd>@context.Case?.Discription</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
 
-@if (task == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <EditForm Model="task" OnValidSubmit="UpdateTask">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-        
-        <div class="mb-3">
-            <label for="description" class="form-label">Description</label>
-            <InputText @bind-Value="task.Description" id="description" class="form-control" required />
-        </div>
-        
-        <div class="mb-3">
-            <label for="dueDate" class="form-label">Due Date</label>
-            <InputDate @bind-Value="task.DueDate" id="dueDate" class="form-control" required />
-        </div>
-        
-        <div class="mb-3">
-            <label for="priority" class="form-label">Priority</label>
-            <InputSelect @bind-Value="task.PriorityId" id="priority" class="form-select" required>
-                @foreach (var priority in priorities)
-                {
-                    <option value="@priority.PriorityId">@priority.Name</option>
-                }
-            </InputSelect>
-        </div>
-        
-        <div class="mb-3">
-            <label for="status" class="form-label">Status</label>
-            <InputSelect @bind-Value="task.StatusId" id="status" class="form-select" required>
-                @foreach (var status in statuses)
-                {
-                    <option value="@status.StatusId">@status.Name</option>
-                }
-            </InputSelect>
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Update Task</button>
-    </EditForm>
-}
+        <MudPaper Class="mt-4 p-4">
+            <h4>Case Details</h4>
+            <MudTable Items="new List<Case> { task.Case }">
+                <HeaderContent>
+                    <MudTh>Start Date</MudTh>
+                    <MudTh>End Date</MudTh>
+                    <MudTh>Registration Date</MudTh>
+                    <MudTh>Registration Number</MudTh>
+                    <MudTh>Petitioner</MudTh>
+                    <MudTh>Defendant</MudTh>
+                    <MudTh>Description</MudTh>
+                    <MudTh>Case Type</MudTh>
+                    <MudTh>Case Status</MudTh>
+                    <MudTh>Client</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>@context.StartDate?.ToString("dd MMM yyyy")</MudTd>
+                    <MudTd>@context.EndDate?.ToString("dd MMM yyyy")</MudTd>
+                    <MudTd>@context.RegistrationDate?.ToString("dd MMM yyyy")</MudTd>
+                    <MudTd>@context.RegistrationNo</MudTd>
+                    <MudTd>@context.Petitioner</MudTd>
+                    <MudTd>@context.Defendant</MudTd>
+                    <MudTd>@context.Discription</MudTd>
+                    <MudTd>@context.CaseType?.TypeName</MudTd>
+                    <MudTd>@context.CaseStatus?.StatusName</MudTd>
+                    <MudTd>@context.AppUser?.UserName</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+        <br />
+        <MudPaper Class="mt-4 p-4">
+            <h4>Update Task Status</h4>
+            <EditForm Model="@task" OnValidSubmit="UpdateTask">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="task.StatusId" Label="Task Status" Required="true">
+                            @foreach (var status in statuses)
+                            {
+                                <MudSelectItem Value="@status.StatusId">@status.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="4">
+                        <div class="mb-3">
+                            <label for="fileAttachment" class="form-label">Attach File (optional)</label>
+                            <InputFile @bind-Value="task.Case.FileAttachment" id="fileAttachment" class="form-control" />
+                        </div>
+                    </MudItem>
+                </MudGrid>
+                <br />
+                <MudItem xs="12">
+                    <MudButton Color="Color.Primary" Variant="Variant.Filled" ButtonType="ButtonType.Submit">Update Status</MudButton>
+                    <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="NavigateBack">Cancel</MudButton>
+                </MudItem>
+            </EditForm>
+        </MudPaper>
+    }
+
 
 @code {
     [Parameter] public int taskId { get; set; }
     private MyTask task;
-    private List<Priority> priorities = new List<Priority>();
     private List<MyTaskStatus> statuses = new List<MyTaskStatus>();
 
     protected override async Task OnInitializedAsync()
@@ -73,23 +112,43 @@ else
             task = await context.MyTasks
                 .Include(t => t.Priority)
                 .Include(t => t.Status)
+                .Include(t => t.Case)
+                    .ThenInclude(c => c.CaseType)
+                .Include(t => t.Case)
+                    .ThenInclude(c => c.CaseStatus)
+                .Include(t => t.Case)
+                    .ThenInclude(c => c.AppUser)
                 .FirstOrDefaultAsync(t => t.TaskId == taskId);
 
-            priorities = await context.PriorityLevel.ToListAsync();
             statuses = await context.Statuses.ToListAsync();
         }
     }
 
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/myassignedtasks");
+    }
+
     private async Task UpdateTask()
     {
-        using (var scope = ServiceScopeFactory.CreateScope())
+        if (task.TaskId != 0)
         {
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            context.MyTasks.Update(task);
-            await context.SaveChangesAsync();
-            snackbar.Add("the task update completed ", Severity.Success);
-        }
+            var existingTask = await myTaskService.GetByIdAsync(task.TaskId);
 
-        Navigation.NavigateTo("/myassignedtasks");
+            if (existingTask != null)
+            {
+                existingTask.StatusId = task.StatusId; // Update the status
+                await myTaskService.UpdateAsync(existingTask); // Save the changes
+                snackbar.Add("The task was completed", Severity.Success);
+            }
+            else
+            {
+                snackbar.Add("The task does not exist", Severity.Error);
+            }
+        }
+        else
+        {
+            snackbar.Add("Invalid task ID", Severity.Error);
+        }
     }
 }

@@ -1,0 +1,127 @@
+﻿@page "/appointments"
+@attribute [Authorize(Roles = "Client, Admin, Team")]
+
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
+@using Microsoft.AspNetCore.Identity
+@using MudBlazor
+@inject IAppointmentService AppointmentService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject AppointmentService AppointmentService
+
+<PageTitle>Appointments</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudCard Elevation="0">
+        <MudCardHeader>
+            <MudText Typo="Typo.h5">Appointment</MudText>
+            <MudSpacer />
+            <MudButton Variant="Variant.Filled" Color="Color.Success" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => Navigation.NavigateTo("/fetchdata"))">Add Appointment</MudButton>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid>
+                <MudItem xs="12" sm="3">
+                    <MudDatePicker Label="From Date" @bind-Date="fromDate" />
+                </MudItem>
+                <MudItem xs="12" sm="3">
+                    <MudDatePicker Label="To Date" @bind-Date="toDate" />
+                </MudItem>
+                <MudItem xs="12" sm="3">
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="@ClearFilters">Clear</MudButton>
+                </MudItem>
+                <MudItem xs="12" sm="3">
+                    <MudButton Variant="Variant.Filled" Color="Color.Info" OnClick="@SearchAppointments">Search</MudButton>
+                </MudItem>
+            </MudGrid>
+
+            <MudTable Items="@appointments" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading" LoadingProgressColor="Color.Info">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Appointments</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh>No</MudTh>
+                    <MudTh>Client Name</MudTh>
+                    <MudTh>Mobile</MudTh>
+                    <MudTh>Date</MudTh>
+                    <MudTh>Time</MudTh>
+                    <MudTh>Action</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="No">@context.Id</MudTd>
+                    <MudTd DataLabel="Client Name">@context.ClientName</MudTd>
+                    <MudTd DataLabel="Mobile">@context.MobileNo</MudTd>
+                    <MudTd DataLabel="Date">@context.Date.ToShortDateString()</MudTd>
+                    <MudTd DataLabel="Time">@context.Time.ToString(@"hh\:mm tt")</MudTd>
+                    <MudTd DataLabel="Action">
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                            <MudMenuItem OnClick="@(() => EditAppointment(context.Id))">Edit</MudMenuItem>
+                            <MudMenuItem OnClick="@(() => DeleteAppointment(context.Id))">Delete</MudMenuItem>
+                        </MudMenu>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private List<Appointment> appointments = new List<Appointment>();
+    private bool _loading = true;
+    private string searchString = "";
+    private DateTime? fromDate;
+    private DateTime? toDate;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAppointments();
+    }
+
+    private async Task LoadAppointments()
+    {
+        _loading = true;
+        appointments = (await AppointmentService.GetAppointments()).ToList();
+        _loading = false;
+    }
+
+    private async Task SearchAppointments()
+    {
+        _loading = true;
+        appointments = (await AppointmentService.GetAppointmentsByDateRange(fromDate, toDate)).ToList();
+        _loading = false;
+    }
+
+    private void ClearFilters()
+    {
+        fromDate = null;
+        toDate = null;
+        searchString = "";
+        LoadAppointments();
+    }
+
+    private void EditAppointment(int id)
+    {
+        Navigation.NavigateTo($"/editappointment/{id}");
+    }
+
+    private async Task DeleteAppointment(int id)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Warning",
+            "Deleting can not be undone!",
+            yesText: "Delete!", cancelText: "Cancel");
+
+        if (result ?? false)
+        {
+            await AppointmentService.DeleteAppointment(id);
+            await LoadAppointments();
+        }
+    }
+}

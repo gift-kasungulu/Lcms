@@ -44,7 +44,7 @@
         <AuthorizeView Roles="Client, Admin, Team">
             <Authorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="fetchdata">
+                    <NavLink class="nav-link" href="appointments">
                         <i class="bi bi-chat-fill mr-4" aria-hidden="true"></i> Appointments
                     </NavLink>
                 </div>
@@ -90,7 +90,7 @@
             <Authorized>
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="earnings">
-                        <i class="bi bi-wallet-fill mr-4" aria-hidden="true"></i> Eanings
+                        <i class="bi bi-wallet-fill mr-4" aria-hidden="true"></i> Earnings
                     </NavLink>
                 </div>
             </Authorized>
@@ -104,22 +104,13 @@
                 </div>
             </Authorized>
         </AuthorizeView>
-        <AuthorizeView Roles="Team, Admin">
+        <AuthorizeView Roles="Admin">
             <Authorized>
-        <MudNavGroup Title="Settings" Expanded="true">
-                  
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="settings">
-                        <i class="bi bi-gear-fill mr-4" aria-hidden="true"></i>Case Settings
-                    </NavLink>
-                </div>
-            
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="tasksetting" EndIcon="@Icons.Material.Filled.AddTask" >
                          Task setting
                     </NavLink>
                 </div>
-        </MudNavGroup>
          </Authorized>
         </AuthorizeView>
        

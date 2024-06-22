@@ -1,18 +1,126 @@
 ﻿@page "/fetchdata"
-
 @attribute [Authorize(Roles = "Client, Admin, Team")]
 
 @using LegalCaseManagement.Data
-
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
+@using Microsoft.AspNetCore.Identity
+@using MudBlazor
+@inject IAppointmentService AppointmentService
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager Navigation
+@inject EmailService EmailService
+@inject AppointmentService AppointmentService
+@inject ISnackbar Snackbar
 
 <PageTitle>Appointments</PageTitle>
 
+<MudContainer>
+    <MudGrid>
+        <MudItem xs="12">
+            <MudPaper>
+                <MudTabs>
+                    <MudTabPanel Text="New Client">
+                        <EditForm Model="newAppointment" OnValidSubmit="HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+
+                            <MudGrid>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="newAppointment.ClientName" Label="New Client Name" Required="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="newAppointment.MobileNo" Label="Mobile No" Required="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="newAppointment.Email" Label="Email" Required="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudDatePicker @bind-Value="newAppointment.Date" Label="Date" Required="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTimePicker @bind-Value="newAppointment.Time" Label="Time" Required="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="newAppointment.Note" Label="Note" />
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudButton Type="submit" Color="Color.Primary">Save</MudButton>
+                            <MudButton @onclick="Cancel" Color="Color.Secondary">Cancel</MudButton>
+                        </EditForm>
+                    </MudTabPanel>
+                    <MudTabPanel Text="Existing Client">
+                        <EditForm Model="newAppointment" OnValidSubmit="HandleValidSubmit">
+                            <DataAnnotationsValidator />
+                            <ValidationSummary />
+
+                            <MudGrid>
+                                <MudItem xs="12" sm="6">
+                                    <MudSelect T="ApplicationUser" Label="Select Client" @bind-Value="selectedClient" Required="true">
+                                        @foreach (var client in clients)
+                                        {
+                                            <MudSelectItem T="ApplicationUser" Value="@client">@($"{client.FirstName} {client.LastName}")</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="newAppointment.MobileNo" Label="Mobile No" Required="true" Disabled="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="newAppointment.Email" Label="Email" Required="true" Disabled="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudDatePicker @bind-Value="newAppointment.Date" Label="Date" Required="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTimePicker @bind-Value="newAppointment.Time" Label="Time" Required="true" />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField @bind-Value="newAppointment.Note" Label="Note" />
+                                </MudItem>
+                            </MudGrid>
+
+                            <MudButton Type="submit" Color="Color.Primary">Save</MudButton>
+                            <MudButton @onclick="Cancel" Color="Color.Secondary">Cancel</MudButton>
+                        </EditForm>
+                    </MudTabPanel>
+                </MudTabs>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</MudContainer>
 
 @code {
-    
+    private Appointment newAppointment = new();
+    private ApplicationUser selectedClient;
+    private List<ApplicationUser> clients = new List<ApplicationUser>();
 
     protected override async Task OnInitializedAsync()
     {
-       
+        clients = (await AppointmentService.GetClients()).ToList();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (selectedClient != null)
+        {
+            newAppointment.ClientName = $"{selectedClient.FirstName} {selectedClient.LastName}";
+            newAppointment.MobileNo = selectedClient.PhoneNumber;
+            newAppointment.Email = selectedClient.Email;
+            newAppointment.UserId = selectedClient.Id;
+        }
+
+        await AppointmentService.AddAppointment(newAppointment);
+        await EmailService.SendEmailAsync(newAppointment.Email, "Appointment Confirmation",
+            $"Dear {newAppointment.ClientName},<br/>You have an appointment on {newAppointment.Date.ToShortDateString()} at {newAppointment.Time}.<br/><br/>Note: {newAppointment.Note}", null);
+
+        Snackbar.Add("Appointment added successfully!", Severity.Success);
+        Navigation.NavigateTo("/appointments");
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/apntmnts");
     }
 }

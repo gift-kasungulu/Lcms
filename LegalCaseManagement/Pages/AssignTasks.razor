@@ -13,6 +13,7 @@
 @inject TaskStatusService taskStatusService
 @inject IServiceScopeFactory ServiceScopeFactory
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 <MudCard>
     <MudCardContent>
@@ -82,6 +83,7 @@
                 <MudTh>Assigned Lawyer</MudTh>
                 <MudTh>Priority</MudTh>
                 <MudTh>Status</MudTh>
+                <MudTh>Action</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="DueDate">@context.DueDate</MudTd>
@@ -92,6 +94,17 @@
                 </MudTd>
                 <MudTd DataLabel="Status">
                     <span class="@GetStatusBadgeClass(@context.Status?.Name)">@context.Status?.Name</span>
+                </MudTd>
+                <MudTd DataLabel="Action">
+                      <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => ViewTaskDetails(context.TaskId)">
+                        View
+                    </MudButton>
+                    @if (@context.Status?.Name.ToLower() == "completed")
+                    {
+                        <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Checklist"
+                        Size="Size.Small" @onclick="() => TransferToCompleted(context.TaskId)"/>
+                        
+                    }
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -171,6 +184,35 @@
         else
         {
             Snackbar.Add("Failed to assign task", Severity.Error);
+        }
+    }
+
+        private void ViewTaskDetails(int taskId)
+    {
+        Navigation.NavigateTo($"/taskdetails/{taskId}");
+    }
+
+    private async Task TransferToCompleted(int taskId)
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var task = await context.MyTasks.FindAsync(taskId);
+
+            if (task != null)
+            {
+                task.StatusId = taskStatuses.FirstOrDefault(s => s.Name.ToLower() == "completed").StatusId;
+                context.MyTasks.Update(task);
+                await context.SaveChangesAsync();
+
+                Snackbar.Add("Task transferred to completed.", Severity.Success);
+
+                // Remove the task from the list and refresh the table
+                tasks.Remove(tasks.FirstOrDefault(t => t.TaskId == taskId));
+                StateHasChanged();
+
+                Navigation.NavigateTo("/completedtasks"); // Navigate to completed tasks page
+            }
         }
     }
 }

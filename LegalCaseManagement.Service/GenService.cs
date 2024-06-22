@@ -66,6 +66,7 @@ namespace LegalCaseManagement.Data
             return myDbContext.Set<T>().ToList();
         }
 
+       
         
         public async Task<bool> DeleteAsync(T entity)
         {

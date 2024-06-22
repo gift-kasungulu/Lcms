@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using LegalCaseManagement.Domain;
+using Microsoft.AspNetCore.Identity;
 
 namespace LegalCaseManagement.Data
 {
@@ -11,10 +12,10 @@ namespace LegalCaseManagement.Data
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
 
-        // Navigation property
+        // Navigation properties
         public List<Case> Cases = new List<Case>();
+        public List<Appointment> Appointments { get; set; } = new List<Appointment>();
 
-        
 
     }
 }

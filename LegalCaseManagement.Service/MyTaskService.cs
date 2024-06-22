@@ -27,5 +27,29 @@ namespace LegalCaseManagement.Service
                 .Include(t => t.Case)
                 .ToListAsync();
         }
+
+        public async Task<MyTask> GetByIdAsync(int taskId)
+    {
+        return await _context.MyTasks
+            .Include(t => t.Priority)
+            .Include(t => t.Status)
+            .Include(t => t.LawyerInfo)
+            .Include(t => t.Case)
+            .FirstOrDefaultAsync(t => t.TaskId == taskId);
+    }
+
+      public async Task<bool> UpdateAsync(MyTask task)
+    {
+        _context.MyTasks.Update(task);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> AddAsync(MyTask newTask)
+    {
+        await _context.MyTasks.AddAsync(newTask);
+        await _context.SaveChangesAsync();
+        return true;
+    }
     }
 }

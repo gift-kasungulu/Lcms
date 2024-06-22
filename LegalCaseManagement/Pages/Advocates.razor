@@ -94,6 +94,80 @@
     </div>
 }
 
+@if (showEditModal)
+{
+    <div class="modal fade show" tabindex="-1" style="display: block;">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Edit Lawyer</h4>
+                    <button type="button" class="btn-close" @onclick="ToggleEditModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="editLawyer" OnValidSubmit="Update">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <div class="mb-3 mt-3">
+                            <label class="form-label">First Name</label>
+                            <input class="form-control" placeholder="Enter First Name" @bind-value="editLawyer.LFirstName" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input class="form-control" placeholder="Enter Last Name" @bind-value="editLawyer.LLastName" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <input class="form-control" placeholder="Enter Phone Number" @bind-value="editLawyer.Phone" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input class="form-control" placeholder="Enter Email" @bind-value="editLawyer.Email" maxlength="255" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Country</label>
+                            <input class="form-control" placeholder="Enter Country" @bind-value="editLawyer.Country" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">City</label>
+                            <input class="form-control" placeholder="Enter City" @bind-value="editLawyer.City" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Age</label>
+                            <input type="number" class="form-control" placeholder="Enter Age" @bind-value="editLawyer.Age" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Case Type</label>
+                            <input type="text" class="form-control" placeholder="Enter Case Type" @bind-value="editLawyer.CaseType" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Experience Years</label>
+                            <input type="number" class="form-control" placeholder="Enter Experience Years" @bind-value="editLawyer.ExperienceYears" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Win Percentage</label>
+                            <input type="number" class="form-control" placeholder="Enter Win Percentage" @bind-value="editLawyer.CaseWinPercentage" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Gender</label>
+                            <select class="form-control" @bind="editLawyer.Gender">
+                                <option value="">Select Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </EditForm>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" @onclick="ToggleEditModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 <MudCard Elevation="25">
     <MudCardHeader>
         <CardHeaderContent>
@@ -111,7 +185,7 @@
             </ToolBarContent>
             <HeaderContent>
 
-                <MudTh>FIRST NAME</MudTh>
+                <MudTh>Fist Name</MudTh>
                 <MudTh>Last Name</MudTh>
                 <MudTh>Email</MudTh>
                 <MudTh>Phone</MudTh>
@@ -128,7 +202,7 @@
                 <MudTd DataLabel="Experience">@context.ExperienceYears</MudTd>
                 <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => OpenEditModal(context))" />
                     <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small"
                         OnClick="@(() => DeleteRec(context))" />
                 </MudTd>
@@ -159,6 +233,11 @@
     private bool showModal = false;
     private string searchString = "";
     private string password = "";
+    private Lawyers editLawyer = new Lawyers();
+    private bool showEditModal = false;
+    private string editPassword = "";
+    private Lawyers selectedLawyer = new Lawyers(); // Used for editing
+
     private RequestModel request = new RequestModel();
 
     protected override async Task OnInitializedAsync()
@@ -166,6 +245,65 @@
         lawyersList = await lawyerService.GetAllAsync();
         
     }
+
+    private void OpenEditModal(Lawyers lawyer)
+{
+    editLawyer = new Lawyers
+    {
+        Id = lawyer.Id,
+        LFirstName = lawyer.LFirstName,
+        LLastName = lawyer.LLastName,
+        Email = lawyer.Email,
+        Phone = lawyer.Phone,
+        Country = lawyer.Country,
+        City = lawyer.City,
+        Age = lawyer.Age,
+        CaseType = lawyer.CaseType,
+        ExperienceYears = lawyer.ExperienceYears,
+        CaseWinPercentage = lawyer.CaseWinPercentage,
+        Gender = lawyer.Gender,
+    };
+    showEditModal = true;
+}
+
+private void ToggleEditModal()
+{
+    showEditModal = !showEditModal;
+    if (!showEditModal)
+    {
+        editLawyer = new Lawyers(); // Reset the form when closing the modal
+        editPassword = string.Empty; // Reset the password field
+    }
+}
+
+    private async Task Update()
+    {
+        try
+        {
+            var result = await lawyerService.UpdateLawyerAsync(editLawyer);
+
+            if (result)
+            {
+                snackbar.Add("Lawyer Detais Updated ", Severity.Success);
+                
+            }
+            else
+            {
+                
+                // Update failed, handle failure scenario
+                snackbar.Add("Failed to update lawyer", Severity.Error);
+                
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle exceptions
+            snackbar.Add($"Failed to update lawyer: {ex.Message}", Severity.Error);
+        }
+
+    }
+
+
 
     private async Task HandleValidSubmit()
     {
@@ -195,21 +333,23 @@
     }
 
     private async Task DeleteRec(Lawyers rec)
+{
+    bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete?");
+    if (confirmed)
     {
-        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete?");
-        if (confirmed)
+        if (await lawyerService.DeleteAsync(rec))
         {
-            if (await lawyerService.DeleteAsync(rec))
-            {
-                lawyersList = await lawyerService.GetAllAsync();
-                snackbar.Add("Lawyer was removed successfully", Severity.Info);
-            }
-            else
-            {
-                snackbar.Add("Operation failed. Try again later", Severity.Error);
-            }
+            lawyersList = await lawyerService.GetAllAsync();
+            snackbar.Add("Lawyer was removed successfully", Severity.Info);
+        }
+        else
+        {
+            snackbar.Add("Operation failed. Try again later", Severity.Error);
         }
     }
+}
+
+
 
     public async Task Add()
 {
