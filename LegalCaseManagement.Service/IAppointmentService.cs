@@ -16,5 +16,11 @@ namespace LegalCaseManagement.Service
         Task<IEnumerable<ApplicationUser>> GetClients();
         Task DeleteAppointment(int id);
         Task<Appointment> GetAppointmentById(int id);
+        Task<IEnumerable<Appointment>> GetAllAppointments();
+        Task<IEnumerable<Appointment>> GetAppointmentsByTeamMember(string userId);
+        Task<IEnumerable<Appointment>> GetAppointmentsByClient(string userId);
+        
+        Task<IEnumerable<Lawyers>> GetLawyers();
+
     }
 }

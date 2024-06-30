@@ -27,14 +27,15 @@ namespace LegalCaseManagement.Data
                 .ToListAsync();
         }
 
-         public async Task<Case> GetByIdAsync(int id) // Adjust the return type to Task<Case>
-    {
-        return await _context.Cases
-            .Include(c => c.CaseType)
-            .Include(c => c.CaseStatus)
-            .Include(c => c.AppUser)
-            .FirstOrDefaultAsync(c => c.CaseId == id);
-    }
+        public async Task<Case> GetByIdAsync(int id)
+        {
+            return await _context.Cases
+                .Include(c => c.CaseType)
+                .Include(c => c.CaseStatus)
+                .Include(c => c.AppUser)
+                .Include(c => c.CaseDocuments) // Include documents
+                .FirstOrDefaultAsync(c => c.CaseId == id);
+        }
 
     }
 }

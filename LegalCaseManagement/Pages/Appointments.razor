@@ -6,16 +6,18 @@
 @using LegalCaseManagement.Service
 @using Microsoft.AspNetCore.Identity
 @using MudBlazor
-@inject IAppointmentService AppointmentService
+@inject AppointmentService AppointmentService
 @inject NavigationManager Navigation
 @inject ISnackbar Snackbar
 @inject IDialogService DialogService
-@inject AppointmentService AppointmentService
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 
 <PageTitle>Appointments</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
-    <MudPaper Elevation="0" Class="pa-4">
+
+    
+        
         <MudGrid>
             <MudItem xs="6">
                 <MudText Typo="Typo.h5">Appointments</MudText>
@@ -47,7 +49,7 @@
                 <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
             </ToolBarContent>
             <HeaderContent>
-                <MudTh>No</MudTh>
+                <MudTh></MudTh>
                 <MudTh>Client Name</MudTh>
                 <MudTh>Mobile</MudTh>
                 <MudTh>Date</MudTh>
@@ -55,15 +57,21 @@
                 <MudTh>Action</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="No">@context.Id</MudTd>
+                <MudTd DataLabel="Created By">
+                    @if (context.CreatedBy == currentUser.Id)
+                    {
+                        <MudBadge Color="Color.Success"></MudBadge>
+                    }
+                </MudTd>
                 <MudTd DataLabel="Client Name">@context.ClientName</MudTd>
                 <MudTd DataLabel="Mobile">@context.MobileNo</MudTd>
                 <MudTd DataLabel="Date">@context.Date.ToShortDateString()</MudTd>
                 <MudTd DataLabel="Time">@context.Time.ToString(@"hh\:mm")</MudTd>
+                
                 <MudTd DataLabel="Action">
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert">
                         <MudMenuItem OnClick="@(() => ViewAppointmentsDetails(context.Id))">
-                            <i class="bi bi-eye"></i> <!-- You can use an eye icon for "View" -->
+                            <i class="bi bi-eye"></i>
                             View
                         </MudMenuItem>
                         <MudMenuItem OnClick="@(() => DeleteAppointment(context.Id))">
@@ -77,8 +85,8 @@
                 <MudTablePager />
             </PagerContent>
         </MudTable>
-    </MudPaper>
-</MudContainer>
+
+
 
 @code {
     private List<Appointment> appointments = new List<Appointment>();
@@ -86,22 +94,39 @@
     private string searchString = "";
     private DateTime? fromDate;
     private DateTime? toDate;
+    private ApplicationUser? currentUser;
 
     protected override async Task OnInitializedAsync()
     {
+        currentUser = await UserManager.GetUserAsync(SignInManager.Context.User);
         await LoadAppointments();
     }
-    
+
     private void ViewAppointmentsDetails(int id)
     {
         Navigation.NavigateTo($"/viewappointment/{id}");
     }
 
-
     private async Task LoadAppointments()
     {
         _loading = true;
-        appointments = (await AppointmentService.GetAppointments()).ToList();
+
+        var user = await UserManager.GetUserAsync(SignInManager.Context.User);
+        var roles = await UserManager.GetRolesAsync(user);
+
+        if (roles.Contains("Admin"))
+        {
+            appointments = (await AppointmentService.GetAllAppointments()).ToList();
+        }
+        else if (roles.Contains("Team"))
+        {
+            appointments = (await AppointmentService.GetAppointmentsByTeamMember(user.Id)).ToList();
+        }
+        else if (roles.Contains("Client"))
+        {
+            appointments = (await AppointmentService.GetAppointmentsByClient(user.Id)).ToList();
+        }
+
         _loading = false;
     }
 
@@ -138,6 +163,4 @@
             await LoadAppointments();
         }
     }
-
-
 }

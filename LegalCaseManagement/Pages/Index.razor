@@ -10,16 +10,31 @@
 @inject CaseService caseService
 @inject ISnackbar snackbar
 
-<MudCard>
-    <MudCardContent>
-        <MudText Typo="Typo.h4">
-            Welcome, @userName
-        </MudText>
+
+
+
+        <MudGrid>
+            <MudItem xs="12">
+                    <MudText Typo="Typo.h6">Notice</MudText>
+                    @foreach (var notice in GetNotices())
+                    {
+                        <div class="notice-item">
+                            <div class="notice-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="notice-content">
+                                @notice.Title
+                            </div>
+                            <div class="notice-action">
+                                <button class="btn btn-primary btn-sm">Read</button>
+                            </div>
+                        </div>
+                    }
+                
+            </MudItem>
+        </MudGrid>
         <br />
         <MudGrid>
-            
-
-
         </MudGrid>
         <br />
         <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
@@ -35,23 +50,12 @@
                         
                         <MudTh>FIRST NAME</MudTh>
                         <MudTh>Last Name</MudTh>
-                        <MudTh>Email</MudTh>
-                        <MudTh>Phone</MudTh>
-                        <MudTh>Experience</MudTh>
-                        <MudTh>Win %</MudTh>
-                        
                         <MudTh>Actions</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         
                         <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
-                        <MudTd DataLabel="LastName">@context.LLastName</MudTd>
-                        <MudTd DataLabel="Email">@context.UserName</MudTd>
-                        <MudTd DataLabel="Phone">@context.Phone</MudTd>
-                        <MudTd DataLabel="Experince">@context.ExperienceYears</MudTd>
-                        <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
-                        
-                        <MudTd DataLabel="Actions">
+                        <MudTd DataLabel="LastName">@context.LLastName</MudTd>                        <MudTd DataLabel="Actions">
                             <MudFab Color="Color.Info" Size="Size.Small" StartIcon="@Icons.Material.Filled.ReadMore"
                                 OnClick="@(()=>ViewLawyerDetails(context))"></MudFab>
                         </MudTd>
@@ -82,10 +86,9 @@
             </MudTabPanel>
             <MudTabPanel Text="About">
                 <MudText>Content Three</MudText>
-            </MudTabPanel>e
+            </MudTabPanel>
         </MudTabs>
-    </MudCardContent>
-</MudCard>
+
 
 @code {
     private Lawyers lawyers = new Lawyers();
@@ -112,6 +115,27 @@
         {
             Nav.NavigateTo("/Identity/Account/Login", forceLoad: true);
         }
+    }
+
+    public class Notice
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+    }
+
+    private List<Notice> GetNotices()
+    {
+        return new List<Notice>
+    {
+        new Notice { Id = 1, Title = "New Supreme Court Ruling on Copyright Law" },
+        new Notice { Id = 2, Title = "Upcoming Legal Workshop: 'Effective Client Communication'" },
+        new Notice { Id = 3, Title = "Changes to Court Filing Procedures Effective Next Month" },
+        new Notice { Id = 4, Title = "Pro Bono Opportunity: Local Community Legal Clinic" },
+        new Notice { Id = 5, Title = "Reminder: Annual Bar Association Dues Deadline Approaching" },
+        new Notice { Id = 6, Title = "New Feature: Online Client Portal Now Available" },
+        new Notice { Id = 7, Title = "Important: Data Privacy and Security Update for All Users" },
+        new Notice { Id = 8, Title = "Courtroom Etiquette Seminar for Junior Associates" }
+    };
     }
 
     private List<Case> GetRecentCases()

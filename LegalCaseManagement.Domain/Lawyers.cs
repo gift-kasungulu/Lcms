@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Components.Forms;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LegalCaseManagement.Data
@@ -27,6 +28,9 @@ namespace LegalCaseManagement.Data
         public Gender Gender { get; set; } // Adding the Gender field using enum
 
         public List<Task> TodoTask { get; set; }
+        public string ImageUrl { get; set; }
+        [NotMapped]
+        public IBrowserFile ImageFile { get; set; }
 
 
     }

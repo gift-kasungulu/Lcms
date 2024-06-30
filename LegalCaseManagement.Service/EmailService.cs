@@ -1,6 +1,10 @@
-﻿using MailKit.Net.Smtp;
+﻿using LegalCaseManagement.Data;
+using LegalCaseManagement.Domain;
+using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Http;
+
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using System;
@@ -10,13 +14,14 @@ using System.Threading.Tasks;
 public class EmailService
 {
     private readonly IConfiguration _configuration;
+    private readonly UserManager<ApplicationUser> _userManager; // Add this line
 
-    public EmailService(IConfiguration configuration)
+    public EmailService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
     {
         _configuration = configuration;
+        _userManager = userManager; // Add this line
     }
-
-    public async Task SendEmailAsync(string toEmail, string subject, string body, IFormFile? file)
+    public async Task SendEmailAsync(string toEmail, string subject, string body, IFormFile? file = null)
     {
         var email = new MimeMessage();
 
@@ -53,6 +58,48 @@ public class EmailService
         await smtp.SendAsync(email);
         await smtp.DisconnectAsync(true);
     }
+
+
+    public async Task SendAppointmentNotificationAsync(Appointment appointment)
+    {
+        var sender = await _userManager.FindByIdAsync(appointment.CreatedBy);
+        var recipient = await _userManager.FindByIdAsync(appointment.UserId);
+
+        if (sender == null || recipient == null)
+        {
+            throw new ArgumentException("Sender or recipient not found.");
+        }
+
+        var subject = "New Appointment Created";
+        var body = "";
+
+        var senderRoles = await _userManager.GetRolesAsync(sender);
+        var recipientRoles = await _userManager.GetRolesAsync(recipient);
+
+        if (senderRoles.Contains("Client") && recipientRoles.Contains("Team"))
+        {
+            // Appointment created by Client with Lawyer
+            body = $"Dear {recipient.Email},\n\n";
+            body += $"You have a new appointment scheduled with {sender.Email} on {appointment.Date.ToShortDateString()} at {appointment.Time.ToString(@"hh\:mm")}.\n\n";
+        }
+        else if (senderRoles.Contains("Team") && recipientRoles.Contains("Client"))
+        {
+            // Appointment created by Lawyer with Client
+            body = $"Dear {recipient.Email},\n\n";
+            body += $"You have a new appointment scheduled with {sender.Email} on {appointment.Date.ToShortDateString()} at {appointment.Time.ToString(@"hh\:mm")}.\n\n";
+        }
+        else
+        {
+            throw new ArgumentException("Invalid appointment configuration.");
+        }
+
+        body += "Thank you.";
+
+        await SendEmailAsync(recipient.Email, subject, body);
+    }
+
+
+   
 
     public async Task SendDefaultWelcomeEmailAsync(string toEmail)
     {

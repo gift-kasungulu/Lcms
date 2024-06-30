@@ -1,136 +1,161 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Legal Case Management</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div>
-<div class="@NavMenuCssClass " @onclick="ToggleNavMenu">
+﻿<div class="sidebar @NavMenuCssClass">
     <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link text-white" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
+        <div class="sidebar-header">
+            <button title="Toggle menu" class="btn-toggle" @onclick="ToggleNavMenu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
         </div>
-        <AuthorizeView Roles=" Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="dashboard">
-                        <i class="bi bi-border-all mr-4" aria-hidden="true"></i> DashBoard
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles=" Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="counter">
-                        <i class="bi bi-people-fill mr-4" aria-hidden="true"></i> User Management
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles=" Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="advocates">
-                        <i class="bi bi-mortarboard-fill mr-4" aria-hidden="true"></i> Advocates
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="dashboard">
+                        <i class="bi bi-border-all icon-spacing" aria-hidden="true"></i>
+                            <span>Dashboard</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
 
-        <AuthorizeView Roles="Client, Admin, Team">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="appointments">
-                        <i class="bi bi-chat-fill mr-4" aria-hidden="true"></i> Appointments
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="Client">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="myassignedcases">
-                        <i class="bi bi-hammer mr-4" aria-hidden="true"></i>Cases
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="Team, Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="cases">
-                        <i class="bi bi-hammer mr-4" aria-hidden="true"></i> Cases
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="Team">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="myassignedtasks">
-                        <i class="bi bi-list-task mr-4" aria-hidden="true"></i> Assigned Tasks
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="assigntask">
-                        <i class="bi bi-list-task mr-4" aria-hidden="true"></i> Tasks
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="Team, Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="earnings">
-                        <i class="bi bi-wallet-fill mr-4" aria-hidden="true"></i> Earnings
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles=" Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="settings">
-                        <i class="bi bi-gear-fill mr-4" aria-hidden="true"></i> Settings
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
-        <AuthorizeView Roles="Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="tasksetting" EndIcon="@Icons.Material.Filled.AddTask" >
-                         Task setting
-                    </NavLink>
-                </div>
-         </Authorized>
-        </AuthorizeView>
-       
-    </nav>
-</div>
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="counter">
+                        <i class="bi bi-people-fill icon-spacing" aria-hidden="true"></i>
+                            <span>User Management</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="advocates">
+                        <i class="bi bi-mortarboard-fill icon-spacing" aria-hidden="true"></i>
+                            <span>Advocates</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Client, Admin, Team">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="appointments">
+                        <i class="bi bi-chat-fill icon-spacing" aria-hidden="true"></i>
+                            <span>Appointments</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Client">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="myassignedcases">
+                        <i class="bi bi-hammer icon-spacing" aria-hidden="true"></i>
+                            <span>Cases</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Team, Admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="cases">
+                        <i class="bi bi-hammer icon-spacing" aria-hidden="true"></i>
+                            <span>Cases</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Team">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="myassignedtasks">
+                        <i class="bi bi-list-task icon-spacing" aria-hidden="true"></i>
+                            <span>Tasks</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="assigntask">
+                        <i class="bi bi-list-task icon-spacing" aria-hidden="true"></i>
+                            <span>Tasks</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Team, Admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="earnings">
+                        <i class="bi bi-wallet-fill icon-spacing" aria-hidden="true"></i>
+                            <span>Earnings</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="settings">
+                        <i class="bi bi-gear-fill icon-spacing" aria-hidden="true"></i>
+                            <span>Settings</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="tasksetting">
+                        <i class="bi bi-list-check icon-spacing" aria-hidden="true"></i>
+                            <span>Task Setting</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Client, Team">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="notifications">
+                        <i class="bi bi-bell icon-spacing" aria-hidden="true"></i>
+                            <span>Notifications</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="messages">
+                        <i class="bi bi-activity icon-spacing"></i>
+                            <span>Logs</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+            </AuthorizeView>
+        </nav>
+    </div>
 
 @code {
-    private bool collapseNavMenu = true;
-
-
-
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
-
-
+    private bool isCollapsed = false;
+    private string NavMenuCssClass => isCollapsed ? "collapsed" : null;
 
     private void ToggleNavMenu()
-
     {
-
-        collapseNavMenu = !collapseNavMenu;
-
+        isCollapsed = !isCollapsed;
     }
 }

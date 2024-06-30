@@ -2,6 +2,7 @@
 using LegalCaseManagement.Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata;
 
 namespace LegalCaseManagement.Data
 {
@@ -20,10 +21,9 @@ namespace LegalCaseManagement.Data
         public DbSet<MyTaskStatus> Statuses { get; set; }
         public DbSet<MyTask> MyTasks { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
-
-
-
-
+        public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<CaseDocument> Documents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -48,6 +48,28 @@ namespace LegalCaseManagement.Data
                .WithMany(u => u.Appointments)
                .HasForeignKey(a => a.UserId);
 
+            builder.Entity<Notification>()
+                .HasKey(n => n.Id);
+
+            builder.Entity<Notification>()
+                .HasOne<ApplicationUser>(n => n.Recipient)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.RecipientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Message>()
+                .HasKey(m => m.Id);
+
+            builder.Entity<Message>()
+                .HasOne<ApplicationUser>(m => m.Sender)
+                .WithMany(u => u.SentMessages)
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Case>()
+                .HasMany(c => c.CaseDocuments)
+                .WithOne(d => d.Case)
+                .HasForeignKey(d => d.CaseId);
         }
 
     }

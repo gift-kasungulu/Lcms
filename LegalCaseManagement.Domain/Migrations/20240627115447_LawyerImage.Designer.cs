@@ -4,6 +4,7 @@ using LegalCaseManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LegalCaseManagement.Domain.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240627115447_LawyerImage")]
+    partial class LawyerImage
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -256,30 +258,6 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Appointments");
-                });
-
-            modelBuilder.Entity("LegalCaseManagement.Domain.CaseDocument", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<int>("CaseId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("FilePath")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CaseId");
-
-                    b.ToTable("Documents");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Domain.Message", b =>
@@ -643,17 +621,6 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("LegalCaseManagement.Domain.CaseDocument", b =>
-                {
-                    b.HasOne("LegalCaseManagement.Data.Case", "Case")
-                        .WithMany("CaseDocuments")
-                        .HasForeignKey("CaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Case");
-                });
-
             modelBuilder.Entity("LegalCaseManagement.Domain.Message", b =>
                 {
                     b.HasOne("LegalCaseManagement.Data.ApplicationUser", "Receiver")
@@ -779,11 +746,6 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.Navigation("ReceivedMessages");
 
                     b.Navigation("SentMessages");
-                });
-
-            modelBuilder.Entity("LegalCaseManagement.Data.Case", b =>
-                {
-                    b.Navigation("CaseDocuments");
                 });
 #pragma warning restore 612, 618
         }

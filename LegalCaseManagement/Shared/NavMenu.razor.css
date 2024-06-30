@@ -60,3 +60,7 @@
         display: block;
     }
 }
+
+.icon-spacing {
+    margin-right: 8px; /* Adjust the margin as needed */
+}

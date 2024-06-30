@@ -1,1 +1,148 @@
-﻿
+﻿@page "/viewappointment/{Id:int}"
+@attribute [Authorize(Roles = "Client, Admin, Team")]
+
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
+@using Microsoft.AspNetCore.Identity
+@using MudBlazor
+@inject AppointmentService AppointmentService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ILogger<AppointmentDetails> Logger
+
+<PageTitle>View Appointment</PageTitle>
+
+        <MudText Typo="Typo.h5" Class="mb-4">Appointment Detail</MudText>
+
+        @if (appointment != null)
+        {
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTable Items="@detailRows" Dense="true" Hover="true" Elevation="0">
+                        <RowTemplate>
+                            <MudTd Style="width: 25%; color: #6c757d;">@context.Label</MudTd>
+                            <MudTd Style="width: 25%;">@context.Value1</MudTd>
+                            <MudTd Style="width: 25%; color: #6c757d;">@context.Label2</MudTd>
+                            <MudTd Style="width: 25%;">@context.Value2</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-6" />
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo($"/editappointment/{Id}"))">Edit</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="@(() => Navigation.NavigateTo("/appointments"))">Back to List</MudButton>
+        }
+        else if (isLoading)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Error">Failed to load appointment data. Please try again later.</MudAlert>
+        }
+   
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Appointment appointment;
+    private List<DetailRow> detailRows = new List<DetailRow>();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAppointment();
+    }
+
+    private async Task LoadAppointment()
+    {
+        try
+        {
+            isLoading = true;
+            appointment = await AppointmentService.GetAppointmentById(Id);
+            if (appointment != null)
+            {
+                PopulateDetailRows();
+            }
+            else
+            {
+                Logger.LogWarning($"Appointment with ID {Id} not found");
+                Snackbar.Add("Appointment not found", Severity.Warning);
+                Navigation.NavigateTo("/appointments");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"Error loading appointment with ID {Id}");
+            Snackbar.Add($"Error loading appointment: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string SafeToString(object value)
+    {
+        try
+        {
+            if (value == null)
+                return "N/A";
+
+            if (value is DateTime dateTime)
+                return dateTime.ToString("dd-MM-yyyy");
+
+            if (value is TimeSpan timeSpan)
+                return timeSpan.ToString(@"hh\:mm tt");
+
+            return value.ToString();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"Error converting value to string: {value}");
+            return "N/A";
+        }
+    }
+
+    private void PopulateDetailRows()
+    {
+        try
+        {
+            detailRows = new List<DetailRow>
+        {
+            new DetailRow("Appointment ID", SafeToString(appointment.Id), "Date", SafeToString(appointment.Date)),
+            new DetailRow("Client Name", SafeToString(appointment.ClientName), "Mobile No", SafeToString(appointment.MobileNo)),
+            new DetailRow("Time", SafeToString(appointment.Time), "Email", SafeToString(appointment.Email)),
+            new DetailRow("Note", SafeToString(appointment.Note), "", "")
+        };
+
+            // Log the raw Time value for debugging
+            Logger.LogInformation($"Raw Time value: {appointment.Time}");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error populating detail rows");
+            Snackbar.Add("Error displaying appointment details", Severity.Error);
+        }
+    }
+
+    public class DetailRow
+    {
+        public string Label { get; set; }
+        public string Value1 { get; set; }
+        public string Label2 { get; set; }
+        public string Value2 { get; set; }
+
+        public DetailRow(string label, string value1, string label2, string value2)
+        {
+            Label = label;
+            Value1 = value1;
+            Label2 = label2;
+            Value2 = value2;
+        }
+    }
+}

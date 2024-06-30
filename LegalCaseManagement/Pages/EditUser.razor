@@ -1,0 +1,82 @@
+﻿@page "/edit/{UserId}"
+
+
+@using LegalCaseManagement.Data
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="mb-4">Edit User</MudText>
+
+@if (user != null)
+{
+    <EditForm Model="@user" OnValidSubmit="UpdateUser">
+        <DataAnnotationsValidator />
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="user.FirstName" Label="First Name" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="user.LastName" Label="Last Name" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="user.Email" Label="Email" Required="true" InputType="InputType.Email" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="user.PhoneNumber" Label="Phone Number" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="user.Country" Label="Country" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="user.City" Label="City" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="user.Address" Label="Address" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mr-2">Update User</MudButton>
+                <MudButton OnClick="Cancel" Variant="Variant.Outlined" Color="Color.Secondary">Cancel</MudButton>
+            </MudItem>
+        </MudGrid>
+    </EditForm>
+}
+else
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+
+@code {
+    [Parameter]
+    public string UserId { get; set; }
+
+    private ApplicationUser user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await UserManager.FindByIdAsync(UserId);
+    }
+
+    private async Task UpdateUser()
+    {
+        var result = await UserManager.UpdateAsync(user);
+        if (result.Succeeded)
+        {
+            Snackbar.Add("User updated successfully", Severity.Success);
+            NavigationManager.NavigateTo("/counter");
+        }
+        else
+        {
+            foreach (var error in result.Errors)
+            {
+                Snackbar.Add(error.Description, Severity.Error);
+            }
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/counter");
+    }
+}

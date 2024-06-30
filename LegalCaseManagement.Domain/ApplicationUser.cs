@@ -15,6 +15,9 @@ namespace LegalCaseManagement.Data
         // Navigation properties
         public List<Case> Cases = new List<Case>();
         public List<Appointment> Appointments { get; set; } = new List<Appointment>();
+        public virtual ICollection<Notification> Notifications { get; set; }
+        public virtual ICollection<Message> SentMessages { get; set; }
+        public virtual ICollection<Message> ReceivedMessages { get; set; }
 
 
     }

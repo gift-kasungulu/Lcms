@@ -12,11 +12,13 @@ namespace LegalCaseManagement.Service
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly EmailService _emailService;
 
-        public AppointmentService(ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+        public AppointmentService(ApplicationDbContext context, UserManager<ApplicationUser> userManager, EmailService emailService)
         {
             _context = context;
             _userManager = userManager;
+            _emailService = emailService;
         }
 
         public async Task AddAppointment(Appointment appointment)
@@ -29,6 +31,9 @@ namespace LegalCaseManagement.Service
 
             _context.Appointments.Add(appointment);
             await _context.SaveChangesAsync();
+
+            // Send email notification
+            await _emailService.SendAppointmentNotificationAsync(appointment);
         }
 
 
@@ -53,6 +58,8 @@ namespace LegalCaseManagement.Service
             return clients;
         }
 
+
+
         public async Task<IEnumerable<Appointment>> GetAppointmentsByDateRange(DateTime? fromDate, DateTime? toDate)
         {
             var query = _context.Appointments.AsQueryable();
@@ -68,6 +75,26 @@ namespace LegalCaseManagement.Service
             return await _context.Appointments
                 .Include(a => a.User)
                 .FirstOrDefaultAsync(a => a.Id == id);
+        }
+
+        public async Task<IEnumerable<Appointment>> GetAllAppointments()
+        {
+            return await _context.Appointments.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Appointment>> GetAppointmentsByClient(string userId)
+        {
+            return await _context.Appointments.Where(a => a.UserId == userId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Appointment>> GetAppointmentsByTeamMember(string userId)
+        {
+            return await _context.Appointments.Where(a => a.CreatedBy == userId).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Lawyers>> GetLawyers()
+        {
+            return await _context.Set<Lawyers>().ToListAsync();
         }
 
 

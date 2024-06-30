@@ -1,0 +1,101 @@
+﻿@page "/notifications"
+@attribute [Authorize(Roles = "Client, Team")]
+
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Service
+@using LegalCaseManagement.Domain
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
+@inject AppointmentService AppointmentService
+@inject NavigationManager Navigation
+
+<PageTitle>Notifications</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge">
+    <MudPaper Elevation="1" Class="pa-4">
+        <MudGrid>
+            <MudItem xs="12">
+                <MudText Typo="Typo.h5">Notifications</MudText>
+            </MudItem>
+        </MudGrid>
+        <MudDivider Class="my-2" />
+        <MudList Dense="true">
+            @foreach (var appointment in appointments)
+            {
+                <MudListItem>
+                    <MudGrid>
+                        <MudItem xs="10">
+                            <MudText Typo="Typo.body1">@notificationMessages[appointment.Id]</MudText>
+                        </MudItem>
+                        <MudItem xs="2" Class="d-flex justify-end">
+                            <MudText Typo="Typo.caption">@appointment.Date.ToShortDateString()</MudText>
+                        </MudItem>
+                    </MudGrid>
+                </MudListItem>
+                <MudDivider />
+            }
+        </MudList>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private List<Appointment> appointments = new List<Appointment>();
+    private Dictionary<int, string> notificationMessages = new Dictionary<int, string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await UserManager.GetUserAsync(SignInManager.Context.User);
+        if (user == null)
+        {
+            // Handle error (e.g., redirect to login page)
+            return;
+        }
+
+        var roles = await UserManager.GetRolesAsync(user);
+
+        if (roles.Contains("Team"))
+        {
+            appointments = (await AppointmentService.GetAppointmentsByTeamMember(user.Id)).ToList();
+        }
+        else if (roles.Contains("Client"))
+        {
+            appointments = (await AppointmentService.GetAppointmentsByClient(user.Id)).ToList();
+        }
+
+        await LoadNotificationMessages();
+    }
+
+    private async Task LoadNotificationMessages()
+    {
+        foreach (var appointment in appointments)
+        {
+            var message = await GetNotificationMessage(appointment);
+            notificationMessages[appointment.Id] = message;
+        }
+    }
+
+    private async Task<string> GetNotificationMessage(Appointment appointment)
+    {
+        var creator = await UserManager.FindByIdAsync(appointment.CreatedBy);
+        if (creator == null)
+        {
+            return $"Appointment on {appointment.Date.ToShortDateString()} (creator not found)";
+        }
+
+        var roles = await UserManager.GetRolesAsync(creator);
+
+        if (roles.Contains("Client"))
+        {
+            return $"Appointment with Client {creator.UserName} on {appointment.Date.ToShortDateString()}";
+        }
+        else if (roles.Contains("Team"))
+        {
+            return $"Appointment with Lawyer {creator.UserName} on {appointment.Date.ToShortDateString()}";
+        }
+        else
+        {
+            return $"Appointment on {appointment.Date.ToShortDateString()}";
+        }
+    }
+}

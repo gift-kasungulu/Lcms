@@ -13,10 +13,7 @@ namespace LegalCaseManagement.Domain
     {
         [Key]
         public int Id { get; set; }
-
-        
         public string? ClientName { get; set; }
-
         
         public string? MobileNo { get; set; }
 
@@ -27,12 +24,11 @@ namespace LegalCaseManagement.Domain
         public TimeSpan Time { get; set; }
 
         public string? Note { get; set; }
-
-        
         public string? Email { get; set; }
 
         [ForeignKey("ApplicationUser")]
         public string UserId { get; set; }
         public ApplicationUser? User { get; set; }
+        public string? CreatedBy { get; set; } //this will help me store the ID of the user that created the Appointment for easy tracking 
     }
 }

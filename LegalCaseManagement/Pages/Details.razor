@@ -8,50 +8,71 @@
 
 @if (lawyer != null)
 {
-    <div class="row">
-    <div class="col-md-6">
-        <MudCard Class="mb-4">
-            <MudCardHeader Class=" mud-text-dark">
-                <h5 class="card-title">Lawyer Details</h5>
-            </MudCardHeader>
-            <MudCardContent>
-                <p class="card-title">FirstName: @lawyer.LFirstName</p>
-                <p class="card-title">LastName: <b>@lawyer.LLastName</b></p>
-                <p class="card-text">Email:<b> @lawyer.Email</b></p>
-                <p class="card-text">Phone: <b>@lawyer.Phone</b></p>
-                <p class="card-text">Country: <b>@lawyer.Country</b></p>
-                <p class="card-text">City: <b>@lawyer.City</b></p>
-                <p class="card-text">Age: <b>@lawyer.Age</b></p>
-                <p class="card-text">Case Type: <b>@lawyer.CaseType</b></p>
-                <p class="card-text">Experience Years: @lawyer.ExperienceYears</p>
-                <p class="card-text">Win Percentage:</p>
-                <MudProgress Linear Value="@lawyer.CaseWinPercentage" Color="Color.Info" />
-                <p class="card-text">@lawyer.CaseWinPercentage%</p>
-            </MudCardContent>
-        </MudCard>
+    <div class="container mt-4">
+        <h6>Lawyer Details</h6>
+        <table class="table">
+            <tbody>
+                <tr>
+                    <td colspan="4" class="text-center">
+                        @if (!string.IsNullOrEmpty(lawyer.ImageUrl))
+                        {
+                            <img src="@lawyer.ImageUrl" alt="Lawyer Image" class="rounded-circle" style="width: 150px; height: 150px;" />
+                        }
+                        else
+                        {
+                            <span>No image available</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td><b>First Name</b></td>
+                    <td>@lawyer.LFirstName</td>
+                    <td><b>Last Name</b></td>
+                    <td>@lawyer.LLastName</td>
+                </tr>
+                <tr>
+                    <td><b>Email</b></td>
+                    <td>@lawyer.UserName</td>
+                    <td><b>Phone</b></td>
+                    <td>@lawyer.Phone</td>
+                </tr>
+                <tr>
+                    <td><b>Country</b></td>
+                    <td>@lawyer.Country</td>
+                    <td><b>City</b></td>
+                    <td>@lawyer.City</td>
+                </tr>
+                <tr>
+                    <td><b>Age</b></td>
+                    <td>@lawyer.Age</td>
+                    <td><b>Case Type</b></td>
+                    <td>@lawyer.CaseType</td>
+                </tr>
+                <tr>
+                    <td><b>Experience Years</b></td>
+                    <td>@lawyer.ExperienceYears</td>
+                    <td><b>Win Percentage</b></td>
+                    <td>
+                        <MudProgress Linear Value="@lawyer.CaseWinPercentage" Color="Color.Info" />
+                        <span>@lawyer.CaseWinPercentage%</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h6>Request for Lawyer</h6>
+        <EditForm Model="request" OnValidSubmit="HandleValidSubmit">
+            <div class="mb-3">
+                <label class="form-label">Your Email</label>
+                <MudTextField @bind-Value="request.Email" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Message</label>
+                <MudTextField @bind-Value="request.Message" TextArea="true" />
+            </div>
+            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
+        </EditForm>
     </div>
-    <div class="col-md-6">
-        <MudCard Class="mb-4">
-            <MudCardHeader Class=" mud-text-dark">
-                <h5 class="card-title">Request for Lawyer</h5>
-            </MudCardHeader>
-            <MudCardContent>
-                <EditForm Model="request" OnValidSubmit="HandleValidSubmit">
-                    <div class="mb-3">
-                        <label class="form-label">Your Email</label>
-                        <MudTextField @bind-Value="request.Email" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Message</label>
-                        <MudTextField @bind-Value="request.Message" TextArea="true" />
-                    </div>
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
-                   
-                </EditForm>
-            </MudCardContent>
-        </MudCard>
-    </div>
-</div>
 }
 else
 {
@@ -60,6 +81,7 @@ else
 
 <button class="btn btn-primary mt-4" @onclick="GoBack">Back</button>
 
+
 @code {
     [Parameter]
     public string LawyerId { get; set; }
@@ -67,7 +89,7 @@ else
     private Lawyers lawyer;
     private RequestModel request = new RequestModel();
 
-     protected override async Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
         lawyer = await lawyerService.GetByIdAsync(LawyerId);
     }

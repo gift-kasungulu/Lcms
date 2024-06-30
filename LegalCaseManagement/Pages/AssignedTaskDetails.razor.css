@@ -59,3 +59,19 @@ button.btn-secondary {
 button:hover {
     opacity: 0.8;
 }
+
+
+.case-detail {
+    margin-bottom: 15px;
+}
+
+    .case-detail strong {
+        display: block;
+        color: #6c757d;
+    }
+
+    .case-detail p {
+        margin: 0;
+        color: #343a40;
+    }
+

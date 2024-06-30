@@ -12,9 +12,10 @@
 }
 
 .modal-dialog {
-    max-width: 500px;
+    max-width: 800px; /* Increase the width */
     margin: 1.75rem auto;
 }
+
 
 .modal-content {
     border-radius: 10px;
@@ -64,4 +65,20 @@
 
 .btn-primary:hover {
     background-color: #0056b3;
+}
+
+.rounded-circle {
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Two columns */
+    gap: 20px; /* Space between grid items */
+}
+
+.grid-item {
+    display: flex;
+    flex-direction: column;
 }

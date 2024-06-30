@@ -1,0 +1,76 @@
+﻿@page "/editlawyer/{}"
+
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
+@inject LawyerService LawyerService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<MudText Typo="Typo.h4" Class="mb-4">Edit Lawyer</MudText>
+
+@if (lawyer != null)
+{
+    <EditForm Model="@lawyer" OnValidSubmit="UpdateLawyer">
+        <DataAnnotationsValidator />
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="lawyer.LFirstName" Label="First Name" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="lawyer.LLastName" Label="Last Name" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="lawyer.UserName" Label="Email" Required="true" InputType="InputType.Email" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="lawyer.Phone" Label="Phone Number" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudNumericField @bind-Value="lawyer.ExperienceYears" Label="Experience (Years)" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudNumericField @bind-Value="lawyer.CaseWinPercentage" Label="Win Percentage" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="mr-2">Update Lawyer</MudButton>
+                <MudButton OnClick="Cancel" Variant="Variant.Outlined" Color="Color.Secondary">Cancel</MudButton>
+            </MudItem>
+        </MudGrid>
+    </EditForm>
+}
+else
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+
+@code {
+    [Parameter]
+    public string LawyerId { get; set; }
+
+    private Lawyers lawyer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        lawyer = await LawyerService.GetByIdAsync(LawyerId);
+    }
+
+    private async Task UpdateLawyer()
+    {
+        var result = await LawyerService.UpdateAsync(lawyer);
+        if (result)
+        {
+            Snackbar.Add("Lawyer updated successfully", Severity.Success);
+            NavigationManager.NavigateTo("/counter");
+        }
+        else
+        {
+            Snackbar.Add("Failed to update lawyer", Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/counter");
+    }
+}

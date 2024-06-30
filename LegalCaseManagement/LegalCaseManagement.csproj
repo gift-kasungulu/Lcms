@@ -8,6 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Pages\EditLawyer.razor" />
+    <Content Remove="Pages\ViewCaseDetails.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.27" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.28" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.28" />
@@ -28,6 +33,24 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LegalCaseManagement.Service\LegalCaseManagement.Service.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Pages\EditLawyer.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\EditLawyer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\ViewCaseDetails.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Pages\EditLawyer.razor" />
+    <None Include="Shared\ViewCaseDetails.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Pages\ViewCaseDetails.razor" />
   </ItemGroup>
 
 </Project>

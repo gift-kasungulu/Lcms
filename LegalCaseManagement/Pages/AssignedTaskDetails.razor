@@ -11,64 +11,40 @@
 @inject ISnackbar snackbar
 @inject MyTaskService myTaskService
 
-    @if (task == null)
-    {
-        <div class="centered">
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-        </div>
-    }
-    else
-    {
-        <h3>Task Details</h3>
-        <br />
-        <MudPaper Elevation="2">
-            <MudTable Items="new List<MyTask> { task }">
-                <HeaderContent>
-                    <MudTh>Description</MudTh>
-                    <MudTh>Due Date</MudTh>
-                    <MudTh>Status</MudTh>
-                    <MudTh>Case</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd>@context.Description</MudTd>
-                    <MudTd>@context.DueDate?.ToString("dd MMM yyyy")</MudTd>
-                    <MudTd>@context.Status?.Name</MudTd>
-                    <MudTd>@context.Case?.Discription</MudTd>
-                </RowTemplate>
-            </MudTable>
-        </MudPaper>
 
-        <MudPaper Class="mt-4 p-4">
+        <MudText Typo="Typo.h5" Class="mb-4">Task Detail</MudText>
+
+        @if (task != null)
+        {
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTable Items="@detailRows" Dense="true" Hover="true" Elevation="0">
+                        <RowTemplate>
+                            <MudTd Style="width: 25%; color: #6c757d;">@context.Label</MudTd>
+                            <MudTd Style="width: 25%;">@context.Value1</MudTd>
+                            <MudTd Style="width: 25%; color: #6c757d;">@context.Label2</MudTd>
+                            <MudTd Style="width: 25%;">@context.Value2</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-6" />
+
             <h4>Case Details</h4>
-            <MudTable Items="new List<Case> { task.Case }">
-                <HeaderContent>
-                    <MudTh>Start Date</MudTh>
-                    <MudTh>End Date</MudTh>
-                    <MudTh>Registration Date</MudTh>
-                    <MudTh>Registration Number</MudTh>
-                    <MudTh>Petitioner</MudTh>
-                    <MudTh>Defendant</MudTh>
-                    <MudTh>Description</MudTh>
-                    <MudTh>Case Type</MudTh>
-                    <MudTh>Case Status</MudTh>
-                    <MudTh>Client</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd>@context.StartDate?.ToString("dd MMM yyyy")</MudTd>
-                    <MudTd>@context.EndDate?.ToString("dd MMM yyyy")</MudTd>
-                    <MudTd>@context.RegistrationDate?.ToString("dd MMM yyyy")</MudTd>
-                    <MudTd>@context.RegistrationNo</MudTd>
-                    <MudTd>@context.Petitioner</MudTd>
-                    <MudTd>@context.Defendant</MudTd>
-                    <MudTd>@context.Discription</MudTd>
-                    <MudTd>@context.CaseType?.TypeName</MudTd>
-                    <MudTd>@context.CaseStatus?.StatusName</MudTd>
-                    <MudTd>@context.AppUser?.UserName</MudTd>
-                </RowTemplate>
-            </MudTable>
-        </MudPaper>
-        <br />
-        <MudPaper Class="mt-4 p-4">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudTable Items="@caseDetailRows" Dense="true" Hover="true" Elevation="0">
+                        <RowTemplate>
+                            <MudTd Style="width: 25%; color: #6c757d;">@context.Label</MudTd>
+                            <MudTd Style="width: 25%;">@context.Value1</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+            </MudGrid>
+
+            <MudDivider Class="my-6" />
+
             <h4>Update Task Status</h4>
             <EditForm Model="@task" OnValidSubmit="UpdateTask">
                 <DataAnnotationsValidator />
@@ -95,38 +71,95 @@
                     <MudButton Color="Color.Secondary" Variant="Variant.Filled" @onclick="NavigateBack">Cancel</MudButton>
                 </MudItem>
             </EditForm>
-        </MudPaper>
-    }
+        }
+        else if (isLoading)
+        {
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Error">Failed to load task data. Please try again later.</MudAlert>
+        }
 
 
 @code {
     [Parameter] public int taskId { get; set; }
     private MyTask task;
     private List<MyTaskStatus> statuses = new List<MyTaskStatus>();
+    private List<DetailRow> detailRows = new List<DetailRow>();
+    private List<DetailRow> caseDetailRows = new List<DetailRow>();
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        using (var scope = ServiceScopeFactory.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            task = await context.MyTasks
-                .Include(t => t.Priority)
-                .Include(t => t.Status)
-                .Include(t => t.Case)
-                    .ThenInclude(c => c.CaseType)
-                .Include(t => t.Case)
-                    .ThenInclude(c => c.CaseStatus)
-                .Include(t => t.Case)
-                    .ThenInclude(c => c.AppUser)
-                .FirstOrDefaultAsync(t => t.TaskId == taskId);
+        await LoadTask();
+    }
 
-            statuses = await context.Statuses.ToListAsync();
+    private async Task LoadTask()
+    {
+        try
+        {
+            isLoading = true;
+            using (var scope = ServiceScopeFactory.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                task = await context.MyTasks
+                    .Include(t => t.Priority)
+                    .Include(t => t.Status)
+                    .Include(t => t.Case)
+                        .ThenInclude(c => c.CaseType)
+                    .Include(t => t.Case)
+                        .ThenInclude(c => c.CaseStatus)
+                    .Include(t => t.Case)
+                        .ThenInclude(c => c.AppUser)
+                    .FirstOrDefaultAsync(t => t.TaskId == taskId);
+
+                statuses = await context.Statuses.ToListAsync();
+            }
+
+            if (task != null)
+            {
+                PopulateDetailRows();
+                PopulateCaseDetailRows();
+            }
+            else
+            {
+                snackbar.Add("Task not found", Severity.Warning);
+                Navigation.NavigateTo("/myassignedtasks");
+            }
+        }
+        catch (Exception ex)
+        {
+            snackbar.Add($"Error loading task: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
-    private void NavigateBack()
+    private void PopulateDetailRows()
     {
-        Navigation.NavigateTo("/myassignedtasks");
+        detailRows = new List<DetailRow>
+        {
+            new DetailRow("Due Date", task.DueDate?.ToString("dd MMM yyyy")),
+            new DetailRow("Description", task.Description, "Status", task.Status?.Name)
+        };
+    }
+
+    private void PopulateCaseDetailRows()
+    {
+        if (task.Case != null)
+        {
+            caseDetailRows = new List<DetailRow>
+            {
+                new DetailRow("Case Type", task.Case.CaseType?.TypeName, ""),
+                new DetailRow("Filing No", task.Case.RegistrationNo, "Filing Date", task.Case.RegistrationDate?.ToString("dd-MM-yyyy")),
+                new DetailRow("First Hearing Date", task.Case.StartDate?.ToString("dd-MM-yyyy"), "Next Hearing Date", task.Case.EndDate?.ToString("dd-MM-yyyy")),
+                new DetailRow("Case Status", task.Case.CaseStatus?.StatusName, "Court No.", "1"),
+                new DetailRow("Judge", "Ms. Neerja Kulwant Kalson D.J / S.J", "", "")
+            };
+        }
     }
 
     private async Task UpdateTask()
@@ -139,7 +172,7 @@
             {
                 existingTask.StatusId = task.StatusId; // Update the status
                 await myTaskService.UpdateAsync(existingTask); // Save the changes
-                snackbar.Add("The task was completed", Severity.Success);
+                snackbar.Add("The task was updated", Severity.Success);
             }
             else
             {
@@ -149,6 +182,27 @@
         else
         {
             snackbar.Add("Invalid task ID", Severity.Error);
+        }
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo("/myassignedtasks");
+    }
+
+    public class DetailRow
+    {
+        public string Label { get; set; }
+        public string Value1 { get; set; }
+        public string Label2 { get; set; }
+        public string Value2 { get; set; }
+
+        public DetailRow(string label, string value1, string label2 = "", string value2 = "")
+        {
+            Label = label;
+            Value1 = value1;
+            Label2 = label2;
+            Value2 = value2;
         }
     }
 }

@@ -1,0 +1,49 @@
+﻿@page "/messages"
+
+@attribute [Authorize(Roles = "Admin")]
+<PageTitle>Activity Logs</PageTitle>
+
+@using LegalCaseManagement.Data
+@using Microsoft.EntityFrameworkCore
+@inject IServiceScopeFactory ServiceScopeFactory
+
+<MudTable Items="caseLogs">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">System Logs</MudText>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Case Number</MudTh>
+        <MudTh>Case Description</MudTh>
+        <MudTh>Created By</MudTh>
+        <MudTh>Creation Date</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="CaseId">@context.RegistrationNo</MudTd>
+        <MudTd DataLabel="Discription">@context.Discription</MudTd>
+        <MudTd DataLabel="CreatedByUser">@context.CreatedByUser?.UserName</MudTd>
+        <MudTd DataLabel="CreatedAt">@context.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+@code {
+    private List<Case> caseLogs = new List<Case>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetCaseLogsAsync();
+    }
+
+    private async Task GetCaseLogsAsync()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            caseLogs = await context.Cases
+                .Include(c => c.CreatedByUser)
+                .ToListAsync();
+        }
+    }
+}

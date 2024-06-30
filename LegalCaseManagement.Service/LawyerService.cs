@@ -1,16 +1,23 @@
 ﻿using LegalCaseManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using LegalCaseManagement.Domain;
+using LegalCaseManagement.Service;
 
 namespace LegalCaseManagement.Data
 {
-    public class LawyerService : GenService<Lawyers>
+    public class LawyerService : GenService<Lawyers>, ILawyerService
     {
         private readonly ApplicationDbContext _context;
         public LawyerService(ApplicationDbContext context) : base(context)
         {
             _context = context;
         }
+
+        public async Task<List<Lawyers>> GetAllAsync()
+        {
+            return await _context.Lawyers.ToListAsync();
+        }
+
 
         public async Task<Lawyers> GetByIdAsync(string id)
         {

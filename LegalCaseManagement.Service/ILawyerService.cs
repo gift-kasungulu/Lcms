@@ -9,5 +9,6 @@ namespace LegalCaseManagement.Service
     public interface ILawyerService
     {
         Task<bool> UpdateLawyerAsync(Lawyers lawyer);
+        Task<List<Lawyers>> GetAllAsync();
     }
 }

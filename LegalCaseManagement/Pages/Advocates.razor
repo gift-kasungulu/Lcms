@@ -25,66 +25,69 @@
                     <EditForm Model="lawyers" OnValidSubmit="Add">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
-                        <div class="mb-3 mt-3">
-                            <label class="form-label">First Name</label>
-                            <input class="form-control" placeholder="Enter First Name" @bind-value="lawyers.LFirstName" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Last Name</label>
-                            <input class="form-control" placeholder="Enter Last Name" @bind-value="lawyers.LLastName" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phone Number</label>
-                            <input class="form-control" placeholder="Enter Phone Number" @bind-value="lawyers.Phone" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input class="form-control" placeholder="Enter Email" @bind-value="lawyers.Email"
-                                maxlength="255" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Country</label>
-                            <input class="form-control" placeholder="Enter Country" @bind-value="lawyers.Country" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">City</label>
-                            <input class="form-control" placeholder="Enter City" @bind-value="lawyers.City" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Age</label>
-                            <input type="number" class="form-control" placeholder="Enter Age" @bind-value="lawyers.Age" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Case Type</label>
-                            <input type="text" class="form-control" placeholder="Enter Case Type"
-                                @bind-value="lawyers.CaseType" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Experience Years</label>
-                            <input type="number" class="form-control" placeholder="Enter Experience Years"
-                                @bind-value="lawyers.ExperienceYears" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Win Percentage</label>
-                            <input type="number" class="form-control" placeholder="Enter Win Percentage"
-                                @bind-value="lawyers.CaseWinPercentage" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Gender</label>
-                            <select class="form-control" @bind="lawyers.Gender">
-                                <option value="">Select Gender</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" class="form-control" placeholder="Enter Password"
-                                @bind-value="password" />
+                        <div class="form-grid">
+                            <div class="grid-item">
+                                <label class="form-label">First Name</label>
+                                <input class="form-control" placeholder="Enter First Name" @bind-value="lawyers.LFirstName" />
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Last Name</label>
+                                <input class="form-control" placeholder="Enter Last Name" @bind-value="lawyers.LLastName" />
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Phone Number</label>
+                                <input class="form-control" placeholder="Enter Phone Number" @bind-value="lawyers.Phone" />
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Email</label>
+                                <input class="form-control" placeholder="Enter Email" @bind-value="lawyers.Email" maxlength="255" />
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Country</label>
+                                <input class="form-control" placeholder="Enter Country" @bind-value="lawyers.Country" />
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">City</label>
+                                <input class="form-control" placeholder="Enter City" @bind-value="lawyers.City" />
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Age</label>
+                                <input type="number" class="form-control" placeholder="Enter Age" @bind-value="lawyers.Age" />
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Case Type</label>
+                                <input type="text" class="form-control" placeholder="Enter Case Type" @bind-value="lawyers.CaseType" />
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Experience Years</label>
+                                <input type="number" class="form-control" placeholder="Enter Experience Years" @bind-value="lawyers.ExperienceYears" />
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Upload Image</label>
+                                <InputFile OnChange="HandleImageUpload" />
+                                
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Win Percentage</label>
+                                <input type="number" class="form-control" placeholder="Enter Win Percentage" @bind-value="lawyers.CaseWinPercentage" />
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Gender</label>
+                                <select class="form-control" @bind="lawyers.Gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="grid-item">
+                                <label class="form-label">Password</label>
+                                <input type="password" class="form-control" placeholder="Enter Password" @bind-value="password" />
+                            </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </EditForm>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-danger" @onclick="ToggleModal">Close</button>
@@ -144,6 +147,14 @@
                             <input type="number" class="form-control" placeholder="Enter Experience Years" @bind-value="editLawyer.ExperienceYears" />
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Image</label>
+                            <InputFile OnChange="HandleEditSelected" />
+                            @if (!string.IsNullOrEmpty(editLawyer.ImageUrl))
+                            {
+                                <img src="@editLawyer.ImageUrl" alt="Lawyer Image" style="max-width: 100px; max-height: 100px;" />
+                            }
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Win Percentage</label>
                             <input type="number" class="form-control" placeholder="Enter Win Percentage" @bind-value="editLawyer.CaseWinPercentage" />
                         </div>
@@ -184,7 +195,7 @@
                     StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
             </ToolBarContent>
             <HeaderContent>
-
+                <MudTh>Image</MudTh>
                 <MudTh>Fist Name</MudTh>
                 <MudTh>Last Name</MudTh>
                 <MudTh>Email</MudTh>
@@ -194,7 +205,12 @@
                 <MudTh>Actions</MudTh>
             </HeaderContent>
             <RowTemplate>
-
+                <MudTd DataLabel="Image">
+                    @if (!string.IsNullOrEmpty(context.ImageUrl))
+                    {
+                        <img src="@context.ImageUrl" alt="Lawyer Image" style="border-radius: 50%; width: 50px; height: 50px;" />
+                    }
+                </MudTd>
                 <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
                 <MudTd DataLabel="LastName">@context.LLastName</MudTd>
                 <MudTd DataLabel="Email">@context.UserName</MudTd>
@@ -202,9 +218,20 @@
                 <MudTd DataLabel="Experience">@context.ExperienceYears</MudTd>
                 <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
                 <MudTd DataLabel="Actions">
-                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(() => OpenEditModal(context))" />
-                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small"
-                        OnClick="@(() => DeleteRec(context))" />
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                        <MudMenuItem >
+                            <i class="bi bi-eye"></i>
+                            View
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OpenEditModal(context))">
+                            <i class="bi bi-pencil-fill"></i>
+                            Update
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => DeleteRec(context))">
+                            <i class="bi bi-trash-fill"></i>
+                            Delete
+                        </MudMenuItem>
+                    </MudMenu>
                 </MudTd>
             </RowTemplate>
             <PagerContent>
@@ -237,6 +264,7 @@
     private bool showEditModal = false;
     private string editPassword = "";
     private Lawyers selectedLawyer = new Lawyers(); // Used for editing
+    private IBrowserFile imageFile;
 
     private RequestModel request = new RequestModel();
 
@@ -245,6 +273,26 @@
         lawyersList = await lawyerService.GetAllAsync();
         
     }
+    private void HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        imageFile = e.File;
+        lawyers.ImageFile = imageFile;
+    }
+
+    private async Task HandleEditSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var format = "image/png"; // you can use other formats too
+
+        using (var stream = new MemoryStream())
+        {
+            await file.OpenReadStream().CopyToAsync(stream);
+            var byteArray = stream.ToArray();
+            var base64 = Convert.ToBase64String(byteArray);
+            editLawyer.ImageUrl = $"data:{format};base64,{base64}";
+        }
+    }
+
 
     private void OpenEditModal(Lawyers lawyer)
 {
@@ -303,8 +351,6 @@ private void ToggleEditModal()
 
     }
 
-
-
     private async Task HandleValidSubmit()
     {
         try
@@ -349,75 +395,90 @@ private void ToggleEditModal()
     }
 }
 
-
-
-    public async Task Add()
-{
-    try
+    private async Task Add()
     {
-        // Create a new ApplicationUser object for the lawyer
-        var user = new Lawyers
+        try
         {
-            UserName = lawyers.Email,
-            Email = lawyers.Email,
-            LFirstName = lawyers.LFirstName,
-            LLastName = lawyers.LLastName,
-            City = lawyers.City,
-            Country = lawyers.Country,
-            Phone = lawyers.Phone,
-            CaseWinPercentage = lawyers.CaseWinPercentage,
-            CaseType = lawyers.CaseType,
-            ExperienceYears = lawyers.ExperienceYears,
-            Age = lawyers.Age,
-            Gender = lawyers.Gender,
-            EmailConfirmed = true
-        };
-
-        var passwordHash = _userManager.PasswordHasher.HashPassword(user, password);
-
-        var result = await _userManager.CreateAsync(user);
-
-        if (result.Succeeded)
-        {
-            user.PasswordHash = passwordHash;
-            await _userManager.UpdateAsync(user);
-
-            // Assign the "Team" role
-            await _userManager.AddToRoleAsync(user, "Team");
-
-            // Save the lawyer details in the database
-            if (await lawyerService.AddAsync(user))
+            // Handle image upload
+            if (imageFile != null)
             {
-                lawyersList = await lawyerService.GetAllAsync();
-                snackbar.Add("Lawyer was added successfully", Severity.Success);
-                ToggleModal(); // Close the modal after adding
+                var file = imageFile;
+                var format = "image/png"; // you can use other formats too
 
-                // Send email with password
-                await emailService.SendEmailAsync(user.Email, "Welcome to our App!", $"Thank you for signing up! Your Email Account has been registered with Us, you can login using the provided password: <strong>{password}</strong>", null);
+                using (var stream = new MemoryStream())
+                {
+                    await file.OpenReadStream().CopyToAsync(stream);
+                    var byteArray = stream.ToArray();
+                    var base64 = Convert.ToBase64String(byteArray);
+                    lawyers.ImageUrl = $"data:{format};base64,{base64}";
+                }
+            }
 
-                // Reset the lawyers object
-                lawyers = new Lawyers();
-                password = string.Empty; // Reset the password field
+            // Create a new ApplicationUser object for the lawyer
+            var user = new Lawyers
+                {
+                    UserName = lawyers.Email,
+                    Email = lawyers.Email,
+                    LFirstName = lawyers.LFirstName,
+                    LLastName = lawyers.LLastName,
+                    City = lawyers.City,
+                    Country = lawyers.Country,
+                    Phone = lawyers.Phone,
+                    CaseWinPercentage = lawyers.CaseWinPercentage,
+                    CaseType = lawyers.CaseType,
+                    ExperienceYears = lawyers.ExperienceYears,
+                    Age = lawyers.Age,
+                    Gender = lawyers.Gender,
+                    EmailConfirmed = true,
+                    ImageUrl = lawyers.ImageUrl // Save the image URL
+                };
+
+            var passwordHash = _userManager.PasswordHasher.HashPassword(user, password);
+
+            var result = await _userManager.CreateAsync(user);
+
+            if (result.Succeeded)
+            {
+                user.PasswordHash = passwordHash;
+                await _userManager.UpdateAsync(user);
+
+                // Assign the "Team" role
+                await _userManager.AddToRoleAsync(user, "Team");
+
+                // Save the lawyer details in the database
+                if (await lawyerService.AddAsync(user))
+                {
+                    lawyersList = await lawyerService.GetAllAsync();
+                    snackbar.Add("Lawyer was added successfully", Severity.Success);
+                    ToggleModal(); // Close the modal after adding
+
+                    // Send email with password
+                    await emailService.SendEmailAsync(user.Email, "Welcome to our App!", $"Thank you for signing up! Your Email Account has been registered with Us, you can login using the provided password: <strong>{password}</strong>", null);
+
+                    // Reset the lawyers object
+                    lawyers = new Lawyers();
+                    password = string.Empty; // Reset the password field
+                }
+                else
+                {
+                    snackbar.Add("Failed to add lawyer to database", Severity.Error);
+                }
             }
             else
             {
-                snackbar.Add("Lawyer Update ", Severity.Success);
+                foreach (var error in result.Errors)
+                {
+                    snackbar.Add(error.Description, Severity.Error);
+                }
             }
         }
-        else
+        catch (Exception ex)
         {
-            foreach (var error in result.Errors)
-            {
-                snackbar.Add(error.Description, Severity.Error);
-            }
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation failed. Try again later", Severity.Error);
         }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-        snackbar.Add("Operation failed. Try again later", Severity.Error);
-    }
-}
+
 
     private void ToggleModal()
     {

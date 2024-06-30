@@ -84,6 +84,7 @@
                 <MudTh>Priority</MudTh>
                 <MudTh>Status</MudTh>
                 <MudTh>Action</MudTh>
+                <MudTh>Status</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="DueDate">@context.DueDate</MudTd>
@@ -99,11 +100,13 @@
                       <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => ViewTaskDetails(context.TaskId)">
                         View
                     </MudButton>
+                </MudTd>
+                <MudTd>
                     @if (@context.Status?.Name.ToLower() == "completed")
                     {
-                        <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Checklist"
-                        Size="Size.Small" @onclick="() => TransferToCompleted(context.TaskId)"/>
-                        
+                        <MudFab  Color="Color.Info"  StartIcon="@Icons.Material.Filled.Checklist"
+                                Size="Size.Small" @onclick="() => TransferToCompleted(context.TaskId)" />
+
                     }
                 </MudTd>
             </RowTemplate>

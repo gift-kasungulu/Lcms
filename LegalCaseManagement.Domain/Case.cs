@@ -1,6 +1,8 @@
-﻿using System;
+﻿using LegalCaseManagement.Domain;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection.Metadata;
 
 namespace LegalCaseManagement.Data
 {
@@ -56,7 +58,13 @@ namespace LegalCaseManagement.Data
 
         // Optional file attachment
         public string? FileAttachment { get; set; } // New optional field for file attachment
+                                                    // New properties for tracking creation info
+        public string? CreatedByUserId { get; set; } // UserId of the creator
+        public DateTime CreatedAt { get; set; } // Timestamp of creation
 
+        [ForeignKey("CreatedByUserId")]
+        public ApplicationUser? CreatedByUser { get; set; } // Navigation property for the creator
+        public ICollection<CaseDocument> CaseDocuments { get; set; }
 
 
     }

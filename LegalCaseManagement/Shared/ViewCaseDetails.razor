@@ -1,0 +1,139 @@
+﻿@page "/mycaseDetails/{caseId:int}"
+@attribute [Authorize(Roles = "Team, Admin")]
+
+@using LegalCaseManagement.Service
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Data.LegalServices
+@using Microsoft.EntityFrameworkCore
+@inject IServiceScopeFactory ServiceScopeFactory
+
+<MudText Typo="Typo.h5">Case</MudText>
+<MudSpacer />
+
+<MudIconButton Icon="@Icons.Material.Filled.FileDownload" Color="Color.Primary" />
+<MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Primary" />
+
+        @if (caseDetails == null)
+{
+    <div class="centered">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
+}
+else
+{
+    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+        <MudTabPanel Text="Detail">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-4">Case Detail</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTable Items="@GetLeftColumnDetails()" Dense="true" Hover="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh Style="width:40%"></MudTh>
+                            <MudTh Style="width:60%"></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Label">@context.Label</MudTd>
+                            <MudTd DataLabel="Value">@context.Value</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTable Items="@GetRightColumnDetails()" Dense="true" Hover="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh Style="width:40%"></MudTh>
+                            <MudTh Style="width:60%"></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Label">@context.Label</MudTd>
+                            <MudTd DataLabel="Value">@context.Value</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.body2" Class="mt-4">
+                        <strong>Description:</strong> @caseDetails.Discription
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.body2" Class="mt-4">
+                        <strong>File Attachment:</strong> @(string.IsNullOrEmpty(caseDetails.FileAttachment) ? "No file attached" : caseDetails.FileAttachment)
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+            <MudDivider Class="my-6" />
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.h6" Class="mb-4">Petitioner and Advocate</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.Petitioner</MudText>
+                    <MudText Typo="Typo.body1">N/A</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.h6" Class="mb-4">Client and Advocate</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.AppUser?.FirstName @caseDetails.AppUser?.LastName</MudText>
+                    <MudText Typo="Typo.body1">N/A</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.h6" Class="mb-4">Court Name</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.Defendant</MudText>
+
+                </MudItem>
+            </MudGrid>
+        </MudTabPanel>
+        <MudTabPanel Text="History">
+            <MudText>History content goes here</MudText>
+        </MudTabPanel>
+        <MudTabPanel Text="Transfer">
+            <MudText>Transfer content goes here</MudText>
+        </MudTabPanel>
+    </MudTabs>
+    <br />
+
+}
+
+
+@code {
+    [Parameter] public int CaseId { get; set; }
+    private Case caseDetails;
+
+    protected override async Task OnInitializedAsync()
+    {
+        caseDetails = await GetCaseDetailsAsync(CaseId);
+    }
+
+    private async Task<Case> GetCaseDetailsAsync(int caseId)
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            return await context.Cases
+                .Include(c => c.CaseStatus)
+                .Include(c => c.CaseType)
+                .Include(c => c.AppUser)
+                .FirstOrDefaultAsync(c => c.CaseId == caseId);
+        }
+    }
+
+    private List<(string Label, string Value)> GetLeftColumnDetails()
+    {
+        return new List<(string, string)>
+        {
+            ("Case Type", caseDetails.CaseType?.TypeName ?? "N/A"),
+            ("Registration No", caseDetails.RegistrationNo ?? "N/A"),
+            ("Registration Date", caseDetails.RegistrationDate?.ToString("dd-MM-yyyy") ?? "N/A"),
+            ("Client", caseDetails.AppUser?.FirstName ?? "N/A")
+        };
+    }
+
+    private List<(string Label, string Value)> GetRightColumnDetails()
+    {
+        return new List<(string, string)>
+        {
+            ("First Hearing Date", caseDetails.StartDate?.ToString("dd-MM-yyyy") ?? "N/A"),
+            ("Next Hearing Date", caseDetails.EndDate?.ToString("dd-MM-yyyy") ?? "N/A"),
+            ("Case Status", caseDetails.CaseStatus?.StatusName ?? "N/A")
+        };
+    }
+}
