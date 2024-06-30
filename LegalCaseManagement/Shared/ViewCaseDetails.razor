@@ -7,6 +7,8 @@
 @using LegalCaseManagement.Data.LegalServices
 @using Microsoft.EntityFrameworkCore
 @inject IServiceScopeFactory ServiceScopeFactory
+@inject DocumentService DocumentService
+
 
 <MudText Typo="Typo.h5">Case</MudText>
 <MudSpacer />
@@ -90,18 +92,84 @@ else
         </MudTabPanel>
     </MudTabs>
     <br />
+    <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="AddDocumentModal">Add Document</MudButton>
+
+<MudDialog FullWidth="true" @bind-Visible="@isModalVisible" MaxWidth="MaxWidth.Small">
+    
+    <DialogContent>
+        <EditForm Model="newDocument" OnValidSubmit="AddDocument">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="mb-3">
+                <label for="documentName" class="form-label">Document Name</label>
+                <InputText @bind-Value="newDocument.Title" id="documentName" class="form-control" required />
+            </div>
+                <div class="mb-3">
+                    <label for="documentFile" class="form-label">Choose Document</label>
+                    <InputFile @bind-Value="documentFile" id="documentFile" accept=".pdf,.doc,.docx,.txt" required />
+                </div>
+            <div class="text-end">
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" Type="submit">Save</MudButton>
+                <MudButton Color="Color.Secondary" Variant="Variant.Filled" OnClick="CloseModal">Cancel</MudButton>
+            </div>
+        </EditForm>
+    </DialogContent>
+</MudDialog>
 
 }
 
 
 @code {
     [Parameter] public int CaseId { get; set; }
-    private Case caseDetails;
+    private Case? caseDetails;
+    private bool isModalVisible = false;
+    private IBrowserFile? documentFile;
+    private CaseDocument newDocument = new CaseDocument();
 
     protected override async Task OnInitializedAsync()
     {
         caseDetails = await GetCaseDetailsAsync(CaseId);
     }
+
+    private void AddDocumentModal()
+    {
+        isModalVisible = true;
+    }
+
+    private void CloseModal()
+    {
+        isModalVisible = false;
+    }
+
+    private async Task AddDocument()
+    {
+        if (documentFile != null)
+        {
+            var document = new CaseDocument
+                {
+                    Title = newDocument.Title,
+                    CaseId = CaseId
+                };
+
+            // Save document to database using DocumentService
+            await DocumentService.AddDocumentAsync(document);
+
+            // Optionally handle file upload logic here
+            // Example: UploadFile(document, documentFile);
+
+            // Reload documents or refresh UI as needed
+            //await LoadDocuments();
+            newDocument = new CaseDocument(); // Reset for next entry
+            CloseModal();
+        }
+        else
+        {
+            // Handle case where no file is selected
+            // You can add validation or show an error message
+        }
+    }
+
+
 
     private async Task<Case> GetCaseDetailsAsync(int caseId)
     {

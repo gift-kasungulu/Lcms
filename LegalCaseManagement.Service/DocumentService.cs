@@ -1,35 +1,41 @@
-﻿using System.Net.Http;
-using System.Net.Http.Json;
+﻿using LegalCaseManagement.Data;
+using LegalCaseManagement.Domain;
+using LegalCaseManagement.Service;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Data.Entity;
+using System.Linq;
 using System.Reflection.Metadata;
 using System.Threading.Tasks;
-using LegalCaseManagement.Domain;
 
-public class DocumentService
+public class DocumentService : IDocumentService
 {
-    private readonly HttpClient _httpClient;
+    private readonly ApplicationDbContext _context;
 
-    public DocumentService(HttpClient httpClient)
+    public DocumentService(ApplicationDbContext context)
     {
-        _httpClient = httpClient;
+        _context = context;
     }
 
-    public async Task<Document[]> GetDocumentsForCase(int caseId)
+    public async Task AddDocumentAsync(CaseDocument document)
     {
-        return await _httpClient.GetFromJsonAsync<Document[]>($"api/cases/{caseId}/documents");
+        _context.Documents.Add(document);
+        await _context.SaveChangesAsync();
     }
 
-    public async Task AddDocument(CaseDocument document)
+    public async Task UpdateDocumentAsync(CaseDocument document)
     {
-        await _httpClient.PostAsJsonAsync("api/documents", document);
+        _context.Documents.Update(document);
+        await _context.SaveChangesAsync();
     }
 
-    public async Task UpdateDocument(CaseDocument document)
+    public async Task DeleteDocumentAsync(int documentId)
     {
-        await _httpClient.PutAsJsonAsync($"api/documents/{document.Id}", document);
-    }
-
-    public async Task DeleteDocument(int documentId)
-    {
-        await _httpClient.DeleteAsync($"api/documents/{documentId}");
+        var document = await _context.Documents.FindAsync(documentId);
+        if (document != null)
+        {
+            _context.Documents.Remove(document);
+            await _context.SaveChangesAsync();
+        }
     }
 }
