@@ -13,18 +13,9 @@ namespace LegalCaseManagement.Domain
     {
         [Key]
         public int Id { get; set; }
-
-        [Required]
+        public string UserId { get; set; }
         public string Message { get; set; }
-
-        [Required]
-        public string RecipientId { get; set; }
-
-        [ForeignKey("RecipientId")]
-        public virtual ApplicationUser Recipient { get; set; } // Navigation property
-
+        public DateTime CreatedAt { get; set; }
         public bool IsRead { get; set; }
-
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

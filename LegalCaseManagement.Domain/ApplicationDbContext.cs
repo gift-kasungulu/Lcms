@@ -51,12 +51,6 @@ namespace LegalCaseManagement.Data
             builder.Entity<Notification>()
                 .HasKey(n => n.Id);
 
-            builder.Entity<Notification>()
-                .HasOne<ApplicationUser>(n => n.Recipient)
-                .WithMany(u => u.Notifications)
-                .HasForeignKey(n => n.RecipientId)
-                .OnDelete(DeleteBehavior.Restrict);
-
             builder.Entity<Message>()
                 .HasKey(m => m.Id);
 

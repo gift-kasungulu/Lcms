@@ -1,12 +1,16 @@
 @page "/casedetails/{caseId:int}"
 @attribute [Authorize(Roles = "Client")]
 
+@using System.IO
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
 @using LegalCaseManagement.Service
 @using LegalCaseManagement.Domain
 @using LegalCaseManagement.Data
 @using LegalCaseManagement.Data.LegalServices
 @using Microsoft.EntityFrameworkCore
 @inject IServiceScopeFactory ServiceScopeFactory
+@inject IJSRuntime JSRuntime
 
         <MudText Typo="Typo.h5">Case</MudText>
         <MudSpacer />
@@ -81,13 +85,39 @@
                             
                         </MudItem>
                     </MudGrid>
+                    <br />
+            <MudDivider Class="my-6" />
+            <MudItem xs="12">
+                <MudText Typo="Typo.h6" Class="mb-4">Upload Case Documents</MudText>
+                <InputFile OnChange="OnFileChange" />
+                <MudButton Color="Color.Primary" OnClick="UploadFiles" Disabled="@(!selectedFiles.Any())" Class="mt-2">
+                    Upload Documents
+                </MudButton>
+            </MudItem>
+            <MudItem xs="12" Class="mt-4">
+                <MudText Typo="Typo.h6" Class="mb-2">Uploaded Documents</MudText>
+                @if (caseDocuments.Any())
+                {
+                    <MudList>
+                        @foreach (var doc in caseDocuments)
+                        {
+                            <MudListItem>
+                                <MudText>@doc.FileName</MudText>
+                                <MudButton Color="Color.Secondary" OnClick="@(() => DownloadDocument(doc.Id))">Download</MudButton>
+                            </MudListItem>
+                        }
+                    </MudList>
+                }
+                else
+                {
+                    <MudText>No documents uploaded yet.</MudText>
+                }
+            </MudItem>
                 </MudTabPanel>
                 <MudTabPanel Text="History">
                     <MudText>History content goes here</MudText>
                 </MudTabPanel>
-                <MudTabPanel Text="Transfer">
-                    <MudText>Transfer content goes here</MudText>
-                </MudTabPanel>
+                
             </MudTabs>
         }
 
@@ -95,10 +125,13 @@
 @code {
     [Parameter] public int CaseId { get; set; }
     private Case caseDetails;
+    private IReadOnlyList<IBrowserFile> selectedFiles = new List<IBrowserFile>();
+    private List<CaseDocument> caseDocuments = new List<CaseDocument>();
 
     protected override async Task OnInitializedAsync()
     {
         caseDetails = await GetCaseDetailsAsync(CaseId);
+        caseDocuments = await GetCaseDocumentsAsync(CaseId);
     }
 
     private async Task<Case> GetCaseDetailsAsync(int caseId)
@@ -118,10 +151,10 @@
     {
         return new List<(string, string)>
         {
-            ("Case Type", caseDetails.CaseType?.TypeName ?? "N/A"),
+            ("Case Category", caseDetails.CaseType?.TypeName ?? "N/A"),
             ("Registration No", caseDetails.RegistrationNo ?? "N/A"),
             ("Registration Date", caseDetails.RegistrationDate?.ToString("dd-MM-yyyy") ?? "N/A"),
-            ("Client", caseDetails.AppUser?.FirstName ?? "N/A")
+            ("Name", caseDetails.AppUser?.FirstName  ?? "N/A")
         };
     }
 
@@ -133,5 +166,82 @@
             ("Next Hearing Date", caseDetails.EndDate?.ToString("dd-MM-yyyy") ?? "N/A"),
             ("Case Status", caseDetails.CaseStatus?.StatusName ?? "N/A")
         };
+    }
+
+    
+    private void OnFileChange(InputFileChangeEventArgs e)
+    {
+        selectedFiles = e.GetMultipleFiles();
+    }
+
+    private async Task UploadFiles()
+    {
+        if (!selectedFiles.Any()) return;
+
+        using var scope = ServiceScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        foreach (var file in selectedFiles)
+        {
+            var trustedFileName = Path.GetRandomFileName();
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", trustedFileName);
+
+            await using FileStream fs = new(path, FileMode.Create);
+            await file.OpenReadStream().CopyToAsync(fs);
+
+            var document = new CaseDocument
+                {
+                    CaseId = CaseId,
+                    FileName = file.Name,
+                    FilePath = path,
+                    UploadDate = DateTime.UtcNow
+                };
+
+            context.Documents.Add(document);
+        }
+
+        await context.SaveChangesAsync();
+        Snackbar.Add("Documents uploaded successfully", Severity.Success);
+        caseDocuments = await GetCaseDocumentsAsync(CaseId);
+        selectedFiles = new List<IBrowserFile>();
+    }
+
+    private async Task<List<CaseDocument>> GetCaseDocumentsAsync(int caseId)
+    {
+        using var scope = ServiceScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        return await context.Documents.Where(d => d.CaseId == caseId).ToListAsync();
+    }
+
+    private async Task DownloadDocument(int documentId)
+    {
+        using var scope = ServiceScopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var document = await context.Documents.FindAsync(documentId);
+        if (document == null)
+        {
+            Snackbar.Add("Document not found", Severity.Error);
+            return;
+        }
+
+        var path = document.FilePath;
+        var fileName = document.FileName;
+
+        // Ensure the file exists
+        if (!File.Exists(path))
+        {
+            Snackbar.Add("File not found", Severity.Error);
+            return;
+        }
+
+        // Read the file content
+        byte[] fileBytes = await File.ReadAllBytesAsync(path);
+
+        // Convert to base64 string
+        string base64String = Convert.ToBase64String(fileBytes);
+
+        // JavaScript function to trigger download
+        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, base64String);
     }
 }

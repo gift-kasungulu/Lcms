@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = "Team, Admin")]
 <PageTitle>Cases</PageTitle>
 
+@using LegalCaseManagement.Service
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Identity
 @using LegalCaseManagement.Data
@@ -134,6 +135,10 @@
                                 <i class="bi bi-eye"></i>
                                 View
                             </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OpenEditDateModal(context))">
+                            <i class="bi bi-calendar-event"></i>
+                            Next Date
+                        </MudMenuItem>
                     </MudMenu>
                 </MudTd>
             </RowTemplate>
@@ -173,6 +178,10 @@
                         <MudMenuItem OnClick="@(() => NavigateToCaseDetails(context.CaseId))">
                             <i class="bi bi-eye"></i>
                             View
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OpenEditDateModal(context))">
+                            <i class="bi bi-calendar-event"></i>
+                            Next Date
                         </MudMenuItem>
                     </MudMenu>
                 </MudTd>
@@ -214,6 +223,10 @@
                             <i class="bi bi-eye"></i>
                             View
                         </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OpenEditDateModal(context))">
+                            <i class="bi bi-calendar-event"></i>
+                            Next Date
+                        </MudMenuItem>
                     </MudMenu>
                 </MudTd>
             </RowTemplate>
@@ -254,6 +267,10 @@
                             <i class="bi bi-eye"></i>
                             View
                         </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OpenEditDateModal(context))">
+                            <i class="bi bi-calendar-event"></i>
+                            Next Date
+                        </MudMenuItem>
                     </MudMenu>
                 </MudTd>
             </RowTemplate>
@@ -263,6 +280,18 @@
         </MudTable>
     </MudTabPanel>
 </MudTabs>
+<MudDialog @bind-IsVisible="isEditDateModalVisible">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Edit Next Hearing Date</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudDatePicker @bind-Date="editingCase.EndDate" Label="Next Hearing Date" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseEditDateModal">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="UpdateNextHearingDate">Save</MudButton>
+    </DialogActions>
+</MudDialog>
     
 <br />
             <MudDatePicker @bind-Date="selectedDate" Label="Select Date" />
@@ -318,6 +347,9 @@
     private List<Case> highPriorityCases = new List<Case>();
     private List<Case> abandonedCases = new List<Case>();
     private List<Case> decidedCases = new List<Case>();
+    private bool isEditDateModalVisible = false;
+    private Case editingCase = new Case();
+
     protected override async Task OnInitializedAsync()
     {
         await GetAllAsync();
@@ -327,6 +359,40 @@
         FilterCases();
 
         selectedDate = DateTime.Today;
+    }
+
+    private void OpenEditDateModal(Case caseToEdit)
+    {
+        editingCase = caseToEdit;
+        isEditDateModalVisible = true;
+    }
+
+    private void CloseEditDateModal()
+    {
+        isEditDateModalVisible = false;
+    }
+
+    private async Task UpdateNextHearingDate()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>();
+            var caseToUpdate = await context.Cases.FindAsync(editingCase.CaseId);
+            if (caseToUpdate != null)
+            {
+                caseToUpdate.EndDate = editingCase.EndDate;
+                await context.SaveChangesAsync();
+                snackbar.Add("Next hearing date updated successfully.", Severity.Success);
+
+                // Create notification
+                var message = $"Next hearing date for case {caseToUpdate.RegistrationNo} has been updated to {caseToUpdate.EndDate:d}.";
+                await notificationService.CreateNotification(caseToUpdate.UserId, message);
+            }
+        }
+
+        await GetAllAsync();
+        CloseEditDateModal();
     }
 
     private void NavigateToCaseDetails(int caseId)

@@ -1,6 +1,5 @@
 ﻿@page "/notifications"
 @attribute [Authorize(Roles = "Client, Team")]
-
 @using LegalCaseManagement.Data
 @using LegalCaseManagement.Service
 @using LegalCaseManagement.Domain
@@ -8,40 +7,58 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject SignInManager<ApplicationUser> SignInManager
 @inject AppointmentService AppointmentService
+@inject NotificationService NotificationService
 @inject NavigationManager Navigation
 
 <PageTitle>Notifications</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.ExtraLarge">
-    <MudPaper Elevation="1" Class="pa-4">
-        <MudGrid>
-            <MudItem xs="12">
-                <MudText Typo="Typo.h5">Notifications</MudText>
-            </MudItem>
-        </MudGrid>
-        <MudDivider Class="my-2" />
-        <MudList Dense="true">
-            @foreach (var appointment in appointments)
-            {
-                <MudListItem>
-                    <MudGrid>
-                        <MudItem xs="10">
-                            <MudText Typo="Typo.body1">@notificationMessages[appointment.Id]</MudText>
-                        </MudItem>
-                        <MudItem xs="2" Class="d-flex justify-end">
-                            <MudText Typo="Typo.caption">@appointment.Date.ToShortDateString()</MudText>
-                        </MudItem>
-                    </MudGrid>
-                </MudListItem>
-                <MudDivider />
-            }
-        </MudList>
-    </MudPaper>
-</MudContainer>
+<MudGrid>
+    <MudItem xs="12">
+        <MudText Typo="Typo.h5">Notifications</MudText>
+    </MudItem>
+</MudGrid>
+<MudDivider Class="my-2" />
+
+<MudList Dense="true">
+    @foreach (var notification in notifications)
+    {
+        <MudListItem>
+            <MudGrid>
+                <MudItem xs="10">
+                    <MudText Typo="Typo.body1">@notification.Message</MudText>
+                </MudItem>
+                <MudItem xs="2" Class="d-flex justify-end">
+                    <MudText Typo="Typo.caption">@notification.CreatedAt.ToLocalTime().ToString("g")</MudText>
+                </MudItem>
+            </MudGrid>
+            <MudButton Color="Color.Primary" OnClick="@(() => MarkAsRead(notification.Id))">Mark as Read</MudButton>
+        </MudListItem>
+        <MudDivider />
+    }
+</MudList>
+
+<MudText Typo="Typo.h6" Class="mt-4">Appointments</MudText>
+<MudList Dense="true">
+    @foreach (var appointment in appointments)
+    {
+        <MudListItem>
+            <MudGrid>
+                <MudItem xs="10">
+                    <MudText Typo="Typo.body1">@notificationMessages[appointment.Id]</MudText>
+                </MudItem>
+                <MudItem xs="2" Class="d-flex justify-end">
+                    <MudText Typo="Typo.caption">@appointment.Date.ToShortDateString()</MudText>
+                </MudItem>
+            </MudGrid>
+        </MudListItem>
+        <MudDivider />
+    }
+</MudList>
 
 @code {
     private List<Appointment> appointments = new List<Appointment>();
     private Dictionary<int, string> notificationMessages = new Dictionary<int, string>();
+    private List<Notification> notifications = new List<Notification>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -53,7 +70,6 @@
         }
 
         var roles = await UserManager.GetRolesAsync(user);
-
         if (roles.Contains("Team"))
         {
             appointments = (await AppointmentService.GetAppointmentsByTeamMember(user.Id)).ToList();
@@ -64,6 +80,7 @@
         }
 
         await LoadNotificationMessages();
+        notifications = await NotificationService.GetUnreadNotificationsForUser(user.Id);
     }
 
     private async Task LoadNotificationMessages()
@@ -82,9 +99,7 @@
         {
             return $"Appointment on {appointment.Date.ToShortDateString()} (creator not found)";
         }
-
         var roles = await UserManager.GetRolesAsync(creator);
-
         if (roles.Contains("Client"))
         {
             return $"Appointment with Client {creator.UserName} on {appointment.Date.ToShortDateString()}";
@@ -97,5 +112,12 @@
         {
             return $"Appointment on {appointment.Date.ToShortDateString()}";
         }
+    }
+
+    private async Task MarkAsRead(int notificationId)
+    {
+        await NotificationService.MarkAsRead(notificationId);
+        notifications = notifications.Where(n => n.Id != notificationId).ToList();
+        StateHasChanged();
     }
 }

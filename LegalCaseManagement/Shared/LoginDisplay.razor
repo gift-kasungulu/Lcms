@@ -2,7 +2,7 @@
     <Authorized>
         <MudMenu FullWidth="true">
             <ActivatorContent>
-                <MudChip Icon="@Icons.Material.Filled.Person" Color="Color.Primary">My Account</MudChip>
+                <MudChip Icon="@Icons.Material.Filled.Person" Color="Color.Primary">Account</MudChip>
             </ActivatorContent>
             <ChildContent>
                 <MudMenuItem>
@@ -17,6 +17,11 @@
                 </MudMenuItem>
             </ChildContent>
         </MudMenu>
+        <form method="post" action="Identity/Account/LogOut" style="display: inline;">
+            <button type="submit" class="nav-link btn btn-link" style="padding: 0; border: none; background: none; cursor: pointer;">
+                <MudIcon Color="Color.Error" Icon="@Icons.Material.Filled.Logout" />
+            </button>
+        </form>
     </Authorized>
     <NotAuthorized>
         <MudMenu FullWidth="true">

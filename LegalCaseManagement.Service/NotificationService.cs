@@ -18,16 +18,24 @@ namespace LegalCaseManagement.Service
             _context = context;
         }
 
-        public async Task CreateNotification(Notification notification)
+        public async Task CreateNotification(string userId, string message)
         {
+            var notification = new Notification
+            {
+                UserId = userId,
+                Message = message,
+                CreatedAt = DateTime.UtcNow,
+                IsRead = false
+            };
+
             _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<List<Notification>> GetNotificationsForUser(string userId)
+        public async Task<List<Notification>> GetUnreadNotificationsForUser(string userId)
         {
             return await _context.Notifications
-                .Where(n => n.RecipientId == userId)
+                .Where(n => n.UserId == userId && !n.IsRead)
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync();
         }

@@ -1,0 +1,13 @@
+﻿.modal-content {
+    border-radius: 10px;
+}
+
+.modal-dialog-centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-backdrop.show {
+    opacity: 0.5;
+}

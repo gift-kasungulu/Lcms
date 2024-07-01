@@ -27,8 +27,14 @@ export function renderCalendar(calendarElement, events) {
 export function getCalendarInstance() {
     return calendar;
 }
-
-// wwwroot/js/site.js
+function downloadFile(fileName, base64String) {
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = "data:application/octet-stream;base64," + base64String;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
 window.downloadFile = function (filename, base64Content) {
     // Convert base64 content to blob

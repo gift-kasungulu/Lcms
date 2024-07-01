@@ -50,14 +50,14 @@
                         
                         <MudTh>FIRST NAME</MudTh>
                         <MudTh>Last Name</MudTh>
-                        <MudTh>Actions</MudTh>
+                        <MudTh></MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         
                         <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
                         <MudTd DataLabel="LastName">@context.LLastName</MudTd>                        <MudTd DataLabel="Actions">
-                            <MudFab Color="Color.Info" Size="Size.Small" StartIcon="@Icons.Material.Filled.ReadMore"
-                                OnClick="@(()=>ViewLawyerDetails(context))"></MudFab>
+                            <MudButton Variant="Variant.Text" Color="Color.Info" Size="Size.Small" StartIcon="@Icons.Material.Filled.ReadMore"
+                                OnClick="@(()=>ViewLawyerDetails(context))">Enquire</MudButton>
                         </MudTd>
                     </RowTemplate>
                     <PagerContent>
