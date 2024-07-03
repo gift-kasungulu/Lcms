@@ -41,22 +41,23 @@
             <MudTabPanel Text="Advocates">
                 <MudTable  Items="lawyersList" Filter="new Func<Lawyers,bool>(Searchrec)" @bind-lawyersList="lawyersList">
                     <ToolBarContent>
-                        <MudText Typo="Typo.h6">Advocates</MudText>
+                        <MudText Typo="Typo.h6">Available Advocates</MudText>
                         <MudSpacer />
                         <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium"
-                            StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                            StartIcon="@Icons.Material.Filled.Search" Class="mt-0">Search Here</MudTextField>
                     </ToolBarContent>
                     <HeaderContent>
                         
-                        <MudTh>FIRST NAME</MudTh>
-                        <MudTh>Last Name</MudTh>
+                        <MudTh></MudTh>
+                        <MudTh></MudTh>
                         <MudTh></MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         
-                        <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
-                        <MudTd DataLabel="LastName">@context.LLastName</MudTd>                        <MudTd DataLabel="Actions">
-                            <MudButton Variant="Variant.Text" Color="Color.Info" Size="Size.Small" StartIcon="@Icons.Material.Filled.ReadMore"
+                        <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
+                        <MudTd DataLabel="LastName">@context.LastName</MudTd>                       
+                        <MudTd DataLabel="Actions">
+                            <MudButton Variant="Variant.Text" Color="Color.Info"
                                 OnClick="@(()=>ViewLawyerDetails(context))">Enquire</MudButton>
                         </MudTd>
                     </RowTemplate>
@@ -84,9 +85,7 @@
                     </MudList>
                 </MudPaper>
             </MudTabPanel>
-            <MudTabPanel Text="About">
-                <MudText>Content Three</MudText>
-            </MudTabPanel>
+            
         </MudTabs>
 
 
@@ -164,7 +163,7 @@
     private bool Searchrec(Lawyers lawyer)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
-        if (lawyer.LFirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (lawyer.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }

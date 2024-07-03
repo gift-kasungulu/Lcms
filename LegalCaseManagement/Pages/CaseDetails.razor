@@ -76,8 +76,8 @@
                         </MudItem>
                         <MudItem xs="12" sm="6">
                             <MudText Typo="Typo.h6" Class="mb-4">Client and Advocate</MudText>
-                            <MudText Typo="Typo.body1">@caseDetails.AppUser?.FirstName @caseDetails.AppUser?.LastName</MudText>
-                            <MudText Typo="Typo.body1">N/A</MudText>
+                            <MudText Typo="Typo.body1">Client: @caseDetails.AppUser?.FirstName @caseDetails.AppUser?.LastName</MudText>
+                            <MudText Typo="Typo.body1">Advocate: @(caseDetails.AssignedLawyer != null ? $"{caseDetails.AssignedLawyer.FirstName} {caseDetails.AssignedLawyer.LastName}" : "Not assigned")</MudText>
                         </MudItem>
                         <MudItem xs="12" sm="6">
                             <MudText Typo="Typo.h6" Class="mb-4">Court Name</MudText>
@@ -143,6 +143,7 @@
                 .Include(c => c.CaseStatus)
                 .Include(c => c.CaseType)
                 .Include(c => c.AppUser)
+                .Include(c => c.AssignedLawyer)
                 .FirstOrDefaultAsync(c => c.CaseId == caseId);
         }
     }
@@ -228,7 +229,7 @@
         var path = document.FilePath;
         var fileName = document.FileName;
 
-        // Ensure the file exists
+        // to ensure the file exist or 
         if (!File.Exists(path))
         {
             Snackbar.Add("File not found", Severity.Error);

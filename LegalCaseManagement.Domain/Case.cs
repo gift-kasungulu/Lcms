@@ -65,7 +65,10 @@ namespace LegalCaseManagement.Data
         [ForeignKey("CreatedByUserId")]
         public ApplicationUser? CreatedByUser { get; set; } // Navigation property for the creator
         public ICollection<CaseDocument> CaseDocuments { get; set; }
-
+        public string? AssignedLawyerId { get; set; }
+        [ForeignKey("AssignedLawyerId")]
+        public Lawyers? AssignedLawyer { get; set; }
+        public ICollection<MyTask> Tasks { get; set; } = new List<MyTask>();
 
     }
 }

@@ -19,7 +19,6 @@
 @inject IHttpContextAccessor HttpContextAccessor
 
 <PageTitle>Dashboard</PageTitle>
-
 <div class="container-fluid">
     <MudText Typo="Typo.h6" Class="mb-4">Dashboard</MudText>
     <br />
@@ -27,7 +26,7 @@
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h5 class="card-title">Clients</h5>
+                    <h5 class="card-title">Total Clients</h5>
                     <h1 class="card-text">@clients.Count</h1>
                     <i class="bi bi-people-fill card-icon"></i>
                 </div>
@@ -36,7 +35,7 @@
         <div class="col-md-3">
             <div class="card bg-secondary text-white">
                 <div class="card-body">
-                    <h5 class="card-title">Cases</h5>
+                    <h5 class="card-title">Total Cases</h5>
                     <h1 class="card-text">@caseList.Count</h1>
                     <i class="bi bi-folder-fill card-icon"></i>
                 </div>
@@ -45,7 +44,7 @@
         <div class="col-md-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
-                    <h5 class="card-title">High-Priority Cases</h5>
+                    <h5 class="card-title">High Priority Cases</h5>
                     <h1 class="card-text">@highPriorityCases.Count</h1>
                     <i class="bi bi-exclamation-circle-fill card-icon"></i>
                 </div>

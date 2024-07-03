@@ -20,7 +20,7 @@
     <RowTemplate>
         <MudTd DataLabel="CaseId">@context.RegistrationNo</MudTd>
         <MudTd DataLabel="Discription">@context.Discription</MudTd>
-        <MudTd DataLabel="CreatedByUser">@context.CreatedByUser?.UserName</MudTd>
+        <MudTd DataLabel="CreatedByUser">@context.CreatedByUser?.FirstName @context.CreatedByUser?.LastName</MudTd>
         <MudTd DataLabel="CreatedAt">@context.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss")</MudTd>
     </RowTemplate>
     <PagerContent>

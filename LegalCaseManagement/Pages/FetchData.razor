@@ -33,7 +33,7 @@
                                 <MudSelect T="Lawyers" @bind-Value="selectedLawyer" Required="true" Label="Select Lawyer">
                                     @foreach (var lawyer in lawyers)
                                     {
-                                        <MudSelectItem T="Lawyers" Value="@lawyer">@($"{lawyer.LFirstName} {lawyer.LLastName}")</MudSelectItem>
+                                        <MudSelectItem T="Lawyers" Value="@lawyer">@($"{lawyer.FirstName} {lawyer.LastName}")</MudSelectItem>
                                     }
                                 </MudSelect>
                             </MudItem>
@@ -102,10 +102,10 @@
 @code {
     private Appointment newAppointment = new();
     private ApplicationUser selectedClient;
-    private Lawyers selectedLawyer;
+    private Lawyers selectedLawyer = new Lawyers();
     private List<ApplicationUser> clients = new List<ApplicationUser>();
     private List<Lawyers> lawyers = new List<Lawyers>();
-    private string userRole;
+    private string? userRole;
 
     protected override async Task OnInitializedAsync()
     {
@@ -124,8 +124,8 @@
 
         newAppointment = new Appointment
             {
-                Date = DateTime.Today.AddDays(1), // Set to one day in the future
-                Time = new TimeSpan(9, 0, 0) // Set to 9:00 AM
+                Date = DateTime.Today.AddDays(1), // Set to a that is one day in the future (for now to test the use case )
+                Time = new TimeSpan(9, 0, 0) // Set to 9:00 AM (for now, we change it in the future )
             };
     }
 

@@ -26,9 +26,9 @@
                 </tr>
                 <tr>
                     <td><b>First Name</b></td>
-                    <td>@lawyer.LFirstName</td>
+                    <td>@lawyer.FirstName</td>
                     <td><b>Last Name</b></td>
-                    <td>@lawyer.LLastName</td>
+                    <td>@lawyer.LastName</td>
                 </tr>
                 <tr>
                     <td><b>Email</b></td>
@@ -71,6 +71,8 @@
                 <MudTextField @bind-Value="request.Message" TextArea="true" />
             </div>
             <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" @onclick="GoBack">Back</MudButton>
+            
         </EditForm>
     </div>
 }
@@ -79,7 +81,6 @@ else
     <p>Lawyer details not found.</p>
 }
 
-<button class="btn btn-primary mt-4" @onclick="GoBack">Back</button>
 
 
 @code {

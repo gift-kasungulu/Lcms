@@ -28,11 +28,11 @@
                         <div class="form-grid">
                             <div class="grid-item">
                                 <label class="form-label">First Name</label>
-                                <input class="form-control" placeholder="Enter First Name" @bind-value="lawyers.LFirstName" />
+                                <input class="form-control" placeholder="Enter First Name" @bind-value="lawyers.FirstName" />
                             </div>
                             <div class="grid-item">
                                 <label class="form-label">Last Name</label>
-                                <input class="form-control" placeholder="Enter Last Name" @bind-value="lawyers.LLastName" />
+                                <input class="form-control" placeholder="Enter Last Name" @bind-value="lawyers.LastName" />
                             </div>
                             <div class="grid-item">
                                 <label class="form-label">Phone Number</label>
@@ -112,11 +112,11 @@
                         <ValidationSummary />
                         <div class="mb-3 mt-3">
                             <label class="form-label">First Name</label>
-                            <input class="form-control" placeholder="Enter First Name" @bind-value="editLawyer.LFirstName" />
+                            <input class="form-control" placeholder="Enter First Name" @bind-value="editLawyer.FirstName" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Last Name</label>
-                            <input class="form-control" placeholder="Enter Last Name" @bind-value="editLawyer.LLastName" />
+                            <input class="form-control" placeholder="Enter Last Name" @bind-value="editLawyer.LastName" />
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Phone Number</label>
@@ -211,8 +211,8 @@
                         <img src="@context.ImageUrl" alt="Lawyer Image" style="border-radius: 50%; width: 50px; height: 50px;" />
                     }
                 </MudTd>
-                <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
-                <MudTd DataLabel="LastName">@context.LLastName</MudTd>
+                <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
+                <MudTd DataLabel="LastName">@context.LastName</MudTd>
                 <MudTd DataLabel="Email">@context.UserName</MudTd>
                 <MudTd DataLabel="Phone">@context.Phone</MudTd>
                 <MudTd DataLabel="Experience">@context.ExperienceYears</MudTd>
@@ -299,8 +299,8 @@
     editLawyer = new Lawyers
     {
         Id = lawyer.Id,
-        LFirstName = lawyer.LFirstName,
-        LLastName = lawyer.LLastName,
+        FirstName = lawyer.FirstName,
+        LastName = lawyer.LastName,
         Email = lawyer.Email,
         Phone = lawyer.Phone,
         Country = lawyer.Country,
@@ -374,8 +374,8 @@ private void ToggleEditModal()
 
      private class RequestModel
     {
-        public string Email { get; set; }
-        public string Message { get; set; }
+        public string? Email { get; set; }
+        public string? Message { get; set; }
     }
 
     private async Task DeleteRec(Lawyers rec)
@@ -394,16 +394,15 @@ private void ToggleEditModal()
         }
     }
 }
-
+    
     private async Task Add()
     {
         try
         {
-            // Handle image upload
             if (imageFile != null)
             {
                 var file = imageFile;
-                var format = "image/png"; // you can use other formats too
+                var format = "image/png";
 
                 using (var stream = new MemoryStream())
                 {
@@ -414,13 +413,12 @@ private void ToggleEditModal()
                 }
             }
 
-            // Create a new ApplicationUser object for the lawyer
             var user = new Lawyers
                 {
                     UserName = lawyers.Email,
                     Email = lawyers.Email,
-                    LFirstName = lawyers.LFirstName,
-                    LLastName = lawyers.LLastName,
+                    FirstName = lawyers.FirstName,
+                    LastName = lawyers.LastName,
                     City = lawyers.City,
                     Country = lawyers.Country,
                     Phone = lawyers.Phone,
@@ -430,39 +428,38 @@ private void ToggleEditModal()
                     Age = lawyers.Age,
                     Gender = lawyers.Gender,
                     EmailConfirmed = true,
-                    ImageUrl = lawyers.ImageUrl // Save the image URL
+                    ImageUrl = lawyers.ImageUrl
                 };
 
-            var passwordHash = _userManager.PasswordHasher.HashPassword(user, password);
-
-            var result = await _userManager.CreateAsync(user);
+            var result = await _userManager.CreateAsync(user, password);
 
             if (result.Succeeded)
             {
-                user.PasswordHash = passwordHash;
-                await _userManager.UpdateAsync(user);
-
-                // Assign the "Team" role
-                await _userManager.AddToRoleAsync(user, "Team");
-
-                // Save the lawyer details in the database
-                if (await lawyerService.AddAsync(user))
+                // Add to Team role
+                var roleResult = await _userManager.AddToRoleAsync(user, "Team");
+                if (!roleResult.Succeeded)
                 {
-                    lawyersList = await lawyerService.GetAllAsync();
-                    snackbar.Add("Lawyer was added successfully", Severity.Success);
-                    ToggleModal(); // Close the modal after adding
-
-                    // Send email with password
-                    await emailService.SendEmailAsync(user.Email, "Welcome to our App!", $"Thank you for signing up! Your Email Account has been registered with Us, you can login using the provided password: <strong>{password}</strong>", null);
-
-                    // Reset the lawyers object
-                    lawyers = new Lawyers();
-                    password = string.Empty; // Reset the password field
+                    snackbar.Add("Failed to add lawyer to Team role", Severity.Warning);
                 }
-                else
+
+                // Send email
+                try
                 {
-                    snackbar.Add("Failed to add lawyer to database", Severity.Error);
+                    await emailService.SendEmailAsync(user.Email, "Welcome to our App!",
+                        $"Thank you for signing up! Your Email Account has been registered with Us, you can login using the provided password: <strong>{password}</strong>", null);
+                    snackbar.Add("Lawyer was added successfully and welcome email sent", Severity.Success);
                 }
+                catch (Exception emailEx)
+                {
+                    // If the email fails, still consider it a success, but notify about email failure
+                    snackbar.Add("Lawyer was added successfully, but failed to send welcome email", Severity.Warning);
+                    Console.WriteLine($"Email sending failed: {emailEx.Message}");
+                }
+
+                ToggleModal();
+                lawyers = new Lawyers();
+                password = string.Empty;
+                imageFile = null;
             }
             else
             {
@@ -474,27 +471,27 @@ private void ToggleEditModal()
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
+            Console.WriteLine($"Exception in Add method: {ex}");
             snackbar.Add("Operation failed. Try again later", Severity.Error);
         }
     }
 
-
+    
     private void ToggleModal()
     {
         showModal = !showModal;
         if (!showModal)
         {
-            lawyers = new Lawyers(); // Reset the form when closing the modal
-            password = string.Empty; // Reset the password field
+            lawyers = new Lawyers(); 
+            password = string.Empty;
         }
     }
 
     private bool Searchrec(Lawyers lawyers)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
-        if (lawyers.LFirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
-        if (lawyers.LLastName.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (lawyers.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
+        if (lawyers.LastName.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
         if (lawyers.Email.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
         if (lawyers.Phone.Contains(searchString, StringComparison.OrdinalIgnoreCase)) return true;
         return false;

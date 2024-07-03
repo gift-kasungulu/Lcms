@@ -21,7 +21,7 @@
             <RowTemplate>
                 <MudTd DataLabel="DueDate">@context.DueDate</MudTd>
                 <MudTd DataLabel="Description">@context.Case?.Discription</MudTd>
-                <MudTd DataLabel="AssignedLawyer">@context.LawyerInfo?.LFirstName @context.LawyerInfo?.LLastName</MudTd>
+                <MudTd DataLabel="AssignedLawyer">@context.LawyerInfo?.FirstName @context.LawyerInfo?.LastName</MudTd>
                 <MudTd DataLabel="Priority">
                     <span class="@GetPriorityBadgeClass(@context.Priority?.Name)">@context.Priority?.Name</span>
                 </MudTd>

@@ -6,7 +6,6 @@
 @using LegalCaseManagement.Data
 @using Microsoft.AspNetCore.Mvc.Rendering
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Mvc.Rendering
 @using System.Security.Claims
 @inject IJSRuntime jstRuntime
 @inject UserManager<ApplicationUser> _userManager
@@ -18,73 +17,68 @@
 @inject LawyerService lawyerService
 @inject NavigationManager NavigationManager
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>User Management</PageTitle>
 
 @if (showModal)
 {
-    <div class="modal fade show" tabindex="-1" style="display: block;">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content custom-modal-content">
-                <div class="modal-header custom-modal-header">
-                    <h5 class="modal-title">Add User</h5>
-                    <button type="button" class="btn-close" @onclick="ToggleModal"></button>
-                </div>
-                <div class="modal-body custom-modal-body">
-                    <EditForm Model="newUser" OnValidSubmit="AddNewUserWithRoles">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
-
-                        <div class="mb-3">
-                            <label class="form-label">First Name</label>
-                            <input class="form-control" placeholder="Enter First Name" @bind-value="newUser.FirstNameUser" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Last Name</label>
-                            <input class="form-control" placeholder="Enter Last Name" @bind-value="newUser.LastNameUser" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input class="form-control" placeholder="Enter Email Address" @bind-value="newUser.LoginName" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phone Number</label>
-                            <input class="form-control" placeholder="Enter Phone Number" @bind-value="newUser.Phone" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Country</label>
-                            <input class="form-control" placeholder="Enter Country" @bind-value="newUser.CountryUser" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">City</label>
-                            <input class="form-control" placeholder="Enter City" @bind-value="newUser.CityUser" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Address</label>
-                            <input class="form-control" placeholder="Enter Address" @bind-value="newUser.AddressUser" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" class="form-control" placeholder="Enter Password" @bind-value="newUser.LoginPassword" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Role</label>
-                            <InputSelect class="form-control" @bind-Value="newUser.UserRole" placeholder="Select Role">
-                                @foreach (var role in selectList)
+<div class="modal-overlay">
+    <div class="modal-container">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add User</h5>
+                <button type="button" class="close-button" @onclick="ToggleModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <EditForm Model="newUser" OnValidSubmit="AddNewUserWithRoles">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="mb-3">
+                        <label class="form-label">First Name</label>
+                        <input class="form-control" placeholder="Enter First Name" @bind-value="newUser.FirstNameUser" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Last Name</label>
+                        <input class="form-control" placeholder="Enter Last Name" @bind-value="newUser.LastNameUser" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input class="form-control" placeholder="Enter Email Address" @bind-value="newUser.LoginName" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input class="form-control" placeholder="Enter Phone Number" @bind-value="newUser.Phone" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Country</label>
+                        <input class="form-control" placeholder="Enter Country" @bind-value="newUser.CountryUser" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">City</label>
+                        <input class="form-control" placeholder="Enter City" @bind-value="newUser.CityUser" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Address</label>
+                        <input class="form-control" placeholder="Enter Address" @bind-value="newUser.AddressUser" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" placeholder="Enter Password" @bind-value="newUser.LoginPassword" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <InputSelect class="form-control" @bind-Value="newUser.UserRole" placeholder="Select Role">
+                            @foreach (var role in selectList)
                                 {
                                     <option value="@role.Value" selected="@role.Selected">@role.Text</option>
                                 }
                             </InputSelect>
                         </div>
-
-                        <button type="submit" class="btn btn-primary w-100">Submit</button>
-                    </EditForm>
-                </div>
-                <div class="modal-footer custom-modal-footer">
-                    <button type="button" class="btn btn-danger w-100" @onclick="ToggleModal">Close</button>
-                </div>
+                    <button type="submit" class="submit-button">Submit</button>
+                </EditForm>
             </div>
         </div>
     </div>
+</div>
 }
 
             <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Add User</MudButton>
@@ -154,8 +148,8 @@
                     </HeaderContent>
                     <RowTemplate>
 
-                        <MudTd DataLabel="FirstName">@context.LFirstName</MudTd>
-                        <MudTd DataLabel="LastName">@context.LLastName</MudTd>
+                        <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
+                        <MudTd DataLabel="LastName">@context.LastName</MudTd>
                         <MudTd DataLabel="Email">@context.UserName</MudTd>
                         <MudTd DataLabel="Phone">@context.Phone</MudTd>
                         <MudTd DataLabel="Experince">@context.ExperienceYears</MudTd>
@@ -265,7 +259,7 @@
     private bool showModal = false;
     private List<IdentityRole> roles = new List<IdentityRole>();
     private IdentityRole newRole = new IdentityRole();
-    private IdentityRole editRole;
+    private IdentityRole editRole = new IdentityRole();
     private MudForm form;
     private bool isEditDialogOpen = false;
     private List<Lawyers> lawyersList = new List<Lawyers>();
@@ -288,7 +282,7 @@
     private bool Searchrec(Lawyers lawyer)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
-        if (lawyer.LFirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (lawyer.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }
@@ -337,12 +331,12 @@
         showModal = !showModal;
         if (!showModal)
         {
-            newUser = new User(); // Reset the form fields when am done
+            newUser = new User();
         }
     }
 
 
-    //delete method
+    //delete method (user rec)
     private async Task DeleteRec(ApplicationUser rec)
     {
         bool confimUserRemoval = await jstRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to Remove user ?");
@@ -361,49 +355,29 @@
         lawyersList = await lawyerService.GetAllAsync();
 
         rolesList = new List<Role>()
-        {
-            new Role(){RoleName = "Admin", ID = "1"},
-            new Role(){RoleName = "Team", ID = "2"},
-            new Role(){RoleName = "Client", ID = "3"}
-        };
+    {
+        new Role(){RoleName = "Admin", ID = "1"},
+        new Role(){RoleName = "Team", ID = "2"},
+        new Role(){RoleName = "Client", ID = "3"}
+    };
 
-        foreach (var role in rolesList)
-        {
-            selectList.Add(new SelectListItem()
-                {
-                    Text = role.RoleName,
-                    Value = role.ID,
-                    Selected = role.RoleName == "Client"
-
-                });
-        }
-        // userList = _userManager.Users.ToList();
-        foreach (var role in rolesList)
-        {
-            if (rolesList.Count < 1)
+        selectList = rolesList.Select(role => new SelectListItem()
             {
-                selectList.Add(new SelectListItem()
+                Text = role.RoleName,
+                Value = role.ID,
+                Selected = role.RoleName == "Client"
+            }).ToList();
 
-                    {
-                        Text = role.RoleName,
-                        Value = role.ID,
-                        Selected = true
+        // to ensure at least one role is selected when my list is empty i set the first Role on the list
 
-                    });
-            }
-
-            else
-
+        if (!selectList.Any(item => item.Selected))
+        {
+            var firstItem = selectList.FirstOrDefault();
+            if (firstItem != null)
             {
-                selectList.Add(new SelectListItem()
-                    {
-                        Text = role.RoleName,
-                        Value = role.ID,
-                        Selected = false
-                    });
+                firstItem.Selected = true;
             }
         }
-
     }
 
     private async Task<List<ApplicationUser>> GetAllClients()

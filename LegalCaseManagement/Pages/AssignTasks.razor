@@ -50,7 +50,7 @@
                     <MudSelect @bind-Value="newTask.LawyerId" Label="Assign To Lwyer" Required="true">
                         @foreach (var lawyer in lawyers)
                         {
-                            <MudSelectItem Value="@lawyer.Id">@lawyer.LFirstName @lawyer.LLastName</MudSelectItem> <!-- Use lawyer.Id for ApplicationUser's Id -->
+                            <MudSelectItem Value="@lawyer.Id">@lawyer.FirstName @lawyer.LastName</MudSelectItem> <!-- Use lawyer.Id for ApplicationUser's Id -->
                         }
                     </MudSelect>
                 </MudItem>
@@ -89,7 +89,7 @@
             <RowTemplate>
                 <MudTd DataLabel="DueDate">@context.DueDate</MudTd>
                 <MudTd DataLabel="Description">@context.Case?.Discription</MudTd>
-                <MudTd DataLabel="AssignedLawyer">@context.LawyerInfo?.LFirstName @context.LawyerInfo?.LLastName</MudTd>
+                <MudTd DataLabel="AssignedLawyer">@context.LawyerInfo?.FirstName @context.LawyerInfo?.LastName</MudTd>
                 <MudTd DataLabel="Priority">
                     <span class="@GetPriorityBadgeClass(@context.Priority?.Name)">@context.Priority?.Name</span>
                 </MudTd>
@@ -97,7 +97,7 @@
                     <span class="@GetStatusBadgeClass(@context.Status?.Name)">@context.Status?.Name</span>
                 </MudTd>
                 <MudTd DataLabel="Action">
-                      <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => ViewTaskDetails(context.TaskId)">
+                      <MudButton Variant="Variant.Text" Color="Color.Primary" @onclick="() => ViewTaskDetails(context.TaskId)">
                         View
                     </MudButton>
                 </MudTd>
@@ -177,16 +177,28 @@
 
     private async Task AssignTask()
     {
-        var result = await myTaskService.AddAsync(newTask);
-        if (result)
+        using (var scope = ServiceScopeFactory.CreateScope())
         {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            // Create and add the new task
+            var task = new MyTask
+                {
+                    Description = newTask.Description,
+                    FromDate = newTask.FromDate,
+                    DueDate = newTask.DueDate,
+                    PriorityId = newTask.PriorityId,
+                    StatusId = newTask.StatusId,
+                    LawyerId = newTask.LawyerId,
+                    CaseId = newTask.CaseId
+                };
+
+            context.MyTasks.Add(task);
+            await context.SaveChangesAsync();
+
             Snackbar.Add("Task assigned successfully", Severity.Success);
             newTask = new MyTask(); // Reset the form
             await GetAllTasksAsync();
-        }
-        else
-        {
-            Snackbar.Add("Failed to assign task", Severity.Error);
         }
     }
 
