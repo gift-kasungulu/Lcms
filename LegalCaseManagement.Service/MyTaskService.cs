@@ -38,18 +38,28 @@ namespace LegalCaseManagement.Service
             .FirstOrDefaultAsync(t => t.TaskId == taskId);
     }
 
-      public async Task<bool> UpdateAsync(MyTask task)
+        public async Task<bool> UpdateAsync(MyTask task)
     {
         _context.MyTasks.Update(task);
         await _context.SaveChangesAsync();
         return true;
     }
 
-    public async Task<bool> AddAsync(MyTask newTask)
+        public async Task<int> GetTasksAssignedCountByLawyerAsync(string lawyerId)
+        {
+            return await _context.MyTasks.CountAsync(t => t.LawyerId == lawyerId);
+        }
+
+        public async Task<int> GetIncompleteTasksCountByLawyerAsync(string lawyerId)
+        {
+            return await _context.MyTasks.CountAsync(t => t.LawyerId == lawyerId && t.Status.Name.ToLower() == "in progress");
+        }
+
+        public async Task<bool> AddAsync(MyTask newTask)
     {
         await _context.MyTasks.AddAsync(newTask);
         await _context.SaveChangesAsync();
         return true;
     }
-    }
+        }
 }

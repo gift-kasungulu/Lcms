@@ -12,80 +12,79 @@
 @inject IServiceScopeFactory ServiceScopeFactory
 @inject IJSRuntime JSRuntime
 
-        <MudText Typo="Typo.h5">Case</MudText>
-        <MudSpacer />
-        
-        <MudIconButton Icon="@Icons.Material.Filled.FileDownload" Color="Color.Primary" />
-        <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Primary" />
-   
-        @if (caseDetails == null)
-        {
-            <div class="centered">
-            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
-            </div>
-        }
-        else
-        {
-            <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
-                <MudTabPanel Text="Detail">
-                    <MudGrid>
-                        <MudItem xs="12">
-                            <MudText Typo="Typo.h6" Class="mb-4">Case Detail</MudText>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudTable Items="@GetLeftColumnDetails()" Dense="true" Hover="true" Elevation="0">
-                                <HeaderContent>
-                                    <MudTh Style="width:40%"></MudTh>
-                                    <MudTh Style="width:60%"></MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd DataLabel="Label">@context.Label</MudTd>
-                                    <MudTd DataLabel="Value">@context.Value</MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudTable Items="@GetRightColumnDetails()" Dense="true" Hover="true" Elevation="0">
-                                <HeaderContent>
-                                    <MudTh Style="width:40%"></MudTh>
-                                    <MudTh Style="width:60%"></MudTh>
-                                </HeaderContent>
-                                <RowTemplate>
-                                    <MudTd DataLabel="Label">@context.Label</MudTd>
-                                    <MudTd DataLabel="Value">@context.Value</MudTd>
-                                </RowTemplate>
-                            </MudTable>
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudText Typo="Typo.body2" Class="mt-4">
-                                <strong>Description:</strong> @caseDetails.Discription
-                            </MudText>
-                        </MudItem>
-                        <MudItem xs="12">
-                            <MudText Typo="Typo.body2" Class="mt-4">
-                                <strong>File Attachment:</strong> @(string.IsNullOrEmpty(caseDetails.FileAttachment) ? "No file attached" : caseDetails.FileAttachment)
-                            </MudText>
-                        </MudItem>
-                    </MudGrid>
-                    <MudDivider Class="my-6" />
-                    <MudGrid>
-                        <MudItem xs="12" sm="6">
-                            <MudText Typo="Typo.h6" Class="mb-4">Petitioner and Advocate</MudText>
-                            <MudText Typo="Typo.body1">@caseDetails.Petitioner</MudText>
-                            <MudText Typo="Typo.body1">N/A</MudText>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudText Typo="Typo.h6" Class="mb-4">Client and Advocate</MudText>
-                            <MudText Typo="Typo.body1">Client: @caseDetails.AppUser?.FirstName @caseDetails.AppUser?.LastName</MudText>
-                            <MudText Typo="Typo.body1">Advocate: @(caseDetails.AssignedLawyer != null ? $"{caseDetails.AssignedLawyer.FirstName} {caseDetails.AssignedLawyer.LastName}" : "Not assigned")</MudText>
-                        </MudItem>
-                        <MudItem xs="12" sm="6">
-                            <MudText Typo="Typo.h6" Class="mb-4">Court Name</MudText>
-                            <MudText Typo="Typo.body1">@caseDetails.Defendant</MudText>
-                            
-                        </MudItem>
-                    </MudGrid>
-                    <br />
+<MudText Typo="Typo.h5">Case</MudText>
+<MudSpacer />
+
+<MudIconButton Icon="@Icons.Material.Filled.FileDownload" Color="Color.Primary" />
+<MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Primary" />
+
+@if (caseDetails == null)
+{
+    <div class="centered">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
+}
+else
+{
+    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+        <MudTabPanel Text="Detail">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-4">Case Detail</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTable Items="@GetLeftColumnDetails()" Dense="true" Hover="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh Style="width:40%"></MudTh>
+                            <MudTh Style="width:60%"></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Label">@context.Label</MudTd>
+                            <MudTd DataLabel="Value">@context.Value</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTable Items="@GetRightColumnDetails()" Dense="true" Hover="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh Style="width:40%"></MudTh>
+                            <MudTh Style="width:60%"></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Label">@context.Label</MudTd>
+                            <MudTd DataLabel="Value">@context.Value</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.body2" Class="mt-4">
+                        <strong>Description:</strong> @caseDetails.Discription
+                    </MudText>
+                </MudItem>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.body2" Class="mt-4">
+                        <strong>File Attachment:</strong> @(string.IsNullOrEmpty(caseDetails.FileAttachment) ? "No file attached" : caseDetails.FileAttachment)
+                    </MudText>
+                </MudItem>
+            </MudGrid>
+            <MudDivider Class="my-6" />
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.h6" Class="mb-4">Petitioner and Advocate</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.Petitioner</MudText>
+                    <MudText Typo="Typo.body1">N/A</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.h6" Class="mb-4">Client and Advocate</MudText>
+                    <MudText Typo="Typo.body1">Client: @caseDetails.AppUser?.FirstName @caseDetails.AppUser?.LastName</MudText>
+                    <MudText Typo="Typo.body1">Advocate: @(caseDetails.AssignedLawyer != null ? $"{caseDetails.AssignedLawyer.FirstName} {caseDetails.AssignedLawyer.LastName}" : "Not assigned")</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.h6" Class="mb-4">Court Name</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.Defendant</MudText>
+                </MudItem>
+            </MudGrid>
+            <br />
             <MudDivider Class="my-6" />
             <MudItem xs="12">
                 <MudText Typo="Typo.h6" Class="mb-4">Upload Case Documents</MudText>
@@ -98,29 +97,39 @@
                 <MudText Typo="Typo.h6" Class="mb-2">Uploaded Documents</MudText>
                 @if (caseDocuments.Any())
                 {
-                    <MudList>
+                    <MudGrid>
                         @foreach (var doc in caseDocuments)
                         {
-                            <MudListItem>
-                                <MudText>@doc.FileName</MudText>
-                                <MudButton Color="Color.Secondary" OnClick="@(() => DownloadDocument(doc.Id))">Download</MudButton>
-                            </MudListItem>
+                            <MudItem xs="12">
+                                <MudPaper Class="pa-4" Style="width: 100%;">
+                                    <MudGrid>
+                                        <MudItem xs="1">
+                                            <MudIconButton Icon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Secondary" />
+                                        </MudItem>
+                                        <MudItem xs="9">
+                                            <MudText>@doc.FileName</MudText>
+                                            <MudText Typo="Typo.caption" Class="text-muted">@doc.UploadDate.ToString("dd MMM yyyy")</MudText>
+                                        </MudItem>
+                                        <MudItem xs="2">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Primary" OnClick="@(() => DownloadDocument(doc.Id))" />
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudPaper>
+                            </MudItem>
                         }
-                    </MudList>
+                    </MudGrid>
                 }
                 else
                 {
                     <MudText>No documents uploaded yet.</MudText>
                 }
             </MudItem>
-                </MudTabPanel>
-                <MudTabPanel Text="History">
-                    <MudText>History content goes here</MudText>
-                </MudTabPanel>
-                
-            </MudTabs>
-        }
-
+        </MudTabPanel>
+        <MudTabPanel Text="History">
+            <MudText>History content goes here</MudText>
+        </MudTabPanel>
+    </MudTabs>
+}
 
 @code {
     [Parameter] public int CaseId { get; set; }
@@ -169,7 +178,6 @@
         };
     }
 
-    
     private void OnFileChange(InputFileChangeEventArgs e)
     {
         selectedFiles = e.GetMultipleFiles();
@@ -211,38 +219,21 @@
     {
         using var scope = ServiceScopeFactory.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-        return await context.Documents.Where(d => d.CaseId == caseId).ToListAsync();
+
+        return await context.Documents
+            .Where(d => d.CaseId == caseId)
+            .ToListAsync();
     }
 
     private async Task DownloadDocument(int documentId)
     {
-        using var scope = ServiceScopeFactory.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-        var document = await context.Documents.FindAsync(documentId);
-        if (document == null)
+        // Implement the document download logic here
+        var document = caseDocuments.FirstOrDefault(d => d.Id == documentId);
+        if (document != null)
         {
-            Snackbar.Add("Document not found", Severity.Error);
-            return;
+            var path = document.FilePath;
+            var js = (IJSInProcessRuntime)JSRuntime;
+            await js.InvokeVoidAsync("BlazorDownloadFile", path, document.FileName);
         }
-
-        var path = document.FilePath;
-        var fileName = document.FileName;
-
-        // to ensure the file exist or 
-        if (!File.Exists(path))
-        {
-            Snackbar.Add("File not found", Severity.Error);
-            return;
-        }
-
-        // Read the file content
-        byte[] fileBytes = await File.ReadAllBytesAsync(path);
-
-        // Convert to base64 string
-        string base64String = Convert.ToBase64String(fileBytes);
-
-        // JavaScript function to trigger download
-        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, base64String);
     }
 }

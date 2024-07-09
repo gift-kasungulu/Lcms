@@ -17,6 +17,15 @@
                 </div>
             </Authorized>
         </AuthorizeView>
+        <AuthorizeView Roles=" Team">
+            <Authorized>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="lawyerdashboard">
+                        <i class="bi bi-border-all icon-spacing" aria-hidden="true"></i> DashBoard
+                    </NavLink>
+                </div>
+            </Authorized>
+        </AuthorizeView>
         <AuthorizeView Roles=" Admin">
             <Authorized>
                 <div class="nav-item px-3">
@@ -90,21 +99,22 @@
                 </div>
             </Authorized>
         </AuthorizeView>
-        <AuthorizeView Roles=" Admin">
-            <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="settings">
-                        <i class="bi bi-gear-fill icon-spacing" aria-hidden="true"></i> Settings
-                    </NavLink>
-                </div>
-            </Authorized>
-        </AuthorizeView>
         <AuthorizeView Roles="Admin">
             <Authorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="tasksetting">
-                        <i class="bi bi-gear-fill icon-spacing" aria-hidden="true"></i> Task Setting
-                    </NavLink>
+                    <div class="dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="settingsDropdown" role="button" @onclick="ToggleSettingsDropdown">
+                            <i class="bi bi-gear-fill icon-spacing" aria-hidden="true"></i> Settings
+                        </a>
+                        <div class="dropdown-menu @(showSettingsDropdown ? "show" : "")" aria-labelledby="settingsDropdown">
+                            <NavLink class="dropdown-item" href="settings">
+                                <i class="bi bi-gear-fill icon-spacing" aria-hidden="true"></i> General Settings
+                            </NavLink>
+                            <NavLink class="dropdown-item" href="tasksetting">
+                                <i class="bi bi-list-task icon-spacing" aria-hidden="true"></i> Task Settings
+                            </NavLink>
+                        </div>
+                    </div>
                 </div>
             </Authorized>
         </AuthorizeView>
@@ -132,7 +142,12 @@
 @code {
     private bool collapseNavMenu = true;
 
+    private bool showSettingsDropdown = false;
 
+    private void ToggleSettingsDropdown()
+    {
+        showSettingsDropdown = !showSettingsDropdown;
+    }
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 

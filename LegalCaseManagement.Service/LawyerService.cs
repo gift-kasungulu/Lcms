@@ -13,6 +13,8 @@ namespace LegalCaseManagement.Data
             _context = context;
         }
 
+
+
         public async Task<List<Lawyers>> GetAllAsync()
         {
             return await _context.Lawyers.ToListAsync();

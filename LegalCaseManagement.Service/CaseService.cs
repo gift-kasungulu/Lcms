@@ -37,5 +37,14 @@ namespace LegalCaseManagement.Data
                 .FirstOrDefaultAsync(c => c.CaseId == id);
         }
 
+        public async Task<int> GetCasesCreatedCountByLawyerAsync(string lawyerId)
+        {
+            return await _context.Cases.CountAsync(c => c.CreatedByUserId == lawyerId);
+        }
+
+        public async Task<int> GetCasesAssignedCountByLawyerAsync(string lawyerId)
+        {
+            return await _context.Cases.CountAsync(c => c.AssignedLawyerId == lawyerId);
+        }
     }
 }

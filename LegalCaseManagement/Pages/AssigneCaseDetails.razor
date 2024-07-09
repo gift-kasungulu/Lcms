@@ -1,53 +1,65 @@
-@*@page "/casedetails/{CaseId:int}"
-@using LegalCaseManagement.Service
-@using LegalCaseManagement.Domain
+@page "/assignedcasedetails/{caseId:int}"
+@attribute [Authorize(Roles = "Admin, Lawyer, Team")]
+
 @using LegalCaseManagement.Data
-@inject CaseService caseService
+@using LegalCaseManagement.Domain
+@using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager Navigation
+@inject CaseService caseService
+@inject LawyerService lawyerService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
-<h3>Case Details</h3>
-
-@if (caseDetails == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
-    <div>
-        <p><strong>Case ID:</strong> @caseDetails.CaseId</p>
-        <p><strong>Start Date:</strong> @caseDetails.StartDate?.ToString("dd MMM yyyy")</p>
-        <p><strong>Next Hearing Date:</strong> @caseDetails.EndDate?.ToString("dd MMM yyyy")</p>
-        <p><strong>Registration Date:</strong> @caseDetails.RegistrationDate?.ToString("dd MMM yyyy")</p>
-        <p><strong>Registration Number:</strong> @caseDetails.RegistrationNo</p>
-        <p><strong>Petitioner:</strong> @caseDetails.Petitioner</p>
-        <p><strong>Defendant:</strong> @caseDetails.Defendant</p>
-        <p><strong>Description:</strong> @caseDetails.Discription</p>
-        <p><strong>Case Type:</strong> @caseDetails.CaseType?.TypeName</p>
-        <p><strong>Status:</strong> @caseDetails.CaseStatus?.StatusName</p>
-        <p><strong>Client:</strong> @caseDetails.AppUser?.UserName</p>
-        @if (!string.IsNullOrEmpty(caseDetails.FileAttachment))
+<MudCard>
+    <MudCardContent>
+        <MudText Typo="Typo.h6" Class="mb-4">Case Details</MudText>
+        @if (caseDetails == null)
         {
-            <p><strong>File Attachment:</strong> <a href="@caseDetails.FileAttachment" target="_blank">View Attachment</a></p>
+            <MudText Typo="Typo.body1">Loading case details...</MudText>
         }
-    </div>
-}
-
-<button class="btn btn-primary mt-4" @onclick="GoBack">Back</button>
+        else
+        {
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle1">Case Number:</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.RegistrationNo</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle1">Petitioner:</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.Petitioner</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle1">Defendant:</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.Defendant</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle1">Start Date:</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.StartDate?.ToString("d")</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle1">Next Hearing Date:</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.EndDate?.ToString("d")</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle1">Description:</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.Discription</MudText>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle1">Assigned Lawyer:</MudText>
+                    <MudText Typo="Typo.body1">@caseDetails.AssignedLawyer?.FirstName @caseDetails.AssignedLawyer?.LastName</MudText>
+                </MudItem>
+            </MudGrid>
+        }
+    </MudCardContent>
+</MudCard>
 
 @code {
     [Parameter]
-    public int CaseId { get; set; }
+    public int caseId { get; set; }
 
-    private Case caseDetails;
+    private Case? caseDetails;
 
     protected override async Task OnInitializedAsync()
     {
-        caseDetails = await caseService.GetByIdAsync(CaseId);
-    }
-
-    private void GoBack()
-    {
-        Navigation.NavigateTo("/myassignedtasks");
+        caseDetails = await caseService.GetByIdAsync(caseId);
     }
 }
-*@

@@ -36,24 +36,68 @@ function downloadFile(fileName, base64String) {
     document.body.removeChild(link);
 }
 
-window.downloadFile = function (filename, base64Content) {
-    // Convert base64 content to blob
-    const byteCharacters = atob(base64Content);
-    const byteNumbers = new Array(byteCharacters.length);
-    for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-    }
-    const byteArray = new Uint8Array(byteNumbers);
-    const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+window.generatePdf = (cases) => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-    // Create a download link and trigger download
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    doc.setFontSize(18);
+    doc.text("LawMaster Pro", 105, 15, null, null, "center");
+    doc.setFontSize(12);
+    doc.text("Chamber No. 600 District Courts, Rohtak - 124001, Haryana, India", 105, 22, null, null, "center");
+
+    doc.setFontSize(14);
+    doc.text(`Cases Listed on ${new Date().toLocaleDateString()}`, 14, 35);
+    doc.text(`Total Cases : ${cases.length}`, 14, 42);
+
+    const tableColumn = ["Sr No", "Cases", "Petitioner vs Respondent", "Stage of Case", "Next Date"];
+    const tableRows = cases.map((caseItem, index) => [
+        index + 1,
+        caseItem.registrationNo,
+        `${caseItem.petitioner} vs ${caseItem.appUser?.firstName} ${caseItem.appUser?.lastName}`,
+        caseItem.caseStatus.statusName,
+        caseItem.endDate ? new Date(caseItem.endDate).toLocaleDateString() : ''
+    ]);
+
+    doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 50,
+        styles: { fontSize: 10, cellPadding: 2 },
+        columnStyles: { 0: { cellWidth: 15 }, 1: { cellWidth: 30 } }
+    });
+
+    doc.save("cases_list.pdf");
+};
+
+window.generatePdf = (cases) => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text("LCMS", 105, 15, null, null, "center");
+    doc.setFontSize(12);
+    doc.text("Court", 105, 22, null, null, "center");
+
+    doc.setFontSize(14);
+    doc.text(`Cases Listed on ${new Date().toLocaleDateString()}`, 14, 35);
+    doc.text(`Total Cases : ${cases.length}`, 14, 42);
+
+    const tableColumn = ["Sr No", "Cases", "Petitioner vs Respondent", "Stage of Case", "Next Date"];
+    const tableRows = cases.map((caseItem, index) => [
+        index + 1,
+        caseItem.registrationNo,
+        `${caseItem.petitioner} vs ${caseItem.appUser?.firstName} ${caseItem.appUser?.lastName}`,
+        caseItem.caseStatus.statusName,
+        caseItem.endDate ? new Date(caseItem.endDate).toLocaleDateString() : ''
+    ]);
+
+    doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 50,
+        styles: { fontSize: 10, cellPadding: 2 },
+        columnStyles: { 0: { cellWidth: 15 }, 1: { cellWidth: 30 } }
+    });
+
+    doc.save("cases_list.pdf");
 };

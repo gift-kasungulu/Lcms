@@ -1,5 +1,5 @@
 @page "/assigntask"
-@attribute [Authorize(Roles = "Admin, Team")]
+@attribute [Authorize(Roles = "Admin")]
 
 @using Microsoft.EntityFrameworkCore
 @using LegalCaseManagement.Data
@@ -15,8 +15,6 @@
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
 
-<MudCard>
-    <MudCardContent>
         <MudText Typo="Typo.h6" Class="mb-4">Assign Task</MudText>
         <EditForm Model="newTask" OnValidSubmit="AssignTask">
             <DataAnnotationsValidator />
@@ -54,24 +52,22 @@
                         }
                     </MudSelect>
                 </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudSelect @bind-Value="newTask.CaseId" Label="Case" Required="true">
-                        @foreach (var legalCase in cases)
-                        {
-                            <MudSelectItem Value="@legalCase.CaseId">@legalCase.Discription</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField @bind-Value="searchString" Label="Search Case" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudSelect @bind-Value="newTask.CaseId" Label="Case" Required="true">
+                @foreach (var legalCase in cases.Where(c => c.Discription.Contains(searchString, StringComparison.OrdinalIgnoreCase)))
+                {
+                    <MudSelectItem Value="@legalCase.CaseId">@legalCase.Discription</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
             </MudGrid>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="mt-4">Assign Task</MudButton>
         </EditForm>
-    </MudCardContent>
-</MudCard>
 
 <br />
-<br />
-<MudCard>
-    <MudCardContent>
         <MudTable Items="tasks">
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Tasks</MudText>
@@ -111,10 +107,9 @@
                 </MudTd>
             </RowTemplate>
         </MudTable>
-    </MudCardContent>
-</MudCard>
 
 @code {
+    private string searchString = String.Empty;
     private List<MyTask> tasks = new List<MyTask>();
     private MyTask newTask = new MyTask();
     private List<Lawyers> lawyers = new List<Lawyers>();
@@ -132,6 +127,16 @@
         };
 
         return badgeClass;
+    }
+
+    private bool Search(Case mycase)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (mycase.Discription.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
     }
 
     private string GetStatusBadgeClass(string status)
@@ -194,13 +199,29 @@
                 };
 
             context.MyTasks.Add(task);
+
+            // Fetch the case and lawyer entities
+            var legalCase = await context.Cases.FindAsync(newTask.CaseId);
+            var lawyer = await context.Lawyers.FindAsync(newTask.LawyerId);
+
+            // Associate the case with the lawyer
+            if (legalCase != null && lawyer != null)
+            {
+                if (!lawyer.AssignedCases.Contains(legalCase))
+                {
+                    lawyer.AssignedCases.Add(legalCase);
+                    context.Lawyers.Update(lawyer);
+                }
+            }
+
             await context.SaveChangesAsync();
 
             Snackbar.Add("Task assigned successfully", Severity.Success);
-            newTask = new MyTask(); // Reset the form
+            newTask = new MyTask(); 
             await GetAllTasksAsync();
         }
     }
+
 
         private void ViewTaskDetails(int taskId)
     {

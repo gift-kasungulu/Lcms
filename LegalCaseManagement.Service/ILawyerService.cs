@@ -10,5 +10,6 @@ namespace LegalCaseManagement.Service
     {
         Task<bool> UpdateLawyerAsync(Lawyers lawyer);
         Task<List<Lawyers>> GetAllAsync();
+        
     }
 }

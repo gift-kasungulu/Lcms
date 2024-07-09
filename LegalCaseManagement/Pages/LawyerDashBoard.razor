@@ -1,0 +1,83 @@
+﻿@page "/lawyerdashboard"
+@attribute [Authorize(Roles = "Team")]
+
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Service
+@using Microsoft.AspNetCore.Identity
+@inject LawyerService lawyerService
+@inject CaseService caseService
+@inject MyTaskService myTaskService
+@inject UserManager<ApplicationUser> userManager
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider authStateProvider
+
+<MudGrid>
+    <MudItem xs="12" sm="6" md="4">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.h6">Cases Created</MudText>
+            <MudText Typo="Typo.h4">@casesCreatedCount</MudText>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => NavigateToCreatedCases()">View</MudButton>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="4">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.h6">Cases Assigned</MudText>
+            <MudText Typo="Typo.h4">@casesAssignedCount</MudText>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => NavigateToAssignedCases()">View</MudButton>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="4">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.h6">Tasks Assigned</MudText>
+            <MudText Typo="Typo.h4">@tasksAssignedCount</MudText>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => NavigateToAssignedTasks()">View</MudButton>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" sm="6" md="4">
+        <MudPaper Class="pa-4" Elevation="2">
+            <MudText Typo="Typo.h6">Incomplete Tasks</MudText>
+            <MudText Typo="Typo.h4">@tasksIncompleteCount</MudText>
+            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => NavigateToIncompleteTasks()">View</MudButton>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    private int casesCreatedCount;
+    private int casesAssignedCount;
+    private int tasksAssignedCount;
+    private int tasksIncompleteCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var currentUser = await userManager.GetUserAsync(user);
+
+        casesCreatedCount = await caseService.GetCasesCreatedCountByLawyerAsync(currentUser.Id);
+        casesAssignedCount = await caseService.GetCasesAssignedCountByLawyerAsync(currentUser.Id);
+        tasksAssignedCount = await myTaskService.GetTasksAssignedCountByLawyerAsync(currentUser.Id);
+        tasksIncompleteCount = await myTaskService.GetIncompleteTasksCountByLawyerAsync(currentUser.Id);
+    }
+
+    private void NavigateToCreatedCases()
+    {
+        Navigation.NavigateTo("/created-cases");
+    }
+
+    private void NavigateToAssignedCases()
+    {
+        Navigation.NavigateTo("/assigned-cases");
+    }
+
+    private void NavigateToAssignedTasks()
+    {
+        Navigation.NavigateTo("/assigned-tasks");
+    }
+
+    private void NavigateToIncompleteTasks()
+    {
+        Navigation.NavigateTo("/incomplete-tasks");
+    }
+}

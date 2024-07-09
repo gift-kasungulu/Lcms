@@ -25,6 +25,8 @@ namespace LegalCaseManagement.Data
         public string? ImageUrl { get; set; }
         [NotMapped]
         public IBrowserFile? ImageFile { get; set; }
+        public ICollection<Case> AssignedCases { get; set; } = new List<Case>(); // The list of cases that are assigned to the lawyer
+
 
 
     }

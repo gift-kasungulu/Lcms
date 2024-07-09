@@ -1,4 +1,5 @@
 @page "/tasksetting"
+@attribute [Authorize(Roles = "Admin")]
 
 @using LegalCaseManagement.Data
 @using LegalCaseManagement.Data.LegalServices
@@ -12,91 +13,112 @@
 @inject MyTaskService mytaskservice
 
 <PageTitle>Task Settings</PageTitle>
-<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Task Status</MudButton>
-<MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModalSecond">Priority levels</MudButton>
 
-@if (showModal)
-{
-    <div class="modal fade show" tabindex="-1" style="display: block;">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Taask Status</h4>
-                    <button type="button" class="btn-close" @onclick="ToggleModal"></button>
-                </div>
-                <div class="modal-body">
-                    <EditForm Model="taskstatus" OnValidSubmit="Add">
+<MudText Typo="Typo.h4" Class="mb-4">Task Settings</MudText>
 
-                        <div class="mb-3 mt-3">
-                            <label class="form-label">Task Name</label>
-                            <input class="form-control" placeholder="Enter Task Name" @bind-value="taskstatus.Name" />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </EditForm>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @onclick="ToggleModal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+    <MudTabPanel Text="Task Statuses">
+        <MudPaper Elevation="0">
+            <MudToolBar>
+                <MudText Typo="Typo.h6">Task Status Categories</MudText>
+                <MudSpacer />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="ToggleModal">Add Task Status</MudButton>
+            </MudToolBar>
+            <MudTable Items="taskStatusList" Dense="true" Hover="true" Elevation="0">
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Id">@context.StatusId</MudTd>
+                    <MudTd DataLabel="Task Status Name">@context.Name</MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => UpdateTaskStatus(context))" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteTaskStatus(context))" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </MudTabPanel>
 
-@if (showModalsecond)
-{
-    <div class="modal fade show" tabindex="-1" style="display: block;">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Task priority</h4>
-                    <button type="button" class="btn-close" @onclick="ToggleModalSecond"></button>
-                </div>
-                <div class="modal-body">
-                    <EditForm Model="priority" OnValidSubmit="AddStatus">
+    <MudTabPanel Text="Priority Levels">
+        <MudPaper Elevation="0">
+            <MudToolBar>
+                <MudText Typo="Typo.h6">Priority Levels</MudText>
+                <MudSpacer />
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="ToggleModalSecond">Add Priority Level</MudButton>
+            </MudToolBar>
+            <MudTable Items="priorityList" Dense="true" Hover="true" Elevation="0">
+                <HeaderContent>
+                    <MudTh>ID</MudTh>
+                    <MudTh>Name</MudTh>
+                    <MudTh>Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Id">@context.PriorityId</MudTd>
+                    <MudTd DataLabel="Priority Name">@context.Name</MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => UpdatePriority(context))" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeletePriority(context))" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </MudTabPanel>
+</MudTabs>
 
-                        <div class="mb-3 mt-3">
-                            <label class="form-label">Priority Name</label>
-                            <input class="form-control" placeholder="Enter Priority Name" @bind-value="priority.Name" />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </EditForm>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @onclick="ToggleModalSecond">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+<MudDialog @bind-IsVisible="showModal" Options="dialogOptions" MaxWidth="MaxWidth.Large" FullWidth="true">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(taskstatus.StatusId == 0 ? "Add New Task Status" : "Edit Task Status")</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="taskstatus.Name" Label="Task Name" Required="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="ToggleModal">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="AddTaskStatus">@(taskstatus.StatusId == 0 ? "Add" : "Update")</MudButton>
+    </DialogActions>
+</MudDialog>
 
+<MudDialog @bind-IsVisible="showModalsecond" Options="dialogOptions" MaxWidth="MaxWidth.Large" FullWidth="true">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(priority.PriorityId == 0 ? "Add New Priority" : "Edit Priority")</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="priority.Name" Label="Priority Name" Required="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="ToggleModalSecond">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="AddPriority">@(priority.PriorityId == 0 ? "Add" : "Update")</MudButton>
+    </DialogActions>
+</MudDialog>
 
-
-@code
-{
-    private MyTask mytask = new MyTask();
+@code {
     private MyTaskStatus taskstatus = new MyTaskStatus();
     private Priority priority = new Priority();
     private List<MyTaskStatus> taskStatusList = new List<MyTaskStatus>();
     private List<Priority> priorityList = new List<Priority>();
     private bool showModal = false;
     private bool showModalsecond = false;
-    private bool isAddingType = false;
     private bool isAddingStatus = false;
-    private bool isDeletingType = false;
+    private bool isAddingPriority = false;
     private bool isDeletingStatus = false;
+    private bool isDeletingPriority = false;
+    private DialogOptions dialogOptions = new DialogOptions { CloseOnEscapeKey = true };
 
     protected override async Task OnInitializedAsync()
     {
-        await GetAll();
-        await GetAllPriority();
+        await GetAllTaskStatuses();
+        await GetAllPriorities();
     }
 
-    private async Task GetAll()
+    private async Task GetAllTaskStatuses()
     {
         taskStatusList = await taskstatusService.GetAllAsync();
     }
 
-    private async Task GetAllPriority()
+    private async Task GetAllPriorities()
     {
         priorityList = await priorityservice.GetAllAsync();
     }
@@ -111,68 +133,28 @@
         showModalsecond = !showModalsecond;
     }
 
-    // add a Taskstatus
-    private async Task Add()
+    private async Task AddTaskStatus()
     {
         try
         {
-            // Check if CaseTypeId is not null or empty
             if (taskstatus.StatusId == 0)
             {
-                isAddingType = true;
+                isAddingStatus = true;
                 var success = await taskstatusService.AddAsync(taskstatus);
                 if (success)
                 {
-                    await GetAll();
+                    await GetAllTaskStatuses();
                     snackbar.Add("Task Status was added", Severity.Success);
                 }
                 else
                 {
                     taskstatusService.Update(taskstatus);
-                    snackbar.Add("Task Updated ", Severity.Info);
-                }
-
-
-            }
-            else
-            {
-                snackbar.Add("an operatipn faie please try again.", Severity.Error);
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
-        }
-        finally
-        {
-            isAddingType = false;
-        }
-    }
-    // Add piority
-    private async Task AddStatus()
-    {
-        try
-        {
-            // Check if priority is not null or empty
-            if (priority.PriorityId == 0)
-            {
-                isAddingStatus = true;
-                var success = await priorityservice.AddAsync(priority);
-                if (success)
-                {
-                    await GetAllPriority();
-                    snackbar.Add("Case Status Was Added Successfully", Severity.Success);
-                }
-                else
-                {
-                    priorityservice.Update(priority);
-                    snackbar.Add("priority updated ", Severity.Info);
+                    snackbar.Add("Task Status updated", Severity.Info);
                 }
             }
             else
             {
-                snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+                snackbar.Add("Operation failed. Please try again.", Severity.Error);
             }
         }
         catch (Exception ex)
@@ -186,5 +168,92 @@
         }
     }
 
+    private async Task AddPriority()
+    {
+        try
+        {
+            if (priority.PriorityId == 0)
+            {
+                isAddingPriority = true;
+                var success = await priorityservice.AddAsync(priority);
+                if (success)
+                {
+                    await GetAllPriorities();
+                    snackbar.Add("Priority was added", Severity.Success);
+                }
+                else
+                {
+                    priorityservice.Update(priority);
+                    snackbar.Add("Priority updated", Severity.Info);
+                }
+            }
+            else
+            {
+                snackbar.Add("Operation failed. Please try again.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+        }
+        finally
+        {
+            isAddingPriority = false;
+        }
+    }
 
-} 
+    private void UpdateTaskStatus(MyTaskStatus taskStatusRecord)
+    {
+        ToggleModal();
+        taskstatus = taskStatusRecord;
+        StateHasChanged();
+    }
+
+    private void UpdatePriority(Priority priorityRecord)
+    {
+        ToggleModalSecond();
+        priority = priorityRecord;
+        StateHasChanged();
+    }
+
+    private async Task DeleteTaskStatus(MyTaskStatus rec)
+    {
+        try
+        {
+            isDeletingStatus = true;
+            await taskstatusService.DeleteAsync(rec);
+            await GetAllTaskStatuses();
+            snackbar.Add("Task Status was deleted", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+        }
+        finally
+        {
+            isDeletingStatus = false;
+        }
+    }
+
+    private async Task DeletePriority(Priority rec)
+    {
+        try
+        {
+            isDeletingPriority = true;
+            await priorityservice.DeleteAsync(rec);
+            await GetAllPriorities();
+            snackbar.Add("Priority was deleted", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+        }
+        finally
+        {
+            isDeletingPriority = false;
+        }
+    }
+}

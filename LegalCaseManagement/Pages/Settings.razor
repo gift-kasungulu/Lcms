@@ -11,124 +11,86 @@
 
 <PageTitle>Settings</PageTitle>
 
+    <MudText Typo="Typo.h4" Class="mb-4">System Settings</MudText>
 
-@if (showModal)
-{
-    <div class="modal fade show" tabindex="-1" style="display: block;">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Add Case Type/Category</h4>
-                    <button type="button" class="btn-close" @onclick="ToggleModal"></button>
-                </div>
-                <div class="modal-body">
-                    <EditForm Model="casetype" OnValidSubmit="Add">
-                        
-                        <div class="mb-3 mt-3">
-                            <label class="form-label">Type Name</label>
-                            <input class="form-control" placeholder="Enter Type Name" @bind-value="casetype.TypeName" />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </EditForm>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @onclick="ToggleModal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+        <MudTabPanel Text="Case Types">
+            <MudPaper Elevation="0">
+                <MudToolBar>
+                    <MudText Typo="Typo.h6">Case Type Categories</MudText>
+                    <MudSpacer />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="ToggleModal">Add Case Type</MudButton>
+                </MudToolBar>
+                <MudTable Items="casetypeList" Dense="true" Hover="true" Elevation="0">
+                    <HeaderContent>
+                        <MudTh>ID</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Id">@context.CaseTypeId</MudTd>
+                        <MudTd DataLabel="Case Type Name">@context.TypeName</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => Update(context))" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteType(context))" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudTabPanel>
 
-<!-- second modal here -->
-@if (showModalsecond)
-{
-    <div class="modal fade show" tabindex="-1" style="display: block;">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Add Case Status</h4>
-                    <button type="button" class="btn-close" @onclick="ToggleModalSecond"></button>
-                </div>
-                <div class="modal-body">
-                    <EditForm Model="casestatus" OnValidSubmit="AddStatus">
-                       
-                        <div class="mb-3 mt-3">
-                            <label class="form-label">Status Name</label>
-                            <input class="form-control" placeholder="Enter Status Name" @bind-value="casestatus.StatusName" />
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </EditForm>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" @onclick="ToggleModalSecond">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+        <MudTabPanel Text="Case Statuses">
+            <MudPaper Elevation="0">
+                <MudToolBar>
+                    <MudText Typo="Typo.h6">Case Statuses</MudText>
+                    <MudSpacer />
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="ToggleModalSecond">Add Case Status</MudButton>
+                </MudToolBar>
+                <MudTable Items="casestatusList" Dense="true" Hover="true" Elevation="0">
+                    <HeaderContent>
+                        <MudTh>ID</MudTh>
+                        <MudTh>Name</MudTh>
+                        <MudTh>Actions</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Id">@context.StatusId</MudTd>
+                        <MudTd DataLabel="Status Name">@context.StatusName</MudTd>
+                        <MudTd>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => UpdateStatus(context))" />
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteRec(context))" />
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudPaper>
+        </MudTabPanel>
+    </MudTabs>
 
-<MudCard Elevation="25">
-    <MudCardHeader>
-        <CardHeaderContent>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Add CaseType</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModalSecond">Add CaseStatus</MudButton>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
-        <div class="row">
-            <!-- Case Type Categories -->
-            <div class="col-md-6">
-                <MudCard Class="mb-4">
-                    <MudCardHeader Class=" mud-text-dark">
-                        <h5 class="card-title">Case Type Categories</h5>
-                    </MudCardHeader>
-                    <MudCardContent>
-                        <MudTable Items="casetypeList" Dense="true" Hover="true">
-                            <HeaderContent>
-                                <MudTh>#</MudTh>
-                                <MudTh> Name</MudTh>
-                                <MudTh>Actions</MudTh>
-                            </HeaderContent>
-                            <RowTemplate>
-                                <MudTd DataLabel="Id">@context.CaseTypeId</MudTd>
-                                <MudTd DataLabel="Case Type Name">@context.TypeName</MudTd>
-                                <MudTd>
-                                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(()=>Update(context))" />
-                                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(()=>DeleteType(context))" />
-                                </MudTd>
-                            </RowTemplate>
-                        </MudTable>
-                    </MudCardContent>
-                </MudCard>
-            </div>
-            <!-- Case Status -->
-            <div class="col-md-6">
-                <MudCard Class="mb-4">
-                    <MudCardHeader Class=" mud-text-dark">
-                        <h5 class="card-title">Case Status</h5>
-                    </MudCardHeader>
-                    <MudCardContent>
-                        <MudTable Items="casestatusList" Dense="true" Hover="true">
-                            <HeaderContent>
-                                <MudTh>#</MudTh>
-                                <MudTh> Name</MudTh>
-                                <MudTh>Actions</MudTh>
-                            </HeaderContent>
-                            <RowTemplate>
-                                <MudTd DataLabel="Id">@context.StatusId</MudTd>
-                                <MudTd DataLabel="Status Name">@context.StatusName</MudTd>
-                                <MudTd>
-                                    <MudFab Color="Color.Info" StartIcon="@Icons.Material.Filled.Edit" Size="Size.Small" OnClick="@(()=>UpdateStatus(context))"/>
-                                    <MudFab Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" Size="Size.Small" OnClick="@(()=>DeleteRec(context))" />
-                                </MudTd>
-                            </RowTemplate>
-                        </MudTable>
-                    </MudCardContent>
-                </MudCard>
-            </div>
-        </div>
-    </MudCardContent>
-</MudCard>
+<MudDialog @bind-IsVisible="showModal" Options="dialogOptions" MaxWidth="MaxWidth.Large" FullWidth="true">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(casetype.CaseTypeId == 0 ? "Add New Case Type" : "Edit Case Type")</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="casetype.TypeName" Label="Type Name" Required="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="ToggleModal">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Add">@(casetype.CaseTypeId == 0 ? "Add" : "Update")</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+<MudDialog @bind-IsVisible="showModalsecond" Options="dialogOptions" MaxWidth="MaxWidth.Large" FullWidth="true">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(casestatus.StatusId == 0 ? "Add New Case Status" : "Edit Case Status")</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="casestatus.StatusName" Label="Status Name" Required="true" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="ToggleModalSecond">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="AddStatus">@(casestatus.StatusId == 0 ? "Add" : "Update")</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     private CaseType casetype = new CaseType();
@@ -141,6 +103,7 @@
     private bool isAddingStatus = false;
     private bool isDeletingType = false;
     private bool isDeletingStatus = false;
+    private DialogOptions dialogOptions = new DialogOptions { CloseOnEscapeKey = true };
 
     protected override async Task OnInitializedAsync()
     {

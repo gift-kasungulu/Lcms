@@ -298,31 +298,32 @@
             <br />
             <MudButton OnClick="SearchCases" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search"
                 Color="Color.Primary">Search</MudButton>
-        <MudTable Items="filteredCaseList" Filter="new Func<Case,bool>(Search)">
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Casue List</MudText>
-
-                <MudButton OnClick="@DownloadPdf">Download PDF</MudButton>
-                <MudSpacer />
-            </ToolBarContent>
-            <HeaderContent>
-                <MudTh>Next Date</MudTh>
-                <MudTh>Petitioner</MudTh>
-                <MudTh>Vs Client</MudTh>
-                <MudTh>Court Name</MudTh>
-                <MudTh>Status</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="EndDate">@context.EndDate</MudTd>
-                <MudTd DataLabel="Petitioner">@context.Petitioner</MudTd>
-                <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
-                <MudTd DataLabel="Defendant">@context.Defendant</MudTd>
-                <MudTd DataLabel="CaseStatus">@context.CaseStatus.StatusName</MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
-        </MudTable>
+<MudTable Items="@filteredCaseList" Dense="true" Hover="true" Filter="new Func<Case,bool>(Search)">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Cases Listed</MudText>
+        <MudSpacer />
+        <MudButton OnClick="@DownloadPdf" Variant="Variant.Filled" Color="Color.Primary">Download PDF</MudButton>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Sr No</MudTh>
+        <MudTh>Cases</MudTh>
+        <MudTh>Petitioner vs Respondent</MudTh>
+        <MudTh>Stage of Case</MudTh>
+        <MudTh>Next Date</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd>@context.CaseId</MudTd>
+        <MudTd>@context.RegistrationNo</MudTd>
+        <MudTd>
+            @context.Petitioner vs @context.AppUser?.FirstName @context.AppUser?.LastName
+        </MudTd>
+        <MudTd>@context.CaseStatus.StatusName</MudTd>
+        <MudTd>@(context.EndDate.HasValue ? context.EndDate.Value.ToString("dd-MM-yyyy") : "")</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
 
 <br />
 <div id="calendar"></div>
@@ -447,9 +448,7 @@
 
     private async Task DownloadPdf()
     {
-        byte[] pdfBytes = pdfService.GeneratePdfFromCases(filteredCases);
-        // Provide a file name and trigger download
-        await JSRuntime.InvokeAsync<object>("saveAsFile", $"filtered_cases.pdf", Convert.ToBase64String(pdfBytes));
+        await JSRuntime.InvokeVoidAsync("generatePdf", filteredCaseList);
     }
 
     private bool Search(Case mycase)
@@ -526,8 +525,6 @@
         await GetAllAsync();
     }
 
-
-
     public void Update(Case caseRecord)
     {
         OpenModal();
@@ -576,7 +573,7 @@
     {
         isModalVisible = true;
     }
-
+    
     private void CloseModal()
     {
         isModalVisible = false;

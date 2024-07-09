@@ -10,6 +10,7 @@ using Syncfusion.Blazor;
 using MudBlazor.Services;
 using LegalCaseManagement.Data.LegalServices;
 using LegalCaseManagement.Service;
+using PdfSharp.Charting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,7 +46,7 @@ builder.Services.AddSingleton<PdfService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<MessagingService>();
 builder.Services.AddScoped<DocumentService>();
-
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
