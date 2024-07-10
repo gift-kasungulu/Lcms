@@ -7,8 +7,6 @@
 @using Microsoft.EntityFrameworkCore
 @inject IServiceScopeFactory ServiceScopeFactory
 
-<MudCard>
-    <MudCardContent>
         <MudText Typo="Typo.h6" Class="mb-4">Completed Tasks</MudText>
         <MudTable Items="completedTasks">
             <HeaderContent>
@@ -30,8 +28,6 @@
                 </MudTd>
             </RowTemplate>
         </MudTable>
-    </MudCardContent>
-</MudCard>
 
 @code {
     private List<MyTask> completedTasks = new List<MyTask>();

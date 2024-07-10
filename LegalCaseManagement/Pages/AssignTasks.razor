@@ -212,15 +212,27 @@
                     lawyer.AssignedCases.Add(legalCase);
                     context.Lawyers.Update(lawyer);
                 }
+
+                // Create a notification for the lawyer
+                var notification = new Notification
+                    {
+                        UserId = lawyer.Id,
+                        Message = $"A new task has been assigned to you: {task.Description}",
+                        CreatedAt = DateTime.UtcNow,
+                        IsRead = false
+                    };
+
+                context.Notifications.Add(notification);
             }
 
             await context.SaveChangesAsync();
 
             Snackbar.Add("Task assigned successfully", Severity.Success);
-            newTask = new MyTask(); 
+            newTask = new MyTask();
             await GetAllTasksAsync();
         }
     }
+
 
 
         private void ViewTaskDetails(int taskId)

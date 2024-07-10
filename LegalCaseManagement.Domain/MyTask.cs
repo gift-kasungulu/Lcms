@@ -29,7 +29,6 @@ namespace LegalCaseManagement.Domain
         [ForeignKey("StatusId")]
         public MyTaskStatus? Status { get; set; } // Navigation property to my Task Status class
 
-
         [Required]
         public string LawyerId { get; set; } // Foreign key for Lawyers, referencing the Id property from IdentityUser
         [ForeignKey("LawyerId")]

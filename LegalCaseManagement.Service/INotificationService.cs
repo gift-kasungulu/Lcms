@@ -9,6 +9,7 @@ namespace LegalCaseManagement.Service
 {
     internal interface INotificationService
     {
+        Task<List<Notification>> GetNotificationsForUser(string userId);
         /// <summary>
         /// Creates a new notification for a specific user.
         /// </summary>
