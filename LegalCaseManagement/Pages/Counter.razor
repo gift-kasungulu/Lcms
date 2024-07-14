@@ -81,7 +81,7 @@
 </div>
 }
 
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Add User</MudButton>
+    <MudButton  Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Add User</MudButton>
             <br />
         <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
             <MudTabPanel Text="Clients">
@@ -328,6 +328,8 @@
 
     private void ToggleModal()
     {
+        newUser = new User();
+
         showModal = !showModal;
         if (!showModal)
         {

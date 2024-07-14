@@ -1,0 +1,60 @@
+﻿@page "/reports"
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Monthly Reports</PageTitle>
+
+<div class="container">
+    <h3 class="mb-4">Monthly Reports</h3>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="GenerateCompletedCasesReport">Completed Cases</MudButton>
+        </div>
+        <div class="col-md-3">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="GenerateAbandonedCasesReport">Abandoned Cases</MudButton>
+        </div>
+        <div class="col-md-3">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="GenerateRunningCasesReport">Running Cases</MudButton>
+        </div>
+        <div class="col-md-3">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="GenerateClientsReport">Clients Handled</MudButton>
+        </div>
+    </div>
+
+    <!-- Display area for reports -->
+    <div class="card">
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(reportContent))
+            {
+                @reportContent
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string reportContent;
+
+    [Inject]
+    private ReportService ReportService { get; set; }
+
+    private async Task GenerateCompletedCasesReport()
+    {
+        reportContent = await ReportService.GenerateCompletedCasesReportAsync();
+    }
+
+    private async Task GenerateAbandonedCasesReport()
+    {
+        reportContent = await ReportService.GenerateAbandonedCasesReportAsync();
+    }
+
+    private async Task GenerateRunningCasesReport()
+    {
+        reportContent = await ReportService.GenerateRunningCasesReportAsync();
+    }
+
+    private async Task GenerateClientsReport()
+    {
+        //reportContent = await ReportService.GenerateClientsReportAsync();
+    }
+}

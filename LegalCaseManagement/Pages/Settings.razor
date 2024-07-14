@@ -31,8 +31,8 @@
                         <MudTd DataLabel="Id">@context.CaseTypeId</MudTd>
                         <MudTd DataLabel="Case Type Name">@context.TypeName</MudTd>
                         <MudTd>
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => Update(context))" />
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteType(context))" />
+                            <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => Update(context))" />
+                            <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteType(context))" />
                         </MudTd>
                     </RowTemplate>
                 </MudTable>
@@ -56,8 +56,8 @@
                         <MudTd DataLabel="Id">@context.StatusId</MudTd>
                         <MudTd DataLabel="Status Name">@context.StatusName</MudTd>
                         <MudTd>
-                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => UpdateStatus(context))" />
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteRec(context))" />
+                            <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => UpdateStatus(context))" />
+                            <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteRec(context))" />
                         </MudTd>
                     </RowTemplate>
                 </MudTable>

@@ -17,6 +17,15 @@ namespace LegalCaseManagement.Service
             _context = context;
         }
 
+        public async Task<List<MyTask>> GetTasksDueInOneDayAsync()
+        {
+            var tomorrow = DateTime.UtcNow.AddDays(1).Date;
+            return await _context.MyTasks
+                .Where(t => t.DueDate.HasValue && t.DueDate.Value.Date == tomorrow)
+                .Include(t => t.LawyerInfo)
+                .ToListAsync();
+        }
+
         // Implement the interface method
         public async Task<List<MyTask>> GetTasksByLawyerIdAsync(string lawyerId)
         {

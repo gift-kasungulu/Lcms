@@ -18,6 +18,27 @@ namespace LegalCaseManagement.Service
             _context = context;
         }
 
+        public async Task SendTaskDueNotificationsAsync()
+        {
+            var myTaskService = new MyTaskService(_context);
+            var tasks = await myTaskService.GetTasksDueInOneDayAsync();
+
+            foreach (var task in tasks)
+            {
+                var notification = new Notification
+                {
+                    UserId = task.LawyerId,
+                    Message = $"Task '{task.Description}' is due tomorrow.",
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false
+                };
+
+                _context.Notifications.Add(notification);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<List<Notification>> GetNotificationsForUser(string userId)
         {
             return await _context.Notifications

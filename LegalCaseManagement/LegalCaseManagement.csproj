@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <Content Remove="Pages\EditLawyer.razor" />
+    <Content Remove="Pages\MyReports.razor" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,11 +41,13 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Pages\EditLawyer.razor" />
+    <_ContentIncludedByDefault Remove="Pages\MyReports.razor" />
     <_ContentIncludedByDefault Remove="Pages\ViewCaseDetails.razor" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="Pages\EditLawyer.razor" />
+    <None Include="Shared\MyReports.razor" />
     <None Include="Pages\ViewCaseDetails.razor" />
   </ItemGroup>
 
@@ -54,6 +57,10 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\uploads\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Pages\MyReports.razor" />
   </ItemGroup>
 
 </Project>

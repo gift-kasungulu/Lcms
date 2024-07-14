@@ -25,40 +25,88 @@ else if (assignedTasks.Count == 0)
 }
 else
 {
-    <MudTable Items="assignedTasks">
-        <ColGroup>
-            <col style="width: 100px;" />
-            <col />
-            <col />
-            <col />
-            <col style="width: 100px;" />
-        </ColGroup>
-        <HeaderContent>
-            <MudTh>Due Date</MudTh>
-            <MudTh>Description</MudTh>
-            <MudTh>Case</MudTh>
-            <MudTh>Priority</MudTh>
-            <MudTh>Status</MudTh>
-            
-        </HeaderContent>
-        <RowTemplate>
-            <MudTd>@context.DueDate?.ToString("dd MMM yyyy")</MudTd>
-            <MudTd>@context.Description</MudTd>
-            <MudTd>@context.Case?.Discription</MudTd>
-            <MudTd>@context.Priority?.Name</MudTd>
-            <MudTd>@context.Status?.Name</MudTd>
-            <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="() => ViewTaskDetails(context.TaskId)">
-                    View
-                </MudButton>
-            </MudTd>
-
-        </RowTemplate>
-    </MudTable>
+    <MudTabs>
+        <MudTabPanel Text="In Progress">
+            @if (inProgressTasks == null || inProgressTasks.Count == 0)
+            {
+                <p>No tasks in progress.</p>
+            }
+            else
+            {
+                <MudTable Items="inProgressTasks">
+                    <ColGroup>
+                        <col style="width: 100px;" />
+                        <col />
+                        <col />
+                        <col />
+                        <col style="width: 100px;" />
+                    </ColGroup>
+                    <HeaderContent>
+                        <MudTh>Due Date</MudTh>
+                        <MudTh>Description</MudTh>
+                        <MudTh>Case</MudTh>
+                        <MudTh>Priority</MudTh>
+                        <MudTh>Status</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.DueDate?.ToString("dd MMM yyyy")</MudTd>
+                        <MudTd>@context.Description</MudTd>
+                        <MudTd>@context.Case?.Discription</MudTd>
+                        <MudTd>@context.Priority?.Name</MudTd>
+                        <MudTd>@context.Status?.Name</MudTd>
+                        <MudTd>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" @onclick="() => ViewTaskDetails(context.TaskId)">
+                                View
+                            </MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudTabPanel>
+        <MudTabPanel Text="Completed">
+            @if (completedTasks == null || completedTasks.Count == 0)
+            {
+                <p>No completed tasks.</p>
+            }
+            else
+            {
+                <MudTable Items="completedTasks">
+                    <ColGroup>
+                        <col style="width: 100px;" />
+                        <col />
+                        <col />
+                        <col />
+                        <col style="width: 100px;" />
+                    </ColGroup>
+                    <HeaderContent>
+                        <MudTh>Due Date</MudTh>
+                        <MudTh>Description</MudTh>
+                        <MudTh>Case</MudTh>
+                        <MudTh>Priority</MudTh>
+                        <MudTh>Status</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@context.DueDate?.ToString("dd MMM yyyy")</MudTd>
+                        <MudTd>@context.Description</MudTd>
+                        <MudTd>@context.Case?.Discription</MudTd>
+                        <MudTd>@context.Priority?.Name</MudTd>
+                        <MudTd>@context.Status?.Name</MudTd>
+                        <MudTd>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" @onclick="() => ViewTaskDetails(context.TaskId)">
+                                View
+                            </MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+        </MudTabPanel>
+    </MudTabs>
 }
 
 @code {
     private List<MyTask> assignedTasks;
+    private List<MyTask> inProgressTasks;
+    private List<MyTask> completedTasks;
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,6 +114,8 @@ else
         if (user != null)
         {
             assignedTasks = await GetAssignedTasksAsync(user.Id);
+            inProgressTasks = assignedTasks.Where(t => t.Status.Name == "In Progress").ToList();
+            completedTasks = assignedTasks.Where(t => t.Status.Name == "Completed").ToList();
         }
     }
 
@@ -97,8 +147,7 @@ else
     }
 
     private void ViewTaskDetails(int taskId)
-{
-    Navigation.NavigateTo($"/taskdetails/{taskId}");
-}
-
+    {
+        Navigation.NavigateTo($"/taskdetails/{taskId}");
+    }
 }

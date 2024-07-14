@@ -34,8 +34,8 @@
                     <MudTd DataLabel="Id">@context.StatusId</MudTd>
                     <MudTd DataLabel="Task Status Name">@context.Name</MudTd>
                     <MudTd>
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => UpdateTaskStatus(context))" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteTaskStatus(context))" />
+                        <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => UpdateTaskStatus(context))" />
+                        <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteTaskStatus(context))" />
                     </MudTd>
                 </RowTemplate>
             </MudTable>
@@ -59,8 +59,8 @@
                     <MudTd DataLabel="Id">@context.PriorityId</MudTd>
                     <MudTd DataLabel="Priority Name">@context.Name</MudTd>
                     <MudTd>
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => UpdatePriority(context))" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeletePriority(context))" />
+                        <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => UpdatePriority(context))" />
+                        <MudIconButton Variant="Variant.Outlined" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeletePriority(context))" />
                     </MudTd>
                 </RowTemplate>
             </MudTable>

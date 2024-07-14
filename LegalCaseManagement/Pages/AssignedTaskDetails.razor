@@ -6,11 +6,12 @@
 @using LegalCaseManagement.Service
 @using Microsoft.EntityFrameworkCore
 @using MudBlazor
+@using System.IO
+@inject IJSRuntime JSRuntime
 @inject IServiceScopeFactory ServiceScopeFactory
 @inject NavigationManager Navigation
 @inject ISnackbar snackbar
 @inject MyTaskService myTaskService
-
 
         <MudText Typo="Typo.h5" Class="mb-4">Task Detail</MudText>
 
@@ -42,6 +43,38 @@
                     </MudTable>
                 </MudItem>
             </MudGrid>
+
+    <MudDivider Class="my-6" />
+
+    <h4>Case Documents</h4>
+    @if (caseDocuments.Any())
+    {
+        <MudGrid>
+            @foreach (var doc in caseDocuments)
+            {
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4" Style="width: 100%;">
+                        <MudGrid>
+                            <MudItem xs="1">
+                                <MudIconButton Icon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Secondary" />
+                            </MudItem>
+                            <MudItem xs="9">
+                                <MudText>@doc.FileName</MudText>
+                                <MudText Typo="Typo.caption" Class="text-muted">@doc.UploadDate.ToString("dd MMM yyyy")</MudText>
+                            </MudItem>
+                            <MudItem xs="2">
+                                <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Primary" OnClick="@(() => DownloadDocument(doc.Id))" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+            }
+        </MudGrid>
+    }
+    else
+    {
+        <MudText>No documents uploaded for this case.</MudText>
+    }
 
             <MudDivider Class="my-6" />
 
@@ -81,6 +114,16 @@
             <MudAlert Severity="Severity.Error">Failed to load task data. Please try again later.</MudAlert>
         }
 
+<script>
+    function downloadFileFromStream(fileName, base64String) {
+        const link = document.createElement('a');
+        link.download = fileName;
+        link.href = "data:application/octet-stream;base64," + base64String;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+</script>
 
 @code {
     [Parameter] public int taskId { get; set; }
@@ -89,10 +132,47 @@
     private List<DetailRow> detailRows = new List<DetailRow>();
     private List<DetailRow> caseDetailRows = new List<DetailRow>();
     private bool isLoading = true;
+    private List<CaseDocument> caseDocuments = new List<CaseDocument>();
 
     protected override async Task OnInitializedAsync()
     {
         await LoadTask();
+    }
+
+    private async Task LoadCaseDocuments()
+    {
+        if (task?.Case != null)
+        {
+            using var scope = ServiceScopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            caseDocuments = await context.Documents
+                .Where(d => d.CaseId == task.Case.CaseId)
+                .ToListAsync();
+        }
+    }
+
+    private async Task DownloadDocument(int documentId)
+    {
+        var document = caseDocuments.FirstOrDefault(d => d.Id == documentId);
+        if (document != null)
+        {
+            try
+            {
+                // Read the file content
+                byte[] fileBytes = await File.ReadAllBytesAsync(document.FilePath);
+
+                // Convert the file to a base64 string
+                string base64String = Convert.ToBase64String(fileBytes);
+
+                // Use JSRuntime to trigger the download
+                await JSRuntime.InvokeVoidAsync("downloadFileFromStream", document.FileName, base64String);
+            }
+            catch (Exception ex)
+            {
+                snackbar.Add($"Error downloading file: {ex.Message}", Severity.Error);
+            }
+        }
     }
 
     private async Task LoadTask()
@@ -121,6 +201,7 @@
             {
                 PopulateDetailRows();
                 PopulateCaseDetailRows();
+                await LoadCaseDocuments(); // Add this line
             }
             else
             {

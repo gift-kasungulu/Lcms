@@ -1,5 +1,5 @@
 @page "/assignedcasedetails/{caseId:int}"
-@attribute [Authorize(Roles = "Admin, Lawyer, Team")]
+@attribute [Authorize(Roles = "Admin, Team")]
 
 @using LegalCaseManagement.Data
 @using LegalCaseManagement.Domain
@@ -9,8 +9,6 @@
 @inject LawyerService lawyerService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-<MudCard>
-    <MudCardContent>
         <MudText Typo="Typo.h6" Class="mb-4">Case Details</MudText>
         @if (caseDetails == null)
         {
@@ -49,14 +47,11 @@
                 </MudItem>
             </MudGrid>
         }
-    </MudCardContent>
-</MudCard>
-
 @code {
     [Parameter]
     public int caseId { get; set; }
 
-    private Case? caseDetails;
+    private Case caseDetails = new Case();
 
     protected override async Task OnInitializedAsync()
     {

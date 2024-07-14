@@ -10,5 +10,6 @@ namespace LegalCaseManagement.Service
         Task<MyTask> GetByIdAsync(int taskId);
         Task<bool> UpdateAsync(MyTask task);
         Task<bool> AddAsync(MyTask newTask);
+        Task<List<MyTask>> GetTasksDueInOneDayAsync();
     }
 }

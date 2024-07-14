@@ -44,6 +44,8 @@ builder.Services.AddMudServices();
 builder.Services.AddSingleton<PdfService>();
 builder.Services.AddSingleton<PdfService>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddHostedService<NotificationHostedService>();
+builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<MessagingService>();
 builder.Services.AddScoped<DocumentService>();
 builder.Services.AddHttpContextAccessor();

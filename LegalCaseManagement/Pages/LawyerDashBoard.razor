@@ -55,6 +55,13 @@
                 <MudListItem>
                     <MudText Typo="Typo.body1">@notification.Message</MudText>
                     <MudText Typo="Typo.caption">@notification.CreatedAt.ToString("g")</MudText>
+                    <MudButton Color="Color.Primary" OnClick="@(() => MarkAsRead(notification.Id))">Mark as Read</MudButton>
+                </MudListItem>
+                <MudListItem>
+                    @if (notification.Message.Contains("is due tomorrow"))
+                    {
+                        <MudBadge Color="Color.Error"></MudBadge>
+                    }
                 </MudListItem>
             }
         </MudList>
@@ -64,6 +71,7 @@
         <MudText>No notifications</MudText>
     }
 </MudPaper>
+
 
 @code {
     private int casesCreatedCount;
@@ -118,6 +126,13 @@
     private void NavigateToCreatedCases()
     {
         Navigation.NavigateTo("/created-cases");
+    }
+
+    private async Task MarkAsRead(int notificationId)
+    {
+        await notificationService.MarkAsRead(notificationId);
+        notifications = notifications.Where(n => n.Id != notificationId).ToList();
+        StateHasChanged();
     }
 
     private void NavigateToAssignedCases()
