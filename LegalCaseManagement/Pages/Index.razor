@@ -78,7 +78,7 @@
                                 @recentCase.Discription
                                 @if (IsCaseNew(recentCase))
                                 {
-                                    <MudBadge Color="Color.Secondary">.                          New</MudBadge>
+                                    <MudBadge Color="Color.Secondary">.New</MudBadge>
                                 }
                             </MudListItem>
                         }
@@ -135,6 +135,7 @@
         new Notice { Id = 7, Title = "Important: Data Privacy and Security Update for All Users" },
         new Notice { Id = 8, Title = "Courtroom Etiquette Seminar for Junior Associates" }
     };
+
     }
 
     private List<Case> GetRecentCases()

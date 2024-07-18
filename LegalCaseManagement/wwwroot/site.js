@@ -6,6 +6,14 @@ function saveAsFile(filename, bytesBase64) {
     link.click();
     document.body.removeChild(link);
 }
+function downloadreportFile(fileName, content) {
+    var blob = new Blob([content], { type: 'application/pdf' });
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+}
+
 function focusDatePicker(datePickerId) {
     // Focus on the MudDatePicker with the provided ID
     var datePicker = document.getElementById(datePickerId);

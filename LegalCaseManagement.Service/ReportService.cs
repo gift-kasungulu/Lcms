@@ -1,65 +1,68 @@
-﻿using LegalCaseManagement.Data;
+﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
+using LegalCaseManagement.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading.Tasks;
 
 public class ReportService
 {
-    private readonly ApplicationDbContext _applicationDbContext;
+    private readonly ApplicationDbContext _context;
 
-    public ReportService(ApplicationDbContext applicationDbContext)
+    public ReportService(ApplicationDbContext context)
     {
-        this._applicationDbContext = applicationDbContext;
+        _context = context;
     }
 
-    public async Task<string> GenerateAbandonedCasesReportAsync()
+    public async Task<MonthlyReport> GenerateMonthlyReportAsync(DateTime month)
     {
-        var abandonedCases = await _applicationDbContext.Cases
-            .Include(c => c.CaseStatus) // Ensure CaseStatus navigation property is included
-            .Where(c => c.CaseStatus.StatusName == "Abandoned" && c.StartDate != null && c.StartDate.Value.Month == DateTime.Now.Month)
+        var startDate = new DateTime(month.Year, month.Month, 1);
+        var endDate = startDate.AddMonths(1).AddDays(-1);
+
+        var cases = await _context.Cases
+            .Where(c => c.StartDate >= startDate && c.StartDate <= endDate)
             .ToListAsync();
 
-        var reportContent = FormatCasesReport(abandonedCases);
-        return reportContent;
-    }
-
-    public async Task<string> GenerateCompletedCasesReportAsync()
-    {
-        // Fetch and generate completed cases report logic
-        // Example:
-        var completedCases = await _applicationDbContext.Cases
-            .Where(c => c.CaseStatus.StatusName == "Completed" && c.EndDate.Value.Month == DateTime.Now.Month)
-            .ToListAsync();
-        return FormatCasesReport(completedCases);
-    }
-
-
-    public async Task<string> GenerateRunningCasesReportAsync()
-    {
-        var runningCases = await _applicationDbContext.Cases
-            .Include(c => c.CaseStatus) // Ensure CaseStatus navigation property is included
-            .Where(c => c.CaseStatus.StatusName == "Running" && c.StartDate != null && c.StartDate.Value.Month == DateTime.Now.Month)
-            .ToListAsync();
-
-        var reportContent = FormatCasesReport(runningCases);
-        return reportContent;
-    }
-
-    private string FormatCasesReport(List<Case> cases)
-    {
-        var sb = new StringBuilder();
-        sb.AppendLine("<h3>Monthly Cases Report</h3>");
-        sb.AppendLine("<ul>");
-
-        foreach (var caseItem in cases)
+        return new MonthlyReport
         {
-            sb.AppendLine($"<li>{caseItem.Discription} - {caseItem.CaseStatus.StatusName}</li>");
-        }
-
-        sb.AppendLine("</ul>");
-        return sb.ToString();
+            TotalCases = cases.Count,
+            CompletedCases = cases.Count(c => c.CaseStatus.StatusName == "Completed"),
+            WonCases = cases.Count(c => c.CaseStatus.StatusName == "Won"),
+            LostCases = cases.Count(c => c.CaseStatus.StatusName == "Lost")
+        };
     }
+
+    public async Task<byte[]> GeneratePdfReportAsync(DateTime month, int totalCases, int completedCases, int wonCases, int lostCases)
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            using (iTextSharp.text.Document document = new iTextSharp.text.Document())
+            {
+                PdfWriter writer = PdfWriter.GetInstance(document, ms);
+                document.Open();
+
+                document.Add(new Paragraph($"Monthly Report for {month:MMMM yyyy}"));
+                document.Add(new Paragraph($"Total Cases: {totalCases}"));
+                document.Add(new Paragraph($"Completed Cases: {completedCases}"));
+                document.Add(new Paragraph($"Won Cases: {wonCases}"));
+                document.Add(new Paragraph($"Lost Cases: {lostCases}"));
+
+                document.Close();
+            }
+
+            return ms.ToArray();
+        }
+    }
+}
+
+public class MonthlyReport
+{
+    public int TotalCases { get; set; }
+    public int CompletedCases { get; set; }
+    public int WonCases { get; set; }
+    public int LostCases { get; set; }
 }

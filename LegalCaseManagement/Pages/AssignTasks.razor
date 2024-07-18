@@ -100,8 +100,11 @@
                 <MudTd>
                     @if (@context.Status?.Name.ToLower() == "completed")
                     {
-                        <MudFab  Color="Color.Info"  StartIcon="@Icons.Material.Filled.Checklist"
-                                Size="Size.Small" @onclick="() => TransferToCompleted(context.TaskId)" />
+                        <MudTooltip Text="Mark as completed">
+                            <MudFab Variant="Varisnt.Outlined" Color="Color.Info" StartIcon="@Icons.Material.Filled.Checklist"
+                            Size="Size.Small" @onclick="() => TransferToCompleted(context.TaskId)" />
+                        </MudTooltip>
+                        
 
                     }
                 </MudTd>

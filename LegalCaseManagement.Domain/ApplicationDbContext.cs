@@ -64,6 +64,20 @@ namespace LegalCaseManagement.Data
                 .HasMany(c => c.CaseDocuments)
                 .WithOne(d => d.Case)
                 .HasForeignKey(d => d.CaseId);
+
+            builder.Entity<Case>()
+        .HasMany(c => c.Tasks)
+        .WithOne(t => t.Case)
+        .HasForeignKey(t => t.CaseId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Case>()
+                .HasMany(c => c.CaseDocuments)
+                .WithOne(d => d.Case)
+                .HasForeignKey(d => d.CaseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            
         }
 
     }

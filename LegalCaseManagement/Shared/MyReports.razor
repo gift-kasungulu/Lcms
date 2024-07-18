@@ -1,60 +1,122 @@
 ﻿@page "/reports"
 @attribute [Authorize(Roles = "Admin")]
+@using MudBlazor
+@inject ISnackbar Snackbar
+@inject IJSRuntime JSRuntime
+@inject ReportService ReportService
 
-<PageTitle>Monthly Reports</PageTitle>
+<PageTitle>Legal Case Management - Monthly Reports</PageTitle>
 
-<div class="container">
-    <h3 class="mb-4">Monthly Reports</h3>
+        <MudText Typo="Typo.h4" Class="mb-4">Monthly Case Reports</MudText>
 
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="GenerateCompletedCasesReport">Completed Cases</MudButton>
-        </div>
-        <div class="col-md-3">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="GenerateAbandonedCasesReport">Abandoned Cases</MudButton>
-        </div>
-        <div class="col-md-3">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="GenerateRunningCasesReport">Running Cases</MudButton>
-        </div>
-        <div class="col-md-3">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="GenerateClientsReport">Clients Handled</MudButton>
-        </div>
-    </div>
+        <MudGrid>
+            <MudItem xs="12" sm="6" md="4">
+                <MudDatePicker @bind-Date="selectedMonth" Label="Select Month" DateFormat="MMMM yyyy"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" />
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GenerateReport"
+                           Class="mt-2" FullWidth="true">Generate Report</MudButton>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="4">
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="DownloadPdf"
+                           Disabled="@(!reportGenerated)" Class="mt-2" FullWidth="true">
+                    <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Class="mr-2" /> Download PDF
+                </MudButton>
+            </MudItem>
+        </MudGrid>
 
-    <!-- Display area for reports -->
-    <div class="card">
-        <div class="card-body">
-            @if (!string.IsNullOrEmpty(reportContent))
-            {
-                @reportContent
-            }
-        </div>
-    </div>
-</div>
+        @if (reportGenerated)
+        {
+            <MudDivider Class="my-6" />
+            <MudText Typo="Typo.h5" Class="mb-4">Report for @selectedMonth?.ToString("MMMM yyyy")</MudText>
+
+            <MudGrid>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Elevation="2" Class="pa-4 mud-theme-primary">
+                        <MudText Typo="Typo.h6">Total Cases</MudText>
+                        <MudText Typo="Typo.h4">@totalCases</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Elevation="2" Class="pa-4 mud-theme-secondary">
+                        <MudText Typo="Typo.h6">Completed Cases</MudText>
+                        <MudText Typo="Typo.h4">@completedCases</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Elevation="2" Class="pa-4 mud-theme-success">
+                        <MudText Typo="Typo.h6">Won Cases</MudText>
+                        <MudText Typo="Typo.h4">@wonCases</MudText>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Elevation="2" Class="pa-4 mud-theme-error">
+                        <MudText Typo="Typo.h6">Lost Cases</MudText>
+                        <MudText Typo="Typo.h4">@lostCases</MudText>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            <MudSimpleTable Class="mt-6" Hover="true" Bordered="true" Striped="true">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Completed Cases</td>
+                        <td>@completedCases</td>
+                        <td>@(totalCases > 0 ? $"{(double)completedCases / totalCases * 100:F2}%" : "N/A")</td>
+                    </tr>
+                    <tr>
+                        <td>Won Cases</td>
+                        <td>@wonCases</td>
+                        <td>@(completedCases > 0 ? $"{(double)wonCases / completedCases * 100:F2}%" : "N/A")</td>
+                    </tr>
+                    <tr>
+                        <td>Lost Cases</td>
+                        <td>@lostCases</td>
+                        <td>@(completedCases > 0 ? $"{(double)lostCases / completedCases * 100:F2}%" : "N/A")</td>
+                    </tr>
+                </tbody>
+            </MudSimpleTable>
+        }
+
 
 @code {
-    private string reportContent;
+    private DateTime? selectedMonth = DateTime.Now;
+    private bool reportGenerated = false;
+    private int totalCases, completedCases, wonCases, lostCases;
 
-    [Inject]
-    private ReportService ReportService { get; set; }
-
-    private async Task GenerateCompletedCasesReport()
+    private async Task GenerateReport()
     {
-        reportContent = await ReportService.GenerateCompletedCasesReportAsync();
+        if (selectedMonth.HasValue)
+        {
+            var report = await ReportService.GenerateMonthlyReportAsync(selectedMonth.Value);
+            totalCases = report.TotalCases;
+            completedCases = report.CompletedCases;
+            wonCases = report.WonCases;
+            lostCases = report.LostCases;
+            reportGenerated = true;
+            Snackbar.Add("Report generated successfully", Severity.Success);
+        }
+        else
+        {
+            Snackbar.Add("Please select a month", Severity.Warning);
+        }
     }
 
-    private async Task GenerateAbandonedCasesReport()
+    private async Task DownloadPdf()
     {
-        reportContent = await ReportService.GenerateAbandonedCasesReportAsync();
-    }
-
-    private async Task GenerateRunningCasesReport()
-    {
-        reportContent = await ReportService.GenerateRunningCasesReportAsync();
-    }
-
-    private async Task GenerateClientsReport()
-    {
-        //reportContent = await ReportService.GenerateClientsReportAsync();
+        if (reportGenerated)
+        {
+            var pdfContent = await ReportService.GeneratePdfReportAsync(selectedMonth.Value, totalCases, completedCases, wonCases, lostCases);
+            await JSRuntime.InvokeVoidAsync("downloadreportFile", "monthly_report.pdf", pdfContent);
+            Snackbar.Add("PDF downloaded successfully", Severity.Success);
+        }
     }
 }

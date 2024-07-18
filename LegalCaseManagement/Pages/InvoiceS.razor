@@ -1,0 +1,65 @@
+﻿@page "/invoice/{InvoiceId}"
+@using Stripe
+@*@using Stripe.BillingPortal*@
+@using Stripe.Checkout
+@inject IConfiguration Configuration
+@inject IJSRuntime JSRuntime
+
+<h2>Pay Invoice</h2>
+
+@if (invoice != null)
+{
+    <p>Amount Due: $@(invoice.AmountDue / 100m)</p>
+    <p>Due Date: @invoice.DueDate?.ToString("d")</p>
+    <button @onclick="PayInvoice" class="btn btn-primary">Pay Now</button>
+}
+else
+{
+    <p>Loading...</p>
+}
+
+@code {
+    [Parameter]
+    public string InvoiceId { get; set; }
+
+    private Invoice invoice;
+
+    protected override async Task OnInitializedAsync()
+    {
+        StripeConfiguration.ApiKey = Configuration["Stripe:SecretKey"];
+        var service = new InvoiceService();
+        invoice = await service.GetAsync(InvoiceId);
+    }
+
+    private async Task PayInvoice()
+    {
+        var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string> { "card" },
+                Mode = "payment",
+                LineItems = new List<SessionLineItemOptions>
+        {
+            new SessionLineItemOptions
+            {
+                PriceData = new SessionLineItemPriceDataOptions
+                {
+                    UnitAmount = invoice.AmountDue,
+                    Currency = "usd",
+                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    {
+                        Name = "Invoice Payment",
+                    },
+                },
+                Quantity = 1,
+            },
+        },
+                SuccessUrl = $"{Configuration["ApplicationUrl"]}/payment-success",
+                CancelUrl = $"{Configuration["ApplicationUrl"]}/payment-cancelled",
+            };
+
+        var service = new SessionService();
+        var session = await service.CreateAsync(options);
+
+        await JSRuntime.InvokeVoidAsync("stripe.redirectToCheckout", session.Id);
+    }
+}

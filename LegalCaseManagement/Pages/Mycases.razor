@@ -98,6 +98,7 @@
     </div>
 </div>
 
+
 <MudButton OnClick="OpenModal" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">
         Create Case
  </MudButton>
@@ -138,6 +139,15 @@
                         <MudMenuItem OnClick="@(() => OpenEditDateModal(context))">
                             <i class="bi bi-calendar-event"></i>
                             Next Date
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OpenUpdateModal(context))">
+                            <i class="bi bi-pencil"></i>
+                            Edit
+                        </MudMenuItem>
+
+                        <MudMenuItem OnClick="@(() => Deletecase(context))">
+                            <i class="bi bi-trash"></i>
+                            Delete 
                         </MudMenuItem>
                     </MudMenu>
                 </MudTd>
@@ -183,6 +193,15 @@
                             <i class="bi bi-calendar-event"></i>
                             Next Date
                         </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OpenUpdateModal(context))">
+                            <i class="bi bi-pencil"></i>
+                            Edit
+                        </MudMenuItem>
+
+                        <MudMenuItem OnClick="@(() => Deletecase(context))">
+                            <i class="bi bi-bi-trash"></i>
+                            Delete
+                        </MudMenuItem>
                     </MudMenu>
                 </MudTd>
             </RowTemplate>
@@ -226,6 +245,15 @@
                         <MudMenuItem OnClick="@(() => OpenEditDateModal(context))">
                             <i class="bi bi-calendar-event"></i>
                             Next Date
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OpenUpdateModal(context))">
+                            <i class="bi bi-pencil"></i>
+                            Edit
+                        </MudMenuItem>
+
+                        <MudMenuItem OnClick="@(() => Deletecase(context))">
+                            <i class="bi bi-bi-trash"></i>
+                            Delete
                         </MudMenuItem>
                     </MudMenu>
                 </MudTd>
@@ -271,6 +299,15 @@
                             <i class="bi bi-calendar-event"></i>
                             Next Date
                         </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OpenUpdateModal(context))">
+                            <i class="bi bi-pencil"></i>
+                            Edit
+                        </MudMenuItem>
+
+                        <MudMenuItem OnClick="@(() => Deletecase(context))">
+                            <i class="bi bi-bi-trash"></i>
+                            Delete
+                        </MudMenuItem>
                     </MudMenu>
                 </MudTd>
             </RowTemplate>
@@ -294,7 +331,9 @@
 </MudDialog>
     
 <br />
-            <MudDatePicker @bind-Date="selectedDate" Label="Select Date" />
+<MudTooltip Text="Select Date"> 
+         <MudDatePicker @bind-Date="selectedDate" Label="Select Date" />
+</MudTooltip>
             <br />
             <MudButton OnClick="SearchCases" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search"
                 Color="Color.Primary">Search</MudButton>
@@ -350,6 +389,54 @@
     private List<Case> decidedCases = new List<Case>();
     private bool isEditDateModalVisible = false;
     private Case editingCase = new Case();
+    private bool isUpdateModalVisible = false;
+    private string updateModalClass => isUpdateModalVisible ? "show" : "";
+    private string updateModalDisplay => isUpdateModalVisible ? "block" : "";
+
+    private void OpenUpdateModal(Case caseToEdit)
+    {
+        editingCase = caseToEdit;
+        isUpdateModalVisible = true;
+    }
+
+    private void CloseUpdateModal()
+    {
+        isUpdateModalVisible = false;
+    }
+
+    private async Task UpdateCase()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>();
+            var caseToUpdate = await context.Cases.FindAsync(editingCase.CaseId);
+            if (caseToUpdate != null)
+            {
+                caseToUpdate.Discription = editingCase.Discription;
+                caseToUpdate.RegistrationDate = editingCase.RegistrationDate;
+                caseToUpdate.RegistrationNo = editingCase.RegistrationNo;
+                caseToUpdate.StartDate = editingCase.StartDate;
+                caseToUpdate.EndDate = editingCase.EndDate;
+                caseToUpdate.Petitioner = editingCase.Petitioner;
+                caseToUpdate.Defendant = editingCase.Defendant;
+                caseToUpdate.UserId = editingCase.UserId;
+                caseToUpdate.CaseTypeId = editingCase.CaseTypeId;
+                caseToUpdate.StatusId = editingCase.StatusId;
+
+                await context.SaveChangesAsync();
+                snackbar.Add("Case updated successfully.", Severity.Success);
+
+                // Create notification
+                var message = $"Case {caseToUpdate.RegistrationNo} has been updated.";
+                await notificationService.CreateNotification(caseToUpdate.UserId, message);
+            }
+        }
+
+        await GetAllAsync();
+        CloseUpdateModal();
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -360,6 +447,12 @@
         FilterCases();
 
         selectedDate = DateTime.Today;
+    }
+
+    private async Task Deletecase(Case mycase)
+    {
+        await caseService.AddAsync(mycase);
+        snackbar.Add("The case was deleted ", Severity.Warning);
     }
 
     private void OpenEditDateModal(Case caseToEdit)
