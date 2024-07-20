@@ -20,6 +20,83 @@
 @inject NavigationManager NavManager
 @inject IHttpContextAccessor HttpContextAccessor
 
+@if (isUpdateModalVisible)
+{
+    <div class="modal show" tabindex="-1" aria-labelledby="updateCaseModalLabel" style="display:block">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateCaseModalLabel">Update Case</h5>
+                    <button type="button" class="btn-close" @onclick="CloseUpdateModal" aria-label="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="editingCase" OnValidSubmit="UpdateCase">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <InputText @bind-Value="editingCase.Discription" id="description" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="registrationDate" class="form-label">Registration Date</label>
+                            <InputDate @bind-Value="editingCase.RegistrationDate" id="registrationDate" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="registrationNo" class="form-label">Registration Number</label>
+                            <InputText @bind-Value="editingCase.RegistrationNo" id="registrationNo" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="startDate" class="form-label">Starting Date</label>
+                            <InputDate @bind-Value="editingCase.StartDate" id="startDate" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="endDate" class="form-label">Next Hearing Date</label>
+                            <InputDate @bind-Value="editingCase.EndDate" id="endDate" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="petitioner" class="form-label">Petitioner</label>
+                            <InputText @bind-Value="editingCase.Petitioner" id="petitioner" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="defendant" class="form-label">Court Name</label>
+                            <InputText @bind-Value="editingCase.Defendant" id="defendant" class="form-control" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="client" class="form-label">Client</label>
+                            <InputSelect @bind-Value="editingCase.UserId" id="client" class="form-select" required>
+                                @foreach (var client in clients)
+                                {
+                                    <option value="@client.Id">@client.FirstName @client.LastName</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label for="caseType" class="form-label">Case Type</label>
+                            <InputSelect @bind-Value="editingCase.CaseTypeId" id="caseType" class="form-select" required>
+                                @foreach (var caseType in caseTypes)
+                                {
+                                    <option value="@caseType.CaseTypeId">@caseType.TypeName</option>
+                                }
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="mb-3">
+                            <label for="caseStatus" class="form-label">Case Status</label>
+                            <InputSelect @bind-Value="editingCase.StatusId" id="caseStatus" class="form-select" required>
+                                @foreach (var caseStatus in caseStatuses)
+                                {
+                                    <option value="@caseStatus.StatusId">@caseStatus.StatusName</option>
+                                }
+                                }
+                            </InputSelect>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Case</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 <div class="modal @modalClass" tabindex="-1" aria-labelledby="addCaseModalLabel" style="display:@modalDisplay">
     <div class="modal-dialog modal-lg">
@@ -98,11 +175,11 @@
     </div>
 </div>
 
-
 <MudButton OnClick="OpenModal" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary">
         Create Case
  </MudButton>
  <br />
+ @*The Tabs*@
             <MudTabs Elevation="1">
     <MudTabPanel Text="Running Cases">
         @* Running Cases Table *@
@@ -140,10 +217,11 @@
                             <i class="bi bi-calendar-event"></i>
                             Next Date
                         </MudMenuItem>
-                        <MudMenuItem OnClick="@(() => OpenUpdateModal(context))">
+                        <MudMenuItem OnClick="() => OpenUpdateModal(context)">
                             <i class="bi bi-pencil"></i>
                             Edit
                         </MudMenuItem>
+
 
                         <MudMenuItem OnClick="@(() => Deletecase(context))">
                             <i class="bi bi-trash"></i>
@@ -193,10 +271,11 @@
                             <i class="bi bi-calendar-event"></i>
                             Next Date
                         </MudMenuItem>
-                        <MudMenuItem OnClick="@(() => OpenUpdateModal(context))">
+                        <MudMenuItem OnClick="() => OpenUpdateModal(context)">
                             <i class="bi bi-pencil"></i>
                             Edit
                         </MudMenuItem>
+
 
                         <MudMenuItem OnClick="@(() => Deletecase(context))">
                             <i class="bi bi-bi-trash"></i>
@@ -246,10 +325,11 @@
                             <i class="bi bi-calendar-event"></i>
                             Next Date
                         </MudMenuItem>
-                        <MudMenuItem OnClick="@(() => OpenUpdateModal(context))">
+                        <MudMenuItem OnClick="() => OpenUpdateModal(context)">
                             <i class="bi bi-pencil"></i>
                             Edit
                         </MudMenuItem>
+
 
                         <MudMenuItem OnClick="@(() => Deletecase(context))">
                             <i class="bi bi-bi-trash"></i>
@@ -299,10 +379,11 @@
                             <i class="bi bi-calendar-event"></i>
                             Next Date
                         </MudMenuItem>
-                        <MudMenuItem OnClick="@(() => OpenUpdateModal(context))">
+                        <MudMenuItem OnClick="() => OpenUpdateModal(context)">
                             <i class="bi bi-pencil"></i>
                             Edit
                         </MudMenuItem>
+
 
                         <MudMenuItem OnClick="@(() => Deletecase(context))">
                             <i class="bi bi-bi-trash"></i>
@@ -316,6 +397,57 @@
             </PagerContent>
         </MudTable>
     </MudTabPanel>
+    <MudTabPanel Text="Completed Cases">
+        @* Completed Cases Table *@
+        <MudTable Items="completedCases" Filter="new Func<Case, bool>(Search)">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Cases</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString" Placeholder="Search by Description, Client, or Case ID"
+                              IconSize="Size.Large" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>#</MudTh>
+                <MudTh>Next Date</MudTh>
+                <MudTh>Petitioner</MudTh>
+                <MudTh>Vs Client</MudTh>
+                <MudTh>Court Name</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Action</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="CaseId">@context.CaseId</MudTd>
+                <MudTd DataLabel="EndDate">@context.EndDate?.ToString("dd-MM-yyyy")</MudTd>
+                <MudTd DataLabel="Petitioner">@context.Petitioner</MudTd>
+                <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
+                <MudTd DataLabel="Defendant">@context.Defendant</MudTd>
+                <MudTd DataLabel="CaseStatus">@context.CaseStatus?.StatusName</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                        <MudMenuItem OnClick="@(() => NavigateToCaseDetails(context.CaseId))">
+                            <i class="bi bi-eye"></i>
+                            View
+                        </MudMenuItem>
+                        <MudMenuItem >
+                            <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="() => MarkCaseAsWon(context.CaseId)">Mark as Won</MudButton>
+                            
+                        </MudMenuItem>
+                        <MudMenuItem>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => MarkCaseAsLost(context.CaseId)">Mark as Lost</MudButton>
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => Deletecase(context))">
+                            <i class="bi bi-trash"></i>
+                            Delete
+                        </MudMenuItem>
+                    </MudMenu>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudTabPanel>
+
 </MudTabs>
 <MudDialog @bind-IsVisible="isEditDateModalVisible">
     <TitleContent>
@@ -390,18 +522,32 @@
     private bool isEditDateModalVisible = false;
     private Case editingCase = new Case();
     private bool isUpdateModalVisible = false;
-    private string updateModalClass => isUpdateModalVisible ? "show" : "";
-    private string updateModalDisplay => isUpdateModalVisible ? "block" : "";
+    private List<Case> completedCases = new List<Case>();
+    private List<Case> cases = new List<Case>();
 
-    private void OpenUpdateModal(Case caseToEdit)
+   
+
+    protected override async Task OnInitializedAsync()
     {
-        editingCase = caseToEdit;
-        isUpdateModalVisible = true;
+        
+        await GetAllAsync();
+        clients = (await _userManager.GetUsersInRoleAsync("Client")).ToList();
+        caseTypes = await caseTypeService.GetAllAsync();
+        caseStatuses = await caseStatusService.GetAllAsync();
+        FilterCases();
+
+        selectedDate = DateTime.Today;
     }
 
     private void CloseUpdateModal()
     {
         isUpdateModalVisible = false;
+    }
+
+    private void OpenUpdateModal(Case caseToEdit)
+    {
+        editingCase = caseToEdit;
+        isUpdateModalVisible = true;
     }
 
     private async Task UpdateCase()
@@ -437,17 +583,41 @@
         CloseUpdateModal();
     }
 
-
-    protected override async Task OnInitializedAsync()
+    private async Task MarkCaseAsWon(int caseId)
     {
-        await GetAllAsync();
-        clients = (await _userManager.GetUsersInRoleAsync("Client")).ToList();
-        caseTypes = await caseTypeService.GetAllAsync();
-        caseStatuses = await caseStatusService.GetAllAsync();
-        FilterCases();
-
-        selectedDate = DateTime.Today;
+        if (await caseService.MarkCaseAsWonAsync(caseId))
+        {
+            UpdateCaseStatus(caseId, "Won");
+            snackbar.Add("Case marked as won successfully", Severity.Success);
+        }
+        else
+        {
+            snackbar.Add("Failed to mark case as won", Severity.Error);
+        }
     }
+
+    private async Task MarkCaseAsLost(int caseId)
+    {
+        if (await caseService.MarkCaseAsLostAsync(caseId))
+        {
+            UpdateCaseStatus(caseId, "Lost");
+            snackbar.Add("Case marked as lost successfully", Severity.Success);
+        }
+        else
+        {
+            snackbar.Add("Failed to mark case as lost", Severity.Error);
+        }
+    }
+
+    private void UpdateCaseStatus(int caseId, string statusName)
+    {
+        var caseToUpdate = cases.FirstOrDefault(c => c.CaseId == caseId);
+        if (caseToUpdate != null)
+        {
+            caseToUpdate.CaseStatus.StatusName = statusName;
+        }
+    }
+
 
     private async Task Deletecase(Case mycase)
     {
@@ -500,6 +670,7 @@
         highPriorityCases = caseList.Where(c => c.CaseType.TypeName == "High").ToList();
         abandonedCases = caseList.Where(c => c.CaseType.TypeName == "Abandoned").ToList();
         decidedCases = caseList.Where(c => c.CaseType.TypeName == "Decided").ToList();
+        completedCases = caseList.Where(c => c.CaseStatus.StatusName == "Completed").ToList();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -647,7 +818,7 @@
         }
     }
 
-        private async Task GetAllAsync()
+    private async Task GetAllAsync()
     {
         var cases = await GetCasesWithRelatedDataAsync();
         var users = await GetUsersAsync();

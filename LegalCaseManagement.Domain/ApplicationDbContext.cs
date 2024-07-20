@@ -11,6 +11,7 @@ namespace LegalCaseManagement.Data
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
+
         }
 
         public DbSet<Case> Cases { get; set; }

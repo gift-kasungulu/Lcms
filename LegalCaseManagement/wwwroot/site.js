@@ -6,13 +6,6 @@ function saveAsFile(filename, bytesBase64) {
     link.click();
     document.body.removeChild(link);
 }
-function downloadreportFile(fileName, content) {
-    var blob = new Blob([content], { type: 'application/pdf' });
-    var link = document.createElement('a');
-    link.href = window.URL.createObjectURL(blob);
-    link.download = fileName;
-    link.click();
-}
 
 function focusDatePicker(datePickerId) {
     // Focus on the MudDatePicker with the provided ID
@@ -118,3 +111,14 @@ window.generatePdf = (cases) => {
 
     doc.save("cases_list.pdf");
 };
+
+window.downloadreportFile = function (fileName, content) {
+    const blob = new Blob([content], { type: 'application/pdf' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link); // Needed for Firefox
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(link.href); // Clean up
+}

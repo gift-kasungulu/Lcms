@@ -136,7 +136,7 @@
         newCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "new").ToList();
         abandonedCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "abandoned").ToList();
         highPriorityCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "high").ToList();
-        decidedCases = caseList.Where(c => c.CaseStatus.StatusName.ToLower() == "decided").ToList();
+        decidedCases = caseList.Where(c => c.CaseStatus.StatusName.ToLower() == "Completed").ToList();
     }
 
     private async void NavigateToAssignedCases()

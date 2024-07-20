@@ -271,7 +271,7 @@
     protected override async Task OnInitializedAsync()
     {
         lawyersList = await lawyerService.GetAllAsync();
-        
+
     }
     private void HandleImageUpload(InputFileChangeEventArgs e)
     {
@@ -295,8 +295,8 @@
 
 
     private void OpenEditModal(Lawyers lawyer)
-{
-    editLawyer = new Lawyers
+    {
+        editLawyer = new Lawyers
     {
         Id = lawyer.Id,
         FirstName = lawyer.FirstName,
@@ -311,18 +311,18 @@
         CaseWinPercentage = lawyer.CaseWinPercentage,
         Gender = lawyer.Gender,
     };
-    showEditModal = true;
-}
-
-private void ToggleEditModal()
-{
-    showEditModal = !showEditModal;
-    if (!showEditModal)
-    {
-        editLawyer = new Lawyers(); // Reset the form when closing the modal
-        editPassword = string.Empty; // Reset the password field
+        showEditModal = true;
     }
-}
+
+    private void ToggleEditModal()
+    {
+        showEditModal = !showEditModal;
+        if (!showEditModal)
+        {
+            editLawyer = new Lawyers(); // Reset the form when closing the modal
+            editPassword = string.Empty; // Reset the password field
+        }
+    }
 
     private async Task Update()
     {
@@ -333,14 +333,14 @@ private void ToggleEditModal()
             if (result)
             {
                 snackbar.Add("Lawyer Detais Updated ", Severity.Success);
-                
+
             }
             else
             {
-                
+
                 // Update failed, handle failure scenario
                 snackbar.Add("Failed to update lawyer", Severity.Error);
-                
+
             }
         }
         catch (Exception ex)
@@ -372,29 +372,29 @@ private void ToggleEditModal()
         }
     }
 
-     private class RequestModel
+    private class RequestModel
     {
         public string? Email { get; set; }
         public string? Message { get; set; }
     }
 
     private async Task DeleteRec(Lawyers rec)
-{
-    bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete?");
-    if (confirmed)
     {
-        if (await lawyerService.DeleteAsync(rec))
+        bool confirmed = await jsRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete?");
+        if (confirmed)
         {
-            lawyersList = await lawyerService.GetAllAsync();
-            snackbar.Add("Lawyer was removed successfully", Severity.Info);
-        }
-        else
-        {
-            snackbar.Add("Operation failed. Try again later", Severity.Error);
+            if (await lawyerService.DeleteAsync(rec))
+            {
+                lawyersList = await lawyerService.GetAllAsync();
+                snackbar.Add("Lawyer was removed successfully", Severity.Info);
+            }
+            else
+            {
+                snackbar.Add("Operation failed. Try again later", Severity.Error);
+            }
         }
     }
-}
-    
+
     private async Task Add()
     {
         try
@@ -435,31 +435,19 @@ private void ToggleEditModal()
 
             if (result.Succeeded)
             {
-                // Add to Team role
-                var roleResult = await _userManager.AddToRoleAsync(user, "Team");
-                if (!roleResult.Succeeded)
-                {
-                    snackbar.Add("Failed to add lawyer to Team role", Severity.Warning);
-                }
+                // Assign roles if necessary
+                await _userManager.AddToRoleAsync(user, "Lawyer");
 
-                // Send email
-                try
-                {
-                    await emailService.SendEmailAsync(user.Email, "Welcome to our App!",
-                        $"Thank you for signing up! Your Email Account has been registered with Us, you can login using the provided password: <strong>{password}</strong>", null);
-                    snackbar.Add("Lawyer was added successfully and welcome email sent", Severity.Success);
-                }
-                catch (Exception emailEx)
-                {
-                    // If the email fails, still consider it a success, but notify about email failure
-                    snackbar.Add("Lawyer was added successfully, but failed to send welcome email", Severity.Warning);
-                    Console.WriteLine($"Email sending failed: {emailEx.Message}");
-                }
 
+                //am sending the defailt welcome email
+                await emailService.SendDefaultWelcomeEmailAsync(user.Email, password);
+
+                snackbar.Add("Email sent", Severity.Success);
+
+                // Reload the lawyers list and close the modal
+                lawyersList = await lawyerService.GetAllAsync();
                 ToggleModal();
-                lawyers = new Lawyers();
-                password = string.Empty;
-                imageFile = null;
+                snackbar.Add("Lawyer added and welcome email sent successfully", Severity.Success);
             }
             else
             {
@@ -471,10 +459,10 @@ private void ToggleEditModal()
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception in Add method: {ex}");
-            snackbar.Add("Operation failed. Try again later", Severity.Error);
+            snackbar.Add($"Failed to add lawyer: {ex.Message}", Severity.Error);
         }
     }
+
 
     
     private void ToggleModal()

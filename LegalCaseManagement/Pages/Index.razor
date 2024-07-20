@@ -6,9 +6,11 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
 @inject LawyerService lawyerService
 @inject CaseService caseService
 @inject ISnackbar snackbar
+@inject UserManager<ApplicationUser> UserManager
 
 
 
@@ -37,6 +39,8 @@
         <MudGrid>
         </MudGrid>
         <br />
+        @if (isClient)
+        {
         <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
             <MudTabPanel Text="Advocates">
                 <MudTable  Items="lawyersList" Filter="new Func<Lawyers,bool>(Searchrec)" @bind-lawyersList="lawyersList">
@@ -87,7 +91,7 @@
             </MudTabPanel>
             
         </MudTabs>
-
+        }
 
 @code {
     private Lawyers lawyers = new Lawyers();
@@ -115,6 +119,22 @@
             Nav.NavigateTo("/Identity/Account/Login", forceLoad: true);
         }
     }
+
+    private bool isClient = false;
+
+    private async Task CheckUserRole()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var appUser = await UserManager.GetUserAsync(user);
+            isClient = await UserManager.IsInRoleAsync(appUser, "Client");
+        }
+    }
+
+
 
     public class Notice
     {

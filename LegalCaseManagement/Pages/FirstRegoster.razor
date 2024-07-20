@@ -1,0 +1,377 @@
+﻿@page "/firstReg"
+
+            <MudText Typo="Typo.h5">Create Admin</MudText>
+            <EditForm Model="newUser" OnValidSubmit="AddNewUserWithRoles">
+                <DataAnnotationsValidator />
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="newUser.FirstNameUser" Label="First Name" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="newUser.LastNameUser" Label="Last Name" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="newUser.LoginName" Label="Email" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="newUser.Phone" Label="Phone Number" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="newUser.CountryUser" Label="Country" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="newUser.CityUser" Label="City" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="newUser.AddressUser" Label="Address" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="newUser.LoginPassword" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect @bind-Value="newUser.UserRole" Label="Role" Variant="Variant.Outlined">
+                            @foreach (var role in selectList)
+                            {
+                                <MudSelectItem Value="@role.Value">@role.Text</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+                
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Submit</MudButton>
+                
+            </EditForm>
+
+
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
+@using LegalCaseManagement.Data
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@inject IJSRuntime jstRuntime
+@inject UserManager<ApplicationUser> _userManager
+@inject SignInManager<ApplicationUser> _signInManager
+@inject ISnackbar snackbar
+@inject AppUserService userService
+@inject IServiceScopeFactory ServiceScopeFactory
+@inject EmailService emailService
+@inject LawyerService lawyerService
+@inject NavigationManager NavigationManager
+
+@code {
+    private string searchString = "";
+    User newUser = new User();
+    List<Role> rolesList = new List<Role>();
+    List<SelectListItem> selectList = new List<SelectListItem>();
+    List<User> MyUser = new List<User>();
+    List<ApplicationUser> userList = new List<ApplicationUser>();
+    ApplicationUser appUsers = new ApplicationUser();
+    private bool showModal = false;
+    private List<IdentityRole> roles = new List<IdentityRole>();
+    private IdentityRole newRole = new IdentityRole();
+    private IdentityRole editRole = new IdentityRole();
+    private MudForm form;
+    private bool isEditDialogOpen = false;
+    private List<Lawyers> lawyersList = new List<Lawyers>();
+
+    private bool Search(ApplicationUser applicationUser)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (applicationUser.UserName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private void NavigateToEditLawyerPage(string lawyerId)
+    {
+        NavigationManager.NavigateTo($"/editlawyer/{lawyerId}");
+    }
+
+    private bool Searchrec(Lawyers lawyer)
+    {
+        if (string.IsNullOrWhiteSpace(searchString)) return true;
+        if (lawyer.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private void NavigateToEditPage(string userId)
+    {
+        NavigationManager.NavigateTo($"/edit/{userId}");
+    }
+
+    public void Update(ApplicationUser userRecord)
+    {
+        ToggleModal();
+        appUsers = userRecord;
+        StateHasChanged();
+    }
+
+    private async Task DeleteLawyer(Lawyers lawyer)
+    {
+        bool confirmDelete = await jstRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this lawyer?");
+        if (confirmDelete)
+        {
+            var result = await lawyerService.DeleteAsync(lawyer);
+            if (result)
+            {
+                lawyersList.Remove(lawyer);
+                snackbar.Add("Lawyer was removed successfully", Severity.Success);
+                StateHasChanged();
+            }
+            else
+            {
+                snackbar.Add("Failed to remove lawyer", Severity.Error);
+            }
+        }
+    }
+
+    private List<ApplicationUser> GetAll()
+    {
+        userList = userService.GetAll();
+        return userList;
+    }
+
+    private void ToggleModal()
+    {
+        newUser = new User();
+
+        showModal = !showModal;
+        if (!showModal)
+        {
+            newUser = new User();
+        }
+    }
+
+
+    //delete method (user rec)
+    private async Task DeleteRec(ApplicationUser rec)
+    {
+        bool confimUserRemoval = await jstRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to Remove user ?");
+        if (confimUserRemoval)
+        {
+            userService.Delete(rec);
+            userList = await GetAllClients();
+            await jstRuntime.InvokeVoidAsync("alert", "User Removed succefully");
+
+        }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsersAndRoles();
+        userList = await GetAllClients();
+        lawyersList = await lawyerService.GetAllAsync();
+
+        rolesList = new List<Role>()
+    {
+        new Role(){RoleName = "Admin", ID = "1"},
+        new Role(){RoleName = "Team", ID = "2"},
+        new Role(){RoleName = "Client", ID = "3"}
+    };
+
+        selectList = rolesList.Select(role => new SelectListItem()
+            {
+                Text = role.RoleName,
+                Value = role.ID,
+                Selected = role.RoleName == "Client"
+            }).ToList();
+
+        // to ensure at least one role is selected when my list is empty i set the first Role on the list
+
+        if (!selectList.Any(item => item.Selected))
+        {
+            var firstItem = selectList.FirstOrDefault();
+            if (firstItem != null)
+            {
+                firstItem.Selected = true;
+            }
+        }
+    }
+
+    private async Task<List<ApplicationUser>> GetAllClients()
+    {
+        var allUsers = await userService.GetAllAsync();
+
+        var clients = new List<ApplicationUser>();
+        foreach (var user in allUsers)
+
+        {
+            if (await _userManager.IsInRoleAsync(user, "Client"))
+            {
+                clients.Add(user);
+            }
+        }
+        return clients;
+    }
+
+    private async Task LoadUsersAndRoles()
+    {
+        try
+        {
+            using (var scope = ServiceScopeFactory.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                // Fetch roles here
+                roles = roleManager.Roles.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception in LoadUsersAndRoles: {ex}");
+            throw;
+        }
+    }
+
+    private async Task SubmitForm()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var result = await roleManager.CreateAsync(new IdentityRole(newRole.Name));
+            if (result.Succeeded)
+            {
+                roles.Add(new IdentityRole { Name = newRole.Name, NormalizedName = newRole.Name.ToUpper() });
+                newRole = new IdentityRole();
+                snackbar.Add("The Role Was Added Successfuly", Severity.Success);
+            }
+            else
+            {
+                Console.WriteLine("Error creating role.");
+            }
+        }
+    }
+
+    private async Task EditRole(IdentityRole role)
+    {
+        editRole = role;
+        isEditDialogOpen = true;
+
+    }
+    private async Task SaveEdit()
+    {
+
+        using (var scope = ServiceScopeFactory.CreateScope())
+
+        {
+
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            var role = await roleManager.FindByIdAsync(editRole.Id);
+            if (role != null)
+            {
+                role.Name = editRole.Name;
+                var result = await roleManager.UpdateAsync(role);
+                if (result.Succeeded)
+                {
+                    var roleIndex = roles.FindIndex(r => r.Id == role.Id);
+
+                    if (roleIndex != -1)
+
+                    {
+                        roles[roleIndex].Name = role.Name;
+
+                        roles[roleIndex].NormalizedName = role.NormalizedName;
+
+
+                    }
+                    isEditDialogOpen = false;
+                    editRole = null;
+
+                }
+                else
+                {
+                    Console.WriteLine("Error updating role.");
+                }
+            }
+        }
+    }
+
+    private void CloseEditDialog()
+    {
+        isEditDialogOpen = false;
+        editRole = null;
+    }
+
+    private async Task DeleteRole(IdentityRole role)
+    {
+        bool comfirmDelete = await jstRuntime.InvokeAsync<bool>("comfirm", "Are you sure you want to delete rRole ?");
+        if (comfirmDelete)
+        {
+            using (var scope = ServiceScopeFactory.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var result = await roleManager.DeleteAsync(role);
+                if (result.Succeeded)
+                {
+                    roles.Remove(role);
+                    snackbar.Add("Role was Removed", Severity.Error);
+                }
+                else
+                {
+                    Console.WriteLine("Error deleting role.");
+                }
+            }
+        }
+    }
+
+    public async void AddNewUserWithRoles(EditContext context)
+
+    {
+        var usermodel = context.Model as User;
+        var passwordHash = _userManager.PasswordHasher.HashPassword(null, usermodel.LoginPassword);
+        var user = new ApplicationUser
+            {
+                UserName = usermodel.LoginName,
+                Email = usermodel.LoginName,
+                EmailConfirmed = true,
+                PhoneNumber = usermodel.Phone,
+                City = usermodel.CityUser,
+                Country = usermodel.CountryUser,
+                Address = usermodel.AddressUser,
+                FirstName = usermodel.FirstNameUser,
+                LastName = usermodel.LastNameUser,
+                PasswordHash = passwordHash
+
+            };
+        try
+        {
+            var result = await _userManager.CreateAsync(user, usermodel.LoginPassword);
+            if (result.Succeeded)
+            {
+                var getRoleFromList = rolesList.FirstOrDefault(x => x.ID == usermodel?.UserRole);
+                var roleAddedResult = await _userManager.AddToRoleAsync(user, getRoleFromList?.RoleName ?? "Client");
+
+                await emailService.SendDefaultWelcomeEmailToUserAsync(user.Email, user.FirstName, user.LastName, usermodel.LoginPassword);
+                if (roleAddedResult.Succeeded)
+                {
+                    snackbar.Add("User was Addedd Successfuly with Role", Severity.Success);
+
+                    newUser = new User();
+                    ToggleModal();
+                    StateHasChanged();
+                    return;
+
+                }
+                else
+                {
+                    snackbar.Add("Operation Failed ", Severity.Error);
+                }
+            }
+            snackbar.Add("User creation failed. Please check the input data.", Severity.Error);
+
+        }
+        catch (Exception ex)
+
+        {
+            await jstRuntime.InvokeVoidAsync("console.error", ex.Message);
+            await jstRuntime.InvokeVoidAsync("alert", "An error occurred during user creation. Please try again later.");
+        }
+
+    }
+
+}

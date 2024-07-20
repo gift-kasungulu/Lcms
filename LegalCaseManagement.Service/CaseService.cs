@@ -17,6 +17,26 @@ namespace LegalCaseManagement.Data
             _context = context;
         }
 
+        public async Task<bool> MarkCaseAsWonAsync(int caseId)
+        {
+            var caseToUpdate = await _context.Cases.FindAsync(caseId);
+            if (caseToUpdate == null) return false;
+
+            caseToUpdate.CaseStatus.StatusName = "Won";
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> MarkCaseAsLostAsync(int caseId)
+        {
+            var caseToUpdate = await _context.Cases.FindAsync(caseId);
+            if (caseToUpdate == null) return false;
+
+            caseToUpdate.CaseStatus.StatusName = "Lost";
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<List<Case>> GetCasesByLawyerIdAsync(string lawyerId)
         {
             return await _context.Cases

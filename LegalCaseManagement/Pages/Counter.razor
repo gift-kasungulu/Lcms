@@ -534,7 +534,9 @@
             {
                 var getRoleFromList = rolesList.FirstOrDefault(x => x.ID == usermodel?.UserRole);
                 var roleAddedResult = await _userManager.AddToRoleAsync(user, getRoleFromList?.RoleName ?? "Client");
-                await emailService.SendDefaultWelcomeEmailAsync(newUser.LoginPassword); // Send welcome email with password
+                
+                await emailService.SendDefaultWelcomeEmailToUserAsync(user.Email, user.FirstName, user.LastName, usermodel.LoginPassword); // sent the email to the user i just added
+
                 if (roleAddedResult.Succeeded)
                 {
                     snackbar.Add("User was Addedd Successfuly with Role", Severity.Success);

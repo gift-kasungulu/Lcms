@@ -99,9 +99,9 @@ public class EmailService
     }
 
 
-   
 
-    public async Task SendDefaultWelcomeEmailAsync(string toEmail)
+
+    public async Task SendDefaultWelcomeEmailAsync(string toEmail, string password)
     {
         var email = new MimeMessage();
 
@@ -113,8 +113,11 @@ public class EmailService
         email.From.Add(MailboxAddress.Parse(fromAddress));
 
         email.To.Add(MailboxAddress.Parse(toEmail));
-        email.Subject = "Welcome to our App! ";
-        email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = "Thank you for signing up! Your Email Account has been registered with Us, you can login using the provided password: <strong>{password}</strong>" };
+        email.Subject = "Welcome to our App!";
+        email.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+        {
+            Text = $"Your email account has been registered with us. You can log in using the provided password: <strong>{password}</strong>"
+        };
 
         using var smtp = new SmtpClient();
         await smtp.ConnectAsync(_configuration["Email:Host"], int.Parse(_configuration["Email:Port"]), SecureSocketOptions.StartTls);
@@ -122,4 +125,34 @@ public class EmailService
         await smtp.SendAsync(email);
         await smtp.DisconnectAsync(true);
     }
+
+    public async Task SendDefaultWelcomeEmailToUserAsync(string toEmail, string firstName, string lastName, string password)
+    {
+        var useremail = new MimeMessage();
+
+        var fromAddress = _configuration["Email:From"];
+        if (string.IsNullOrWhiteSpace(fromAddress))
+        {
+            throw new ArgumentException("From email address is not configured.");
+        }
+        useremail.From.Add(MailboxAddress.Parse(fromAddress));
+
+        useremail.To.Add(MailboxAddress.Parse(toEmail));
+        useremail.Subject = "Welcome to our App!";
+        useremail.Body = new TextPart(MimeKit.Text.TextFormat.Html)
+        {
+            Text = $"Dear {firstName} {lastName},<br/><br/>" +
+                   $"Thank you for signing up! Your email account has been registered with us. " +
+                   $"You can log in using the provided password: <strong>{password}</strong><br/><br/>" +
+                   $"Best Regards,<br/>The Team"
+        };
+
+        using var smtp = new SmtpClient();
+        await smtp.ConnectAsync(_configuration["Email:Host"], int.Parse(_configuration["Email:Port"]), SecureSocketOptions.StartTls);
+        await smtp.AuthenticateAsync(_configuration["Email:Username"], _configuration["Email:Password"]);
+        await smtp.SendAsync(useremail);
+        await smtp.DisconnectAsync(true);
+    }
+
+
 }

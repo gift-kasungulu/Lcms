@@ -1,40 +1,24 @@
 ﻿<AuthorizeView>
     <Authorized>
-        <MudMenu FullWidth="true">
-            <ActivatorContent>
-                <MudChip Icon="@Icons.Material.Filled.Person" Color="Color.Primary">Account</MudChip>
-            </ActivatorContent>
-            <ChildContent>
-                <MudMenuItem>
-                    <MudIcon Icon="@Icons.Material.Filled.Person" /> @context.User.Identity?.Name
-                </MudMenuItem>
-                <MudMenuItem>
-                    <form method="post" action="Identity/Account/LogOut" style="display: inline;">
-                        <button type="submit" class="nav-link btn btn-link" style="padding: 0; border: none; background: none; cursor: pointer;">
-                            <MudIcon Icon="@Icons.Material.Filled.Logout" />
-                        </button>
-                    </form>
-                </MudMenuItem>
-            </ChildContent>
-        </MudMenu>
-        <form method="post" action="Identity/Account/LogOut" style="display: inline;">
-            <button type="submit" class="nav-link btn btn-link" style="padding: 0; border: none; background: none; cursor: pointer;">
-                <MudIcon Color="Color.Error" Icon="@Icons.Material.Filled.Logout" />
-            </button>
-        </form>
+        <MudFab Href="Identity/Account/Manage"
+                   StartIcon="@Icons.Material.Filled.Person"
+                   Color="Color.Primary" Size="Size.Small">
+                  
+        </MudFab>
+        <MudTooltip Text="Logout">
+            <form method="post" action="Identity/Account/LogOut" style="display: inline;">
+                <button type="submit" class="nav-link btn btn-link" style="padding: 0; border: none; background: none; cursor: pointer;">
+                    <MudIcon Icon="@Icons.Material.Filled.Logout" />
+                </button>
+            </form>
+        </MudTooltip>
     </Authorized>
     <NotAuthorized>
-        <MudMenu FullWidth="true">
-            <ActivatorContent>
-                <MudChip Icon="@Icons.Material.Filled.Login" Color="Color.Primary">Login</MudChip>
-            </ActivatorContent>
-            <ChildContent>
-                <MudMenuItem>
-                    <a href="Identity/Account/Login" class="nav-link">
-                        <MudIcon Icon="@Icons.Material.Filled.Login" /> Log in
-                    </a>
-                </MudMenuItem>
-            </ChildContent>
-        </MudMenu>
+        <MudButton Href="Identity/Account/Login"
+                   StartIcon="@Icons.Material.Filled.Login"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled">
+            Login
+        </MudButton>
     </NotAuthorized>
 </AuthorizeView>
