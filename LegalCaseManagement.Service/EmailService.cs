@@ -14,12 +14,12 @@ using System.Threading.Tasks;
 public class EmailService
 {
     private readonly IConfiguration _configuration;
-    private readonly UserManager<ApplicationUser> _userManager; // Add this line
+    private readonly UserManager<ApplicationUser> _userManager; 
 
     public EmailService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
     {
         _configuration = configuration;
-        _userManager = userManager; // Add this line
+        _userManager = userManager; 
     }
     public async Task SendEmailAsync(string toEmail, string subject, string body, IFormFile? file = null)
     {
@@ -36,7 +36,7 @@ public class EmailService
         email.Subject = subject;
         email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = body };
 
-        // Adding file to email
+        
         if (file != null && file.Length > 0)
         {
             var attachment = new MimePart(MimeTypes.GetMimeType(file.FileName))

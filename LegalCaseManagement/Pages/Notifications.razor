@@ -1,5 +1,7 @@
 ﻿@page "/notifications"
+
 @attribute [Authorize(Roles = "Client, Team")]
+
 @using LegalCaseManagement.Data
 @using LegalCaseManagement.Service
 @using LegalCaseManagement.Domain
@@ -65,7 +67,6 @@
         var user = await UserManager.GetUserAsync(SignInManager.Context.User);
         if (user == null)
         {
-            // Handle error (e.g., redirect to login page)
             return;
         }
 

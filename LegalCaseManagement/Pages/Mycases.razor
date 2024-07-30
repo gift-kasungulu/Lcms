@@ -343,60 +343,6 @@
             </PagerContent>
         </MudTable>
     </MudTabPanel>
-    <MudTabPanel Text="Decided Cases">
-        @* Decided Cases Table *@
-                <MudTable Items="decidedCases" Filter="new Func<Case,bool>(Search)">
-                    <ToolBarContent>
-                        <MudText Typo="Typo.h6">Cases</MudText>
-                        <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search by Description, Client, or Case ID"
-                              IconSize="Size.Large" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
-
-                    </ToolBarContent>
-            <HeaderContent>
-                <MudTh>#</MudTh>
-                <MudTh>Next Date</MudTh>
-                <MudTh>Petitioner</MudTh>
-                <MudTh>Vs Client</MudTh>
-                <MudTh>Court Name</MudTh>
-                <MudTh>Status</MudTh>
-                <MudTh>Action</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="CaseId">@context.CaseId</MudTd>
-                <MudTd DataLabel="EndDate">@context.EndDate?.ToString("dd-MM-yyyy")</MudTd>
-                <MudTd DataLabel="Petitioner">@context.Petitioner</MudTd>
-                <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
-                <MudTd DataLabel="Defendant">@context.Defendant</MudTd>
-                <MudTd DataLabel="CaseStatus">@context.CaseStatus?.StatusName</MudTd>
-                <MudTd DataLabel="Actions">
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                        <MudMenuItem OnClick="@(() => NavigateToCaseDetails(context.CaseId))">
-                            <i class="bi bi-eye"></i>
-                            View
-                        </MudMenuItem>
-                        <MudMenuItem OnClick="@(() => OpenEditDateModal(context))">
-                            <i class="bi bi-calendar-event"></i>
-                            Next Date
-                        </MudMenuItem>
-                        <MudMenuItem OnClick="() => OpenUpdateModal(context)">
-                            <i class="bi bi-pencil"></i>
-                            Edit
-                        </MudMenuItem>
-
-
-                        <MudMenuItem OnClick="@(() => Deletecase(context))">
-                            <i class="bi bi-bi-trash"></i>
-                            Delete
-                        </MudMenuItem>
-                    </MudMenu>
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
-        </MudTable>
-    </MudTabPanel>
     <MudTabPanel Text="Completed Cases">
         @* Completed Cases Table *@
         <MudTable Items="completedCases" Filter="new Func<Case, bool>(Search)">

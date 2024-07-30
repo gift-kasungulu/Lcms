@@ -12,86 +12,79 @@
 @inject ISnackbar snackbar
 @inject UserManager<ApplicationUser> UserManager
 
-
-
-
-        <MudGrid>
-            <MudItem xs="12">
-                    <MudText Typo="Typo.h6">Notice</MudText>
-                    @foreach (var notice in GetNotices())
-                    {
-                        <div class="notice-item">
-                            <div class="notice-icon">
-                                <i class="fas fa-info-circle"></i>
-                            </div>
-                            <div class="notice-content">
-                                @notice.Title
-                            </div>
-                            <div class="notice-action">
-                                <button class="btn btn-primary btn-sm">Read</button>
-                            </div>
-                        </div>
-                    }
-                
-            </MudItem>
-        </MudGrid>
-        <br />
-        <MudGrid>
-        </MudGrid>
-        <br />
-        @if (isClient)
+<MudGrid>
+    <MudItem xs="12">
+        <MudText Typo="Typo.h6">Notice</MudText>
+        @foreach (var notice in GetNotices())
         {
-        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
-            <MudTabPanel Text="Advocates">
-                <MudTable  Items="lawyersList" Filter="new Func<Lawyers,bool>(Searchrec)" @bind-lawyersList="lawyersList">
-                    <ToolBarContent>
-                        <MudText Typo="Typo.h6">Available Advocates</MudText>
-                        <MudSpacer />
-                        <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium"
-                            StartIcon="@Icons.Material.Filled.Search" Class="mt-0">Search Here</MudTextField>
-                    </ToolBarContent>
-                    <HeaderContent>
-                        
-                        <MudTh></MudTh>
-                        <MudTh></MudTh>
-                        <MudTh></MudTh>
-                    </HeaderContent>
-                    <RowTemplate>
-                        
-                        <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
-                        <MudTd DataLabel="LastName">@context.LastName</MudTd>                       
-                        <MudTd DataLabel="Actions">
-                            <MudButton Variant="Variant.Text" Color="Color.Info"
-                                OnClick="@(()=>ViewLawyerDetails(context))">Enquire</MudButton>
-                        </MudTd>
-                    </RowTemplate>
-                    <PagerContent>
-                        <MudTablePager />
-                    </PagerContent>
-                </MudTable>
-            </MudTabPanel>
-            <MudTabPanel Text="Recent Cases">
-                <MudPaper xs="12" sm="6">
-                    <MudList Clickable="true">
-                        <MudListSubheader>
-                            Recent cases
-                        </MudListSubheader>
-                        @foreach (var recentCase in GetRecentCases())
-                        {
-                            <MudListItem Avatar="@Icons.Material.Filled.Work">
-                                @recentCase.Discription
-                                @if (IsCaseNew(recentCase))
-                                {
-                                    <MudBadge Color="Color.Secondary">.New</MudBadge>
-                                }
-                            </MudListItem>
-                        }
-                    </MudList>
-                </MudPaper>
-            </MudTabPanel>
-            
-        </MudTabs>
+            <div class="notice-item">
+                <div class="notice-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div class="notice-content">
+                    @notice.Title
+                </div>
+                <div class="notice-action">
+                    <button class="btn btn-primary">Read</button>
+                </div>
+            </div>
         }
+    </MudItem>
+</MudGrid>
+<br />
+<MudGrid>
+</MudGrid>
+<br />
+@if (isClient)
+{
+    <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+        <MudTabPanel Text="Advocates">
+            <MudTable Items="lawyersList" Filter="new Func<Lawyers,bool>(Searchrec)" @bind-lawyersList="lawyersList">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Available Advocates</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium"
+                                  StartIcon="@Icons.Material.Filled.Search" Class="mt-0">Search Here</MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh></MudTh>
+                    <MudTh></MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
+                    <MudTd DataLabel="LastName">@context.LastName</MudTd>
+                    <MudTd DataLabel="Actions">
+                        <MudButton Variant="Variant.Text" Color="Color.Info"
+                                   OnClick="@(() => ViewLawyerDetails(context))">Enquire</MudButton>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+        </MudTabPanel>
+        <MudTabPanel Text="Recent Cases">
+            <MudPaper xs="12" sm="6">
+                <MudList Clickable="true">
+                    <MudListSubheader>
+                        Recent cases
+                    </MudListSubheader>
+                    @foreach (var recentCase in GetRecentCases())
+                    {
+                        <MudListItem Avatar="@Icons.Material.Filled.Work">
+                            @recentCase.Discription
+                            @if (IsCaseNew(recentCase))
+                            {
+                                <MudBadge Color="Color.Secondary">.New</MudBadge>
+                            }
+                        </MudListItem>
+                    }
+                </MudList>
+            </MudPaper>
+        </MudTabPanel>
+    </MudTabs>
+}
 
 @code {
     private Lawyers lawyers = new Lawyers();
@@ -99,6 +92,7 @@
     private List<Lawyers> lawyersList = new List<Lawyers>();
     private string searchString = " ";
     private string userName;
+    private bool isClient = false; // set it to false by default
 
     protected override async Task OnInitializedAsync()
     {
@@ -113,14 +107,13 @@
         if (isAuthenticated)
         {
             userName = user.FindFirst(c => c.Type == ClaimTypes.Name)?.Value;
+            await CheckUserRole();
         }
         else
         {
             Nav.NavigateTo("/Identity/Account/Login", forceLoad: true);
         }
     }
-
-    private bool isClient = false;
 
     private async Task CheckUserRole()
     {
@@ -134,8 +127,6 @@
         }
     }
 
-
-
     public class Notice
     {
         public int Id { get; set; }
@@ -145,17 +136,16 @@
     private List<Notice> GetNotices()
     {
         return new List<Notice>
-    {
-        new Notice { Id = 1, Title = "New Supreme Court Ruling on Copyright Law" },
-        new Notice { Id = 2, Title = "Upcoming Legal Workshop: 'Effective Client Communication'" },
-        new Notice { Id = 3, Title = "Changes to Court Filing Procedures Effective Next Month" },
-        new Notice { Id = 4, Title = "Pro Bono Opportunity: Local Community Legal Clinic" },
-        new Notice { Id = 5, Title = "Reminder: Annual Bar Association Dues Deadline Approaching" },
-        new Notice { Id = 6, Title = "New Feature: Online Client Portal Now Available" },
-        new Notice { Id = 7, Title = "Important: Data Privacy and Security Update for All Users" },
-        new Notice { Id = 8, Title = "Courtroom Etiquette Seminar for Junior Associates" }
-    };
-
+        {
+            new Notice { Id = 1, Title = "New Supreme Court Ruling on Copyright Law" },
+            new Notice { Id = 2, Title = "Upcoming Legal Workshop: 'Effective Client Communication'" },
+            new Notice { Id = 3, Title = "Changes to Court Filing Procedures Effective Next Month" },
+            new Notice { Id = 4, Title = "Pro Bono Opportunity: Local Community Legal Clinic" },
+            new Notice { Id = 5, Title = "Reminder: Annual Bar Association Dues Deadline Approaching" },
+            new Notice { Id = 6, Title = "New Feature: Online Client Portal Now Available" },
+            new Notice { Id = 7, Title = "Important: Data Privacy and Security Update for All Users" },
+            new Notice { Id = 8, Title = "Courtroom Etiquette Seminar for Junior Associates" }
+        };
     }
 
     private List<Case> GetRecentCases()

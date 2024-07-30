@@ -1,24 +1,40 @@
 ﻿<AuthorizeView>
     <Authorized>
-        <MudFab Href="Identity/Account/Manage"
-                   StartIcon="@Icons.Material.Filled.Person"
-                   Color="Color.Primary" Size="Size.Small">
-                  
-        </MudFab>
-        <MudTooltip Text="Logout">
-            <form method="post" action="Identity/Account/LogOut" style="display: inline;">
-                <button type="submit" class="nav-link btn btn-link" style="padding: 0; border: none; background: none; cursor: pointer;">
-                    <MudIcon Icon="@Icons.Material.Filled.Logout" />
+        <div class="d-flex align-items-center">
+            <a href="/notifications" class="btn btn-primary btn-sm btn-icon me-2">
+                <i class="bi bi-bell"></i>
+            </a>
+            <a href="Identity/Account/Manage" class="btn btn-primary btn-sm btn-icon me-2">
+                <i class="bi bi-person-fill"></i>
+            </a>
+            <form method="post" action="Identity/Account/LogOut" class="d-inline">
+                <button type="submit" class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
                 </button>
             </form>
-        </MudTooltip>
+        </div>
     </Authorized>
     <NotAuthorized>
-        <MudButton Href="Identity/Account/Login"
-                   StartIcon="@Icons.Material.Filled.Login"
-                   Color="Color.Primary"
-                   Variant="Variant.Filled">
-            Login
-        </MudButton>
+        <a href="Identity/Account/Login" class="btn btn-primary">
+            <i class="bi bi-box-arrow-in-right me-2"></i>Login
+        </a>
     </NotAuthorized>
 </AuthorizeView>
+
+<style>
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+        border-radius: 50px;
+    }
+
+    .btn-icon {
+        width: 2rem;
+        height: 2rem;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        
+    }
+</style>
