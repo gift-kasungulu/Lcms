@@ -1,6 +1,6 @@
 ﻿@page "/notifications"
 
-@attribute [Authorize(Roles = "Client, Team")]
+@attribute [Authorize(Roles = "Admin, Client, Team")]
 
 @using LegalCaseManagement.Data
 @using LegalCaseManagement.Service
@@ -39,28 +39,53 @@
     }
 </MudList>
 
-<MudText Typo="Typo.h6" Class="mt-4">Appointments</MudText>
-<MudList Dense="true">
-    @foreach (var appointment in appointments)
-    {
-        <MudListItem>
-            <MudGrid>
-                <MudItem xs="10">
-                    <MudText Typo="Typo.body1">@notificationMessages[appointment.Id]</MudText>
-                </MudItem>
-                <MudItem xs="2" Class="d-flex justify-end">
-                    <MudText Typo="Typo.caption">@appointment.Date.ToShortDateString()</MudText>
-                </MudItem>
-            </MudGrid>
-        </MudListItem>
-        <MudDivider />
-    }
-</MudList>
+@if (isAdmin)
+{
+    <MudText Typo="Typo.h6" Class="mt-4">Pending Appointments</MudText>
+    <MudList Dense="true">
+        @foreach (var appointment in appointments)
+        {
+            <MudListItem>
+                <MudGrid>
+                    <MudItem xs="10">
+                        <MudText Typo="Typo.body1">@notificationMessages[appointment.Id]</MudText>
+                    </MudItem>
+                    <MudItem xs="2" Class="d-flex justify-end">
+                        <MudText Typo="Typo.caption">@appointment.Date.ToShortDateString()</MudText>
+                    </MudItem>
+                </MudGrid>
+                <MudButton Color="Color.Success" OnClick="@(() => ApproveAppointment(appointment.Id))">Approve</MudButton>
+            </MudListItem>
+            <MudDivider />
+        }
+    </MudList>
+}
+else
+{
+    <MudText Typo="Typo.h6" Class="mt-4">Approved Appointments</MudText>
+    <MudList Dense="true">
+        @foreach (var appointment in appointments)
+        {
+            <MudListItem>
+                <MudGrid>
+                    <MudItem xs="10">
+                        <MudText Typo="Typo.body1">@notificationMessages[appointment.Id]</MudText>
+                    </MudItem>
+                    <MudItem xs="2" Class="d-flex justify-end">
+                        <MudText Typo="Typo.caption">@appointment.Date.ToShortDateString()</MudText>
+                    </MudItem>
+                </MudGrid>
+            </MudListItem>
+            <MudDivider />
+        }
+    </MudList>
+}
 
 @code {
     private List<Appointment> appointments = new List<Appointment>();
     private Dictionary<int, string> notificationMessages = new Dictionary<int, string>();
     private List<Notification> notifications = new List<Notification>();
+    private bool isAdmin = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -71,7 +96,13 @@
         }
 
         var roles = await UserManager.GetRolesAsync(user);
-        if (roles.Contains("Team"))
+        isAdmin = roles.Contains("Admin");
+
+        if (isAdmin)
+        {
+            appointments = (await AppointmentService.GetPendingAppointments()).ToList();
+        }
+        else if (roles.Contains("Team"))
         {
             appointments = (await AppointmentService.GetAppointmentsByTeamMember(user.Id)).ToList();
         }
@@ -119,6 +150,13 @@
     {
         await NotificationService.MarkAsRead(notificationId);
         notifications = notifications.Where(n => n.Id != notificationId).ToList();
+        StateHasChanged();
+    }
+
+    private async Task ApproveAppointment(int appointmentId)
+    {
+        await AppointmentService.ApproveAppointment(appointmentId);
+        appointments = appointments.Where(a => a.Id != appointmentId).ToList();
         StateHasChanged();
     }
 }

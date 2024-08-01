@@ -55,15 +55,18 @@ namespace LegalCaseManagement.Data
         {
             try
             {
+                _context.Lawyers.Attach(lawyer);
                 _context.Entry(lawyer).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error updating lawyer: {ex.Message}");
                 return false;
             }
         }
+
     }
 }
 

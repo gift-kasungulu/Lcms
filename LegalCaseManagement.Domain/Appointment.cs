@@ -30,5 +30,6 @@ namespace LegalCaseManagement.Domain
         public string UserId { get; set; }
         public ApplicationUser? User { get; set; }
         public string? CreatedBy { get; set; } //this will help me store the ID of the user that created the Appointment for easy tracking 
+        public bool IsApproved { get; set; } //help to track the approved cases 
     }
 }

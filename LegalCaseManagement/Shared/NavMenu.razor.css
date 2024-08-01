@@ -64,3 +64,11 @@
 .icon-spacing {
     margin-right: 8px; /* Adjust the margin as needed */
 }
+
+.dropdown-menu{
+    background-color: darkblue;
+}
+
+.nav-hover:hover{
+    color:black;
+}

@@ -2,6 +2,7 @@
 using LegalCaseManagement.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,7 +37,6 @@ namespace LegalCaseManagement.Service
             await _emailService.SendAppointmentNotificationAsync(appointment);
         }
 
-
         public async Task<IEnumerable<Appointment>> GetAppointments()
         {
             return await _context.Appointments.Include(a => a.User).ToListAsync();
@@ -57,8 +57,6 @@ namespace LegalCaseManagement.Service
 
             return clients;
         }
-
-
 
         public async Task<IEnumerable<Appointment>> GetAppointmentsByDateRange(DateTime? fromDate, DateTime? toDate)
         {
@@ -84,19 +82,18 @@ namespace LegalCaseManagement.Service
 
         public async Task<IEnumerable<Appointment>> GetAppointmentsByClient(string userId)
         {
-            return await _context.Appointments.Where(a => a.UserId == userId).ToListAsync();
+            return await _context.Appointments.Where(a => a.UserId == userId && a.IsApproved).ToListAsync();
         }
 
         public async Task<IEnumerable<Appointment>> GetAppointmentsByTeamMember(string userId)
         {
-            return await _context.Appointments.Where(a => a.CreatedBy == userId).ToListAsync();
+            return await _context.Appointments.Where(a => a.CreatedBy == userId && a.IsApproved).ToListAsync();
         }
 
         public async Task<IEnumerable<Lawyers>> GetLawyers()
         {
             return await _context.Set<Lawyers>().ToListAsync();
         }
-
 
         public async Task DeleteAppointment(int id)
         {
@@ -105,6 +102,28 @@ namespace LegalCaseManagement.Service
             {
                 _context.Appointments.Remove(appointment);
                 await _context.SaveChangesAsync();
+            }
+        }
+
+        // New methods for managing appointment approval status
+        public async Task<IEnumerable<Appointment>> GetPendingAppointments()
+        {
+            return await _context.Appointments
+                .Where(a => !a.IsApproved)
+                .Include(a => a.User)
+                .ToListAsync();
+        }
+
+        public async Task ApproveAppointment(int appointmentId)
+        {
+            var appointment = await _context.Appointments.FindAsync(appointmentId);
+            if (appointment != null && !appointment.IsApproved)
+            {
+                appointment.IsApproved = true;
+                await _context.SaveChangesAsync();
+
+                // Optionally, send an email notification about the approval
+                //await _emailService.SendAppointmentApprovalNotificationAsync(appointment);
             }
         }
     }

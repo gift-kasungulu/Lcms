@@ -103,11 +103,11 @@
             <Authorized>
                 <div class="nav-item px-3">
                     <div class="dropdown">
-                        <a class="nav-link dropdown-toggle" href="" id="settingsDropdown" role="button" @onclick="ToggleSettingsDropdown">
+                        <a class="nav-link dropdown-toggle"  id="settingsDropdown" role="button" @onclick="ToggleSettingsDropdown">
                             <i class="bi bi-gear-fill icon-spacing" aria-hidden="true"></i> Settings
                         </a>
                         <div class="dropdown-menu @(showSettingsDropdown ? "show" : "")" aria-labelledby="settingsDropdown">
-                            <NavLink class="dropdown-item" href="settings">
+                            <NavLink class="dropdown-item nav-hover" href="settings">
                                 <i class="bi bi-gear-fill icon-spacing" aria-hidden="true"></i> General Settings
                             </NavLink>
                             <NavLink class="dropdown-item" href="tasksetting">

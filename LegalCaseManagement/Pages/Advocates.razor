@@ -6,9 +6,11 @@
 @inject IJSRuntime jsRuntime 
 @using MailKit.Net.Smtp
 @inject ISnackbar snackbar
+@inject AuthenticationStateProvider authenticationStateProvider
 @inject UserManager<ApplicationUser> _userManager
 @inject RoleManager<IdentityRole> _roleManager
 @inject EmailService emailService
+@inject NavigationManager Navmanager
 
 <PageTitle>Advocates</PageTitle>
 
@@ -219,7 +221,7 @@
                 <MudTd DataLabel="Win">@context.CaseWinPercentage</MudTd>
                 <MudTd DataLabel="Actions">
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                        <MudMenuItem >
+                        <MudMenuItem OnClick="@(() => ViewLawyerDetails(context))">
                             <i class="bi bi-eye"></i>
                             View
                         </MudMenuItem>
@@ -239,18 +241,22 @@
             </PagerContent>
         </MudTable>
         <br />
-        <EditForm Model="request" OnValidSubmit="HandleValidSubmit">
-                    <div class="mb-3">
-                        <label class="form-label">Your Email</label>
-                        <MudTextField @bind-Value="request.Email" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Message</label>
-                        <MudTextField @bind-Value="request.Message" TextArea="true" />
-                    </div>
-                        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
-                   
-                </EditForm>
+        @if (isAdmin)
+        {
+            <EditForm Model="request" OnValidSubmit="HandleValidSubmit">
+                <div class="mb-3">
+                    <label class="form-label">Your Email</label>
+                    <MudTextField @bind-Value="request.Email" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Message</label>
+                    <MudTextField @bind-Value="request.Message" TextArea="true" />
+                </div>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
+
+            </EditForm>
+        }
+        
     </MudCardContent>
 </MudCard>
 
@@ -265,14 +271,34 @@
     private string editPassword = "";
     private Lawyers selectedLawyer = new Lawyers(); // Used for editing
     private IBrowserFile imageFile;
+    private bool isAdmin = false;
 
     private RequestModel request = new RequestModel();
 
     protected override async Task OnInitializedAsync()
     {
         lawyersList = await lawyerService.GetAllAsync();
+        await CheckUsreRole();
 
     }
+
+    private async Task CheckUsreRole()
+    {
+        var authState = await authenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var AppAdmin = await _userManager.GetUserAsync(user);
+            isAdmin = await _userManager.IsInRoleAsync(AppAdmin, "Client");
+        }
+    }
+
+    private void ViewLawyerDetails(Lawyers lawyer)
+    {
+        Navmanager.NavigateTo($"/details/{lawyer.Id}");
+    }
+
     private void HandleImageUpload(InputFileChangeEventArgs e)
     {
         imageFile = e.File;
@@ -328,28 +354,40 @@
     {
         try
         {
+            // If image is being changed, update the URL
+            if (imageFile != null)
+            {
+                var format = "image/png";
+
+                using (var stream = new MemoryStream())
+                {
+                    await imageFile.OpenReadStream().CopyToAsync(stream);
+                    var byteArray = stream.ToArray();
+                    var base64 = Convert.ToBase64String(byteArray);
+                    editLawyer.ImageUrl = $"data:{format};base64,{base64}";
+                }
+            }
+
+            // Attempt to update the lawyer's details
             var result = await lawyerService.UpdateLawyerAsync(editLawyer);
 
             if (result)
             {
-                snackbar.Add("Lawyer Detais Updated ", Severity.Success);
-
+                snackbar.Add("Lawyer details updated successfully", Severity.Success);
+                lawyersList = await lawyerService.GetAllAsync(); // Refresh the list
+                ToggleEditModal(); // Close the modal
             }
             else
             {
-
-                // Update failed, handle failure scenario
                 snackbar.Add("Failed to update lawyer", Severity.Error);
-
             }
         }
         catch (Exception ex)
         {
-            // Handle exceptions
             snackbar.Add($"Failed to update lawyer: {ex.Message}", Severity.Error);
         }
-
     }
+
 
     private async Task HandleValidSubmit()
     {

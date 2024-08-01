@@ -1,4 +1,4 @@
-﻿<style >
+﻿
 .table-bordered {
     border: 1px solid #dee2e6;
 }
@@ -25,4 +25,16 @@
     margin-top: 1.5rem;
 }
 
-</style >
+.detail{
+    text-align: center;
+}
+
+img {
+    border: 1px solid #0000ff;
+
+}
+
+.image-hover-effect:hover {
+    transition: transform 0.3s, filter 0.3s;
+    transform: scale(1.1);
+}

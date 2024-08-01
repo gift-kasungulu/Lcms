@@ -1,22 +1,27 @@
 ﻿@page "/details/{LawyerId}"
 @using LegalCaseManagement.Data
 @using MailKit.Net.Smtp
+@using Microsoft.AspNetCore.Identity
 @inject LawyerService lawyerService
 @inject EmailService emailService
 @inject NavigationManager Navigation
 @inject IJSRuntime jstRuntime
+@inject AuthenticationStateProvider authenticationStateprovider
+@inject UserManager<ApplicationUser> userManager
+
 
 @if (lawyer != null)
 {
     <div class="container mt-4">
-        <h6>Lawyer Details</h6>
+        <h6 class="detail">Lawyer Details</h6>
         <table class="table">
             <tbody>
                 <tr>
                     <td colspan="4" class="text-center">
                         @if (!string.IsNullOrEmpty(lawyer.ImageUrl))
                         {
-                            <img src="@lawyer.ImageUrl" alt="Lawyer Image" class="rounded-circle" style="width: 150px; height: 150px;" />
+                            <img src="@lawyer.ImageUrl" alt="Lawyer Image" class="rounded-circle image-hover-effect" style="width: 150px; height: 150px;" />
+                           
                         }
                         else
                         {
@@ -59,21 +64,24 @@
                 </tr>
             </tbody>
         </table>
+        @if (isClient)
+        {
+            <h6>Request for Lawyer</h6>
+            <EditForm Model="request" OnValidSubmit="HandleValidSubmit">
+                <div class="mb-3">
+                    <label class="form-label">Your Email</label>
+                    <MudTextField @bind-Value="request.Email" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Message</label>
+                    <MudTextField @bind-Value="request.Message" TextArea="true" />
+                </div>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" @onclick="GoBack">Back</MudButton>
 
-        <h6>Request for Lawyer</h6>
-        <EditForm Model="request" OnValidSubmit="HandleValidSubmit">
-            <div class="mb-3">
-                <label class="form-label">Your Email</label>
-                <MudTextField @bind-Value="request.Email" />
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Message</label>
-                <MudTextField @bind-Value="request.Message" TextArea="true" />
-            </div>
-            <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" @onclick="GoBack">Back</MudButton>
-            
-        </EditForm>
+            </EditForm>
+        }
+        
     </div>
 }
 else
@@ -86,6 +94,7 @@ else
 @code {
     [Parameter]
     public string LawyerId { get; set; }
+    private bool isClient = false;
 
     private Lawyers lawyer;
     private RequestModel request = new RequestModel();
@@ -93,6 +102,19 @@ else
     protected override async Task OnInitializedAsync()
     {
         lawyer = await lawyerService.GetByIdAsync(LawyerId);
+        await CheckRole();
+    }
+
+    private async Task CheckRole()
+    {
+        var authstate = await authenticationStateprovider.GetAuthenticationStateAsync();
+        var user = authstate.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var appClient = await userManager.GetUserAsync(user);
+            isClient = await userManager.IsInRoleAsync(appClient, "Client");
+        }
     }
 
     private async Task HandleValidSubmit()
