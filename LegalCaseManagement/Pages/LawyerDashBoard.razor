@@ -8,70 +8,75 @@
 @using System.Security.Claims
 @inject LawyerService lawyerService
 @inject CaseService caseService
-@inject MyTaskService myTaskService
+@inject MyTaskService myTaskService 
 @inject UserManager<ApplicationUser> userManager
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider authStateProvider
 @inject NotificationService notificationService
 
-<MudGrid>
-    <MudItem xs="12" sm="6" md="4">
-        <MudPaper Class="pa-4" Elevation="2">
-            <MudText Typo="Typo.h6">Cases Created</MudText>
-            <MudText Typo="Typo.h4">@casesCreatedCount</MudText>
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => NavigateToCreatedCases()">View</MudButton>
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="12" sm="6" md="4">
-        <MudPaper Class="pa-4" Elevation="2">
-            <MudText Typo="Typo.h6">Cases Assigned</MudText>
-            <MudText Typo="Typo.h4">@casesAssignedCount</MudText>
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => NavigateToAssignedCases()">View</MudButton>
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="12" sm="6" md="4">
-        <MudPaper Class="pa-4" Elevation="2">
-            <MudText Typo="Typo.h6">Tasks Assigned</MudText>
-            <MudText Typo="Typo.h4">@tasksAssignedCount</MudText>
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => NavigateToAssignedTasks()">View</MudButton>
-        </MudPaper>
-    </MudItem>
-    <MudItem xs="12" sm="6" md="4">
-        <MudPaper Class="pa-4" Elevation="2">
-            <MudText Typo="Typo.h6">Incomplete Tasks</MudText>
-            <MudText Typo="Typo.h4">@tasksIncompleteCount</MudText>
-            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="() => NavigateToIncompleteTasks()">View</MudButton>
-        </MudPaper>
-    </MudItem>
-</MudGrid>
-<br />
-<MudPaper Class="pa-4">
-    <MudText Typo="Typo.h6">Notifications</MudText>
-    @if (notifications != null && notifications.Any())
-    {
-        <MudList>
-            @foreach (var notification in notifications)
-            {
-                <MudListItem>
-                    <MudText Typo="Typo.body1">@notification.Message</MudText>
-                    <MudText Typo="Typo.caption">@notification.CreatedAt.ToString("g")</MudText>
-                    <MudButton Color="Color.Primary" OnClick="@(() => MarkAsRead(notification.Id))">Mark as Read</MudButton>
-                </MudListItem>
-                <MudListItem>
-                    @if (notification.Message.Contains("is due tomorrow"))
-                    {
-                        <MudBadge Color="Color.Error"></MudBadge>
-                    }
-                </MudListItem>
-            }
-        </MudList>
-    }
-    else
-    {
-        <MudText>No notifications</MudText>
-    }
-</MudPaper>
+    <MudPaper Class="pa-4 mb-4" Elevation="1">
+        <MudText Typo="Typo.h4" Color="Color.Primary">Lawyer Dashboard</MudText>
+        <MudDivider Class="my-2" />
+        <MudGrid>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4" Elevation="3">
+                    <MudText Typo="Typo.h6">Cases Created</MudText>
+                    <MudText Typo="Typo.h4" Color="Color.Secondary">@casesCreatedCount</MudText>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => NavigateToCreatedCases()">View</MudButton>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4" Elevation="3">
+                    <MudText Typo="Typo.h6">Cases Assigned</MudText>
+                    <MudText Typo="Typo.h4" Color="Color.Secondary">@casesAssignedCount</MudText>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => NavigateToAssignedCases()">View</MudButton>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4" Elevation="3">
+                    <MudText Typo="Typo.h6">Tasks Assigned</MudText>
+                    <MudText Typo="Typo.h4" Color="Color.Secondary">@tasksAssignedCount</MudText>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => NavigateToAssignedTasks()">View</MudButton>
+                </MudPaper>
+            </MudItem>
+            <MudItem xs="12" sm="6" md="3">
+                <MudPaper Class="pa-4" Elevation="3">
+                    <MudText Typo="Typo.h6">Incomplete Tasks</MudText>
+                    <MudText Typo="Typo.h4" Color="Color.Secondary">@tasksIncompleteCount</MudText>
+                    <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="() => NavigateToIncompleteTasks()">View</MudButton>
+                </MudPaper>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
 
+    <MudPaper Class="pa-4" Elevation="1">
+        <MudText Typo="Typo.h5" Color="Color.Primary">Notifications</MudText>
+        <MudDivider Class="my-2" />
+        @if (notifications != null && notifications.Any())
+        {
+            <MudList Dense="true">
+                @foreach (var notification in notifications)
+                {
+                    <MudListItem>
+                        <MudGrid>
+                            <MudItem xs="10">
+                                <MudText Typo="Typo.body1">@notification.Message</MudText>
+                            </MudItem>
+                            <MudItem xs="2" Class="d-flex justify-end">
+                                <MudText Typo="Typo.caption">@notification.CreatedAt.ToString("g")</MudText>
+                            </MudItem>
+                        </MudGrid>
+                        <MudButton Color="Color.Secondary" OnClick="@(() => MarkAsRead(notification.Id))">Mark as Read</MudButton>
+                    </MudListItem>
+                    <MudDivider />
+                }
+            </MudList>
+        }
+        else
+        {
+            <MudText Typo="Typo.body1">No notifications</MudText>
+        }
+    </MudPaper>
 
 @code {
     private int casesCreatedCount;
@@ -90,35 +95,14 @@
             var userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(userId))
             {
-                if (notificationService == null)
-                {
-                    throw new InvalidOperationException("notificationService is null");
-                }
-
                 notifications = await notificationService.GetNotificationsForUser(userId);
             }
         }
 
-        if (userManager == null)
-        {
-            throw new InvalidOperationException("userManager is null");
-        }
-
         var currentUser = await userManager.GetUserAsync(user);
-
-        if (caseService == null)
-        {
-            throw new InvalidOperationException("caseService is null");
-        }
 
         casesCreatedCount = await caseService.GetCasesCreatedCountByLawyerAsync(currentUser.Id);
         casesAssignedCount = await caseService.GetCasesAssignedCountByLawyerAsync(currentUser.Id);
-
-        if (myTaskService == null)
-        {
-            throw new InvalidOperationException("myTaskService is null");
-        }
-
         tasksAssignedCount = await myTaskService.GetTasksAssignedCountByLawyerAsync(currentUser.Id);
         tasksIncompleteCount = await myTaskService.GetIncompleteTasksCountByLawyerAsync(currentUser.Id);
     }

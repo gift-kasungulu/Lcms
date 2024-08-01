@@ -37,12 +37,13 @@
                     </MudSelect>
                 </MudItem>
                 <MudItem xs="12" sm="6" md="4">
-                    <MudSelect @bind-Value="newTask.StatusId" Label="Task Status" Required="true">
-                        @foreach (var status in taskStatuses)
-                        {
-                            <MudSelectItem Value="@status.StatusId">@status.Name</MudSelectItem>
-                        }
-                    </MudSelect>
+            <MudSelect @bind-Value="newTask.StatusId" Label="Task Status" Required="true" Disabled="true">
+                @foreach (var status in taskStatuses)
+                {
+                    <MudSelectItem Value="@status.StatusId">@status.Name</MudSelectItem>
+                }
+            </MudSelect>
+
                 </MudItem>
                 <MudItem xs="12" sm="6" md="4">
                     <MudSelect @bind-Value="newTask.LawyerId" Label="Assign To Lwyer" Required="true">
@@ -53,16 +54,18 @@
                     </MudSelect>
                 </MudItem>
         <MudItem xs="12" sm="6" md="4">
-            <MudTextField @bind-Value="searchString" Label="Search Case" />
+            <MudTextField @bind-Value="searchString" Label="Search Case" @oninput="UpdateCaseList" />
         </MudItem>
+
         <MudItem xs="12" md="6">
             <MudSelect @bind-Value="newTask.CaseId" Label="Case" Required="true">
-                @foreach (var legalCase in cases.Where(c => c.Discription.Contains(searchString, StringComparison.OrdinalIgnoreCase)))
+                @foreach (var legalCase in filteredCases)
                 {
                     <MudSelectItem Value="@legalCase.CaseId">@legalCase.Discription</MudSelectItem>
                 }
             </MudSelect>
         </MudItem>
+
             </MudGrid>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="mt-4">Assign Task</MudButton>
         </EditForm>
@@ -112,6 +115,7 @@
         </MudTable>
 
 @code {
+    private List<Case> filteredCases = new List<Case>();
     private string searchString = String.Empty;
     private List<MyTask> tasks = new List<MyTask>();
     private MyTask newTask = new MyTask();
@@ -131,6 +135,20 @@
 
         return badgeClass;
     }
+
+
+    private void UpdateCaseList()
+    {
+        if (string.IsNullOrEmpty(searchString))
+        {
+            filteredCases = cases;
+        }
+        else
+        {
+            filteredCases = cases.Where(c => c.Discription.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+    }
+
 
     private bool Search(Case mycase)
     {
@@ -162,6 +180,8 @@
         cases = await caseService.GetAllAsync();
         priorities = await priorityService.GetAllAsync();
         taskStatuses = await taskStatusService.GetAllAsync();
+
+        filteredCases = cases;
     }
 
     private async Task<List<MyTask>> GetTasksWithRelatedDataAsync()
@@ -189,6 +209,15 @@
         {
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
+            // Find the "In Progress" status
+            var inProgressStatus = taskStatuses.FirstOrDefault(s => s.Name.Equals("In Progress", StringComparison.OrdinalIgnoreCase));
+
+            if (inProgressStatus == null)
+            {
+                Snackbar.Add("Default task status 'In Progress' not found.", Severity.Error);
+                return;
+            }
+
             // Create and add the new task
             var task = new MyTask
                 {
@@ -196,7 +225,7 @@
                     FromDate = newTask.FromDate,
                     DueDate = newTask.DueDate,
                     PriorityId = newTask.PriorityId,
-                    StatusId = newTask.StatusId,
+                    StatusId = inProgressStatus.StatusId, // Set status to "In Progress"
                     LawyerId = newTask.LawyerId,
                     CaseId = newTask.CaseId
                 };
@@ -235,6 +264,7 @@
             await GetAllTasksAsync();
         }
     }
+
 
 
 
