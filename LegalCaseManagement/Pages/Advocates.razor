@@ -98,7 +98,6 @@
         </div>
     </div>
 }
-
 @if (showEditModal)
 {
     <div class="modal fade show" tabindex="-1" style="display: block;">
@@ -323,20 +322,21 @@
     private void OpenEditModal(Lawyers lawyer)
     {
         editLawyer = new Lawyers
-    {
-        Id = lawyer.Id,
-        FirstName = lawyer.FirstName,
-        LastName = lawyer.LastName,
-        Email = lawyer.Email,
-        Phone = lawyer.Phone,
-        Country = lawyer.Country,
-        City = lawyer.City,
-        Age = lawyer.Age,
-        CaseType = lawyer.CaseType,
-        ExperienceYears = lawyer.ExperienceYears,
-        CaseWinPercentage = lawyer.CaseWinPercentage,
-        Gender = lawyer.Gender,
-    };
+            {
+                Id = lawyer.Id,
+                FirstName = lawyer.FirstName,
+                LastName = lawyer.LastName,
+                Email = lawyer.Email,
+                Phone = lawyer.Phone,
+                Country = lawyer.Country,
+                City = lawyer.City,
+                Age = lawyer.Age,
+                CaseType = lawyer.CaseType,
+                ExperienceYears = lawyer.ExperienceYears,
+                CaseWinPercentage = lawyer.CaseWinPercentage,
+                Gender = lawyer.Gender,
+                ImageUrl = lawyer.ImageUrl
+            };
         showEditModal = true;
     }
 
@@ -374,8 +374,8 @@
             if (result)
             {
                 snackbar.Add("Lawyer details updated successfully", Severity.Success);
-                lawyersList = await lawyerService.GetAllAsync(); // Refresh the list
-                ToggleEditModal(); // Close the modal
+                lawyersList = await lawyerService.GetAllAsync();
+                ToggleEditModal();
             }
             else
             {
@@ -384,7 +384,7 @@
         }
         catch (Exception ex)
         {
-            snackbar.Add($"Failed to update lawyer: {ex.Message}", Severity.Error);
+            snackbar.Add($"{ex.Message}", Severity.Error);
         }
     }
 
@@ -433,6 +433,7 @@
         }
     }
 
+//create a new lawyer here
     private async Task Add()
     {
         try
@@ -474,7 +475,7 @@
             if (result.Succeeded)
             {
                 // Assign roles if necessary
-                await _userManager.AddToRoleAsync(user, "Lawyer");
+                await _userManager.AddToRoleAsync(user, "Team");
 
 
                 //am sending the defailt welcome email

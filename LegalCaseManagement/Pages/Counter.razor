@@ -178,6 +178,48 @@
                     </PagerContent>
                 </MudTable>
             </MudTabPanel>
+    <MudTabPanel Text="Admins">
+        <MudTable Items="adminList" Filter="new Func<ApplicationUser,bool>(SearchAdmin)" @bind-adminList="adminList">
+            <ToolBarContent>
+                <MudText Typo="Typo.h6">Admin Users</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchStringAdmin" Placeholder="Search Here" IconSize="Size.Medium"
+                              StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>FIRST NAME</MudTh>
+                <MudTh>Last Name</MudTh>
+                <MudTh>Email</MudTh>
+                <MudTh>Phone</MudTh>
+                <MudTh>Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="FirstName">@context.FirstName</MudTd>
+                <MudTd DataLabel="LastName">@context.LastName</MudTd>
+                <MudTd DataLabel="Email">@context.Email</MudTd>
+                <MudTd DataLabel="Phone">@context.PhoneNumber</MudTd>
+                <MudTd DataLabel="Actions">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                        <MudMenuItem>
+                            <i class="bi bi-eye"></i>
+                            View
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => NavigateToEditAdminPage(context.Id))">
+                            <i class="bi bi-pencil-fill"></i>
+                            Edit
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => DeleteAdmin(context))">
+                            <i class="bi bi-trash-fill"></i>
+                            Delete
+                        </MudMenuItem>
+                    </MudMenu>
+                </MudTd>
+            </RowTemplate>
+            <PagerContent>
+                <MudTablePager />
+            </PagerContent>
+        </MudTable>
+    </MudTabPanel>
         </MudTabs>
 
         <br />
@@ -263,6 +305,8 @@
     private MudForm form;
     private bool isEditDialogOpen = false;
     private List<Lawyers> lawyersList = new List<Lawyers>();
+    private List<ApplicationUser> adminList = new List<ApplicationUser>();
+    private string searchStringAdmin = "";
 
     private bool Search(ApplicationUser applicationUser)
     {
@@ -323,6 +367,7 @@
     private List<ApplicationUser> GetAll()
     {
         userList = userService.GetAll();
+        StateHasChanged();
         return userList;
     }
 
@@ -350,11 +395,13 @@
 
         }
     }
+
     protected override async Task OnInitializedAsync()
     {
         await LoadUsersAndRoles();
         userList = await GetAllClients();
         lawyersList = await lawyerService.GetAllAsync();
+        await LoadAdmins();
 
         rolesList = new List<Role>()
     {
@@ -378,6 +425,59 @@
             if (firstItem != null)
             {
                 firstItem.Selected = true;
+            }
+        }
+    }
+
+    private async Task LoadAdmins()
+    {
+        var allUsers = await userService.GetAllAsync();
+        adminList = new List<ApplicationUser>();
+
+        foreach (var user in allUsers)
+        {
+            if (await _userManager.IsInRoleAsync(user, "Admin"))
+            {
+                adminList.Add(user);
+            }
+        }
+    }
+
+    // Method to filter Admins
+    private bool SearchAdmin(ApplicationUser adminUser)
+    {
+        if (string.IsNullOrWhiteSpace(searchStringAdmin)) return true;
+        if (adminUser.UserName.Contains(searchStringAdmin, StringComparison.OrdinalIgnoreCase) ||
+            adminUser.FirstName.Contains(searchStringAdmin, StringComparison.OrdinalIgnoreCase) ||
+            adminUser.LastName.Contains(searchStringAdmin, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    // Method to navigate to the Admin edit page
+    private void NavigateToEditAdminPage(string adminId)
+    {
+        NavigationManager.NavigateTo($"/editadmin/{adminId}");
+    }
+
+    // Method to delete an Admin
+    private async Task DeleteAdmin(ApplicationUser adminUser)
+    {
+        bool confirmDelete = await jstRuntime.InvokeAsync<bool>("confirm", "Are you sure you want to delete this admin?");
+        if (confirmDelete)
+        {
+            var result = await _userManager.DeleteAsync(adminUser);
+            if (result.Succeeded)
+            {
+                adminList.Remove(adminUser);
+                snackbar.Add("Admin was removed successfully", Severity.Success);
+                StateHasChanged();
+            }
+            else
+            {
+                snackbar.Add("Failed to remove admin", Severity.Error);
             }
         }
     }
@@ -508,8 +608,8 @@
         }
     }
 
-    public async void AddNewUserWithRoles(EditContext context)
 
+    public async void AddNewUserWithRoles(EditContext context)
     {
         var usermodel = context.Model as User;
         var passwordHash = _userManager.PasswordHasher.HashPassword(null, usermodel.LoginPassword);
@@ -525,8 +625,8 @@
                 FirstName = usermodel.FirstNameUser,
                 LastName = usermodel.LastNameUser,
                 PasswordHash = passwordHash
-
             };
+
         try
         {
             var result = await _userManager.CreateAsync(user, usermodel.LoginPassword);
@@ -534,34 +634,35 @@
             {
                 var getRoleFromList = rolesList.FirstOrDefault(x => x.ID == usermodel?.UserRole);
                 var roleAddedResult = await _userManager.AddToRoleAsync(user, getRoleFromList?.RoleName ?? "Client");
-                
-                await emailService.SendDefaultWelcomeEmailToUserAsync(user.Email, user.FirstName, user.LastName, usermodel.LoginPassword); // sent the email to the user i just added
 
                 if (roleAddedResult.Succeeded)
                 {
-                    snackbar.Add("User was Addedd Successfuly with Role", Severity.Success);
-                    
-                    newUser = new User(); 
+                    snackbar.Add("User was added successfully with role", Severity.Success);
+                    newUser = new User();
                     ToggleModal();
-                    StateHasChanged();
+                    
                     return;
-                   
                 }
                 else
                 {
-                    snackbar.Add("Operation Failed ", Severity.Error);
+                    snackbar.Add("Failed to assign role to user", Severity.Error);
                 }
             }
-            snackbar.Add("User creation failed. Please check the input data.", Severity.Error);
-
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    snackbar.Add($"Error: {error.Description}", Severity.Error);
+                }
+            }
         }
         catch (Exception ex)
-
         {
             await jstRuntime.InvokeVoidAsync("console.error", ex.Message);
-            await jstRuntime.InvokeVoidAsync("alert", "An error occurred during user creation. Please try again later.");
+            snackbar.Add("An error occurred during user creation. Please try again later.", Severity.Error);
         }
-
     }
+
+
 
 }

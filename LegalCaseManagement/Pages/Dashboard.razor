@@ -24,53 +24,53 @@
     <MudText Typo="Typo.h6" Class="mb-4">Dashboard</MudText>
     <div class="row">
         <div class="col-md-3">
-            <div class="card bg-primary text-white">
+            <div class="card ">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h1 class="card-text mb-0">@clients.Count</h1>
                             <p class="card-title mb-0">Clients</p>
                         </div>
-                        <i class="bi bi-people-fill card-icon"></i>
+                        <i class="bi bi-people-fill card-icon-p"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-secondary text-white">
+            <div class="card ">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h1 class="card-text mb-0">@caseList.Count</h1>
                             <p class="card-title mb-0">Cases</p>
                         </div>
-                        <i class="bi bi-folder-fill card-icon"></i>
+                        <i class="bi bi-folder-fill card-icon-y"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-warning text-white">
+            <div class="card ">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h1 class="card-text mb-0">@highPriorityCases.Count</h1>
                             <p class="card-title mb-0">High-Priority Cases</p>
                         </div>
-                        <i class="bi bi-trophy-fill card-icon"></i>
+                        <i class="bi bi-trophy-fill card-icon-r"></i>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="card bg-success text-white">
+            <div class="card ">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h1 class="card-text mb-0">@decidedCases.Count</h1>
                             <p class="card-title mb-0">Decided Cases</p>
                         </div>
-                        <i class="bi bi-check2-circle card-icon"></i>
+                        <i class="bi bi-check2-circle card-icon-g"></i>
                     </div>
                 </div>
             </div>
@@ -85,7 +85,7 @@
             <MudDatePicker @bind-Date="selectedDate" Label="Select Date" />
             <br />
             <MudButton OnClick="SearchCases" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search"
-                       Color="Color.Primary" Class="ml-4">Search</MudButton>
+                       Color="Color.Primary" Class="ml-auto">Search</MudButton>
             <MudTable Items="filteredCaseList" Filter="new Func<Case,bool>(Search)" Class="mt-4">
                 <HeaderContent>
                     <MudTh>No</MudTh>
@@ -150,7 +150,7 @@
         newCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "new").ToList();
         abandonedCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "abandoned").ToList();
         highPriorityCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "high").ToList();
-        decidedCases = caseList.Where(c => c.CaseStatus.StatusName.ToLower() == "Completed").ToList();
+        decidedCases = caseList.Where(c => c.CaseStatus.StatusName.ToLower() == "completed").ToList();
     }
 
     private async void NavigateToAssignedCases()

@@ -1,47 +1,5 @@
-﻿@page "/firstReg"
-
-            <MudText Typo="Typo.h5">Create Admin</MudText>
-            <EditForm Model="newUser" OnValidSubmit="AddNewUserWithRoles">
-                <DataAnnotationsValidator />
-                <MudGrid>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="newUser.FirstNameUser" Label="First Name" Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="newUser.LastNameUser" Label="Last Name" Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="newUser.LoginName" Label="Email" Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="newUser.Phone" Label="Phone Number" Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="newUser.CountryUser" Label="Country" Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="newUser.CityUser" Label="City" Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="newUser.AddressUser" Label="Address" Variant="Variant.Outlined" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudTextField @bind-Value="newUser.LoginPassword" Label="Password" Variant="Variant.Outlined" InputType="InputType.Password" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6">
-                        <MudSelect @bind-Value="newUser.UserRole" Label="Role" Variant="Variant.Outlined">
-                            @foreach (var role in selectList)
-                            {
-                                <MudSelectItem Value="@role.Value">@role.Text</MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudItem>
-                </MudGrid>
-                
-                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Submit</MudButton>
-                
-            </EditForm>
-
+﻿@page "/firstregister"
+<PageTitle>First Register</PageTitle>
 
 @using LegalCaseManagement.Domain
 @using LegalCaseManagement.Service
@@ -58,6 +16,102 @@
 @inject EmailService emailService
 @inject LawyerService lawyerService
 @inject NavigationManager NavigationManager
+
+
+<style>
+    .registration-container {
+        max-width: 600px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-title {
+        text-align: center;
+        color: #333;
+        margin-bottom: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        border-radius: 4px;
+    }
+
+    .btn-primary {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="registration-container">
+    <h2 class="form-title">Create Admin</h2>
+    <EditForm Model="newUser" OnValidSubmit="AddNewUserWithRoles">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label class="form-label">First Name</label>
+                <InputText class="form-control" placeholder="Enter First Name" @bind-Value="newUser.FirstNameUser" />
+            </div>
+            <div class="col-md-6 form-group">
+                <label class="form-label">Last Name</label>
+                <InputText class="form-control" placeholder="Enter Last Name" @bind-Value="newUser.LastNameUser" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Email</label>
+            <InputText class="form-control" placeholder="Enter Email Address" @bind-Value="newUser.LoginName" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Phone Number</label>
+            <InputText class="form-control" placeholder="Enter Phone Number" @bind-Value="newUser.Phone" />
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label class="form-label">Country</label>
+                <InputText class="form-control" placeholder="Enter Country" @bind-Value="newUser.CountryUser" />
+            </div>
+            <div class="col-md-6 form-group">
+                <label class="form-label">City</label>
+                <InputText class="form-control" placeholder="Enter City" @bind-Value="newUser.CityUser" />
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Address</label>
+            <InputText class="form-control" placeholder="Enter Address" @bind-Value="newUser.AddressUser" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Password</label>
+            <InputText type="password" class="form-control" placeholder="Enter Password" @bind-Value="newUser.LoginPassword" />
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Role</label>
+            <InputSelect class="form-control" @bind-Value="newUser.UserRole">
+                @foreach (var role in selectList)
+                {
+                    <option value="@role.Value" selected="@role.Selected">@role.Text</option>
+                }
+            </InputSelect>
+        </div>
+        <br />
+        <button type="submit" class="btn btn-primary">Create Account</button>
+    </EditForm>
+</div>
 
 @code {
     private string searchString = "";
@@ -320,7 +374,6 @@
     }
 
     public async void AddNewUserWithRoles(EditContext context)
-
     {
         var usermodel = context.Model as User;
         var passwordHash = _userManager.PasswordHasher.HashPassword(null, usermodel.LoginPassword);
@@ -336,8 +389,8 @@
                 FirstName = usermodel.FirstNameUser,
                 LastName = usermodel.LastNameUser,
                 PasswordHash = passwordHash
-
             };
+
         try
         {
             var result = await _userManager.CreateAsync(user, usermodel.LoginPassword);
@@ -346,32 +399,32 @@
                 var getRoleFromList = rolesList.FirstOrDefault(x => x.ID == usermodel?.UserRole);
                 var roleAddedResult = await _userManager.AddToRoleAsync(user, getRoleFromList?.RoleName ?? "Client");
 
-                await emailService.SendDefaultWelcomeEmailToUserAsync(user.Email, user.FirstName, user.LastName, usermodel.LoginPassword);
                 if (roleAddedResult.Succeeded)
                 {
-                    snackbar.Add("User was Addedd Successfuly with Role", Severity.Success);
-
+                    snackbar.Add("User was added successfully with role", Severity.Success);
                     newUser = new User();
                     ToggleModal();
-                    StateHasChanged();
                     return;
-
                 }
                 else
                 {
-                    snackbar.Add("Operation Failed ", Severity.Error);
+                    snackbar.Add("Failed to assign role to user", Severity.Error);
                 }
             }
-            snackbar.Add("User creation failed. Please check the input data.", Severity.Error);
-
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    snackbar.Add($"Error: {error.Description}", Severity.Error);
+                }
+            }
         }
         catch (Exception ex)
-
         {
             await jstRuntime.InvokeVoidAsync("console.error", ex.Message);
-            await jstRuntime.InvokeVoidAsync("alert", "An error occurred during user creation. Please try again later.");
+            snackbar.Add("An error occurred during user creation. Please try again later.", Severity.Error);
         }
-
     }
+
 
 }

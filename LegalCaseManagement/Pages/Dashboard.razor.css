@@ -9,19 +9,40 @@
 }
 
 .card-title {
+    color: darkslategrey;
     font-size: 0.9rem;
     font-weight: normal;
     margin-bottom: 0;
 }
 
 .card-text {
+    color: black;
     font-size: 2.5rem;
     font-weight: bold;
     margin-bottom: 0;
     line-height: 1;
 }
 
-.card-icon {
+.card-icon-p {
+    color: cadetblue;
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.card-icon-r {
+    color: red;
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.card-icon-y {
+    color: darkorange;
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.card-icon-g {
+    color: lawngreen;
     font-size: 2.5rem;
     opacity: 0.9;
 }

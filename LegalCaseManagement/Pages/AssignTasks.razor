@@ -49,7 +49,7 @@
                     <MudSelect @bind-Value="newTask.LawyerId" Label="Assign To Lwyer" Required="true">
                         @foreach (var lawyer in lawyers)
                         {
-                            <MudSelectItem Value="@lawyer.Id">@lawyer.FirstName @lawyer.LastName</MudSelectItem> <!-- Use lawyer.Id for ApplicationUser's Id -->
+                            <MudSelectItem Value="@lawyer.Id">@lawyer.FirstName @lawyer.LastName</MudSelectItem>
                         }
                     </MudSelect>
                 </MudItem>
