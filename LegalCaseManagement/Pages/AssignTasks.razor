@@ -14,6 +14,8 @@
 @inject IServiceScopeFactory ServiceScopeFactory
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
+@inject EmailService EmailService
+@inject IDialogService DialogService
 
         <MudText Typo="Typo.h6" Class="mb-4">Assign Task</MudText>
         <EditForm Model="newTask" OnValidSubmit="AssignTask">
@@ -82,8 +84,8 @@
                 <MudTh>Assigned Lawyer</MudTh>
                 <MudTh>Priority</MudTh>
                 <MudTh>Status</MudTh>
-                <MudTh>Action</MudTh>
                 <MudTh>Status</MudTh>
+                <MudTh>Action</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="DueDate">@context.DueDate</MudTd>
@@ -95,11 +97,7 @@
                 <MudTd DataLabel="Status">
                     <span class="@GetStatusBadgeClass(@context.Status?.Name)">@context.Status?.Name</span>
                 </MudTd>
-                <MudTd DataLabel="Action">
-                      <MudButton Variant="Variant.Text" Color="Color.Primary" @onclick="() => ViewTaskDetails(context.TaskId)">
-                        View
-                    </MudButton>
-                </MudTd>
+                
                 <MudTd>
                     @if (@context.Status?.Name.ToLower() == "completed")
                     {
@@ -111,8 +109,71 @@
 
                     }
                 </MudTd>
+                <MudTd>
+            <MudTd>
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                    <MudMenuItem OnClick="@(() => ViewTaskDetails(context.CaseId))">
+                        <i class="bi bi-eye"></i>
+                        View
+                    </MudMenuItem>
+                    
+                    <MudMenuItem OnClick="() => EditTask(context)">
+                        <i class="bi bi-pencil"></i>
+                        Edit
+                    </MudMenuItem>
+
+
+                    <MudMenuItem OnClick="@(() => DeleteTask(context.TaskId))">
+                        <i class="bi bi-trash"></i>
+                        Delete
+                    </MudMenuItem>
+                </MudMenu>
+               
+            </MudTd>
+                </MudTd>
             </RowTemplate>
         </MudTable>
+
+        <!-- Edit dialog -->
+<MudDialog @bind-IsVisible="editDialogVisible">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Edit Task</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudTextField @bind-Value="editingTask.Description" Label="Description" />
+        <MudDatePicker @bind-Date="editingTask.FromDate" Label="Due Date" />
+        <MudDatePicker @bind-Date="editingTask.DueDate" Label="Due Date" />
+        <MudSelect @bind-Value="editingTask.PriorityId" Label="Priority" Required="true">
+            @foreach (var priority in priorities)
+            {
+                <MudSelectItem Value="@priority.PriorityId">@priority.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect @bind-Value="editingTask.StatusId" Label="Task Status" Required="true" Disabled="true">
+            @foreach (var status in taskStatuses)
+            {
+                <MudSelectItem Value="@status.StatusId">@status.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect @bind-Value="editingTask.LawyerId" Label="Assign To Lwyer" Required="true">
+            @foreach (var lawyer in lawyers)
+            {
+                <MudSelectItem Value="@lawyer.Id">@lawyer.FirstName @lawyer.LastName</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSelect @bind-Value="editingTask.CaseId" Label="Case" Required="true">
+            @foreach (var legalCase in filteredCases)
+            {
+                <MudSelectItem Value="@legalCase.CaseId">@legalCase.Discription</MudSelectItem>
+            }
+        </MudSelect>
+        
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="UpdateTask">Save</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="@(() => editDialogVisible = false)">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     private List<Case> filteredCases = new List<Case>();
@@ -123,6 +184,8 @@
     private List<Case> cases = new List<Case>();
     private List<Priority> priorities = new List<Priority>();
     private List<MyTaskStatus> taskStatuses = new List<MyTaskStatus>();
+    private bool editDialogVisible = false;
+    private MyTask editingTask = new MyTask();
 
     private string GetPriorityBadgeClass(string priority)
     {
@@ -136,7 +199,6 @@
         return badgeClass;
     }
 
-
     private void UpdateCaseList()
     {
         if (string.IsNullOrEmpty(searchString))
@@ -148,7 +210,6 @@
             filteredCases = cases.Where(c => c.Discription.Contains(searchString, StringComparison.OrdinalIgnoreCase)).ToList();
         }
     }
-
 
     private bool Search(Case mycase)
     {
@@ -259,13 +320,34 @@
 
             await context.SaveChangesAsync();
 
+            
+            // Send email notification to the assigned lawyer
+            if (lawyer != null)
+            {
+                var subject = "New Task Assigned";
+                var body = $"Dear {lawyer.FirstName} {lawyer.LastName},<br><br>" +
+                           $"A new task has been assigned to you:<br>" +
+                           $"Description: {task.Description}<br>" +
+                           $"Due Date: {task.DueDate}<br><br>" +
+                           $"Please log in to the system to view more details.<br><br>" +
+                           $"Best regards,<br>Legal Case Management System";
+
+                try
+                {
+                    await EmailService.SendEmailAsync(lawyer.Email, subject, body);
+                    Snackbar.Add("Task assigned and notification sent successfully", Severity.Success);
+                }
+                catch (Exception ex)
+                {
+                    Snackbar.Add($"Task assigned but failed to send email: {ex.Message}", Severity.Warning);
+                }
+            }
+
             Snackbar.Add("Task assigned successfully", Severity.Success);
             newTask = new MyTask();
             await GetAllTasksAsync();
         }
     }
-
-
 
 
         private void ViewTaskDetails(int taskId)
@@ -293,6 +375,62 @@
                 StateHasChanged();
 
                 Navigation.NavigateTo("/completedtasks"); // Navigate to completed tasks page
+            }
+        }
+    }
+
+    private void EditTask(MyTask task)
+    {
+        editingTask = new MyTask
+            {
+                TaskId = task.TaskId,
+                Description = task.Description,
+                DueDate = task.DueDate,
+                // Copy other properties as needed
+            };
+        editDialogVisible = true;
+    }
+
+    private async Task UpdateTask()
+    {
+        using (var scope = ServiceScopeFactory.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var taskToUpdate = await context.MyTasks.FindAsync(editingTask.TaskId);
+            if (taskToUpdate != null)
+            {
+                taskToUpdate.Description = editingTask.Description;
+                taskToUpdate.DueDate = editingTask.DueDate;
+                // Update other properties as needed
+
+                await context.SaveChangesAsync();
+                Snackbar.Add("Task updated successfully", Severity.Success);
+                editDialogVisible = false;
+                await GetAllTasksAsync(); // Refresh the task list
+            }
+        }
+    }
+
+    private async Task DeleteTask(int taskId)
+    {
+        bool? result = await DialogService.ShowMessageBox(
+            "Delete Confirmation",
+            "Are you sure you want to delete this task?",
+            yesText: "Delete", cancelText: "Cancel");
+
+        if (result == true)
+        {
+            using (var scope = ServiceScopeFactory.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var taskToDelete = await context.MyTasks.FindAsync(taskId);
+                if (taskToDelete != null)
+                {
+                    context.MyTasks.Remove(taskToDelete);
+                    await context.SaveChangesAsync();
+                    Snackbar.Add("Task deleted successfully", Severity.Success);
+                    await GetAllTasksAsync(); // Refresh the task list
+                }
             }
         }
     }

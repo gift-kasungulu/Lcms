@@ -121,7 +121,7 @@ else
     {
         try
         {
-            await emailService.SendEmailAsync(request.Email, "Lawyer Request", request.Message, null);
+           // await emailService.SendEmailAsync(request.Email, "Lawyer Request", request.Message, null);
             await jstRuntime.InvokeVoidAsync("alert", "Email sent successfully!");
         }
         catch (SmtpCommandException smtpEx)

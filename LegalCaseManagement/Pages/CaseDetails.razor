@@ -15,8 +15,10 @@
 <MudText Typo="Typo.h5">Case</MudText>
 <MudSpacer />
 
-<MudIconButton Icon="@Icons.Material.Filled.FileDownload" Color="Color.Primary" />
-<MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Primary" />
+<div class="my-2">
+    <MudIconButton Icon="@Icons.Material.Filled.FileDownload" Color="Color.Primary" />
+    <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Primary" />
+</div>
 
 @if (caseDetails == null)
 {
@@ -89,7 +91,7 @@ else
             <MudItem xs="12">
                 <MudText Typo="Typo.h6" Class="mb-4">Upload Case Documents</MudText>
                 <InputFile OnChange="OnFileChange" />
-                <MudButton Color="Color.Primary" OnClick="UploadFiles" Disabled="@(!selectedFiles.Any())" Class="mt-2">
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="UploadFiles" Disabled="@(!selectedFiles.Any())" Class="mt-2">
                     Upload Documents
                 </MudButton>
             </MudItem>

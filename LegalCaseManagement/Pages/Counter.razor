@@ -80,9 +80,11 @@
     </div>
 </div>
 }
-
-    <MudButton  Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Add User</MudButton>
-            <br />
+<div class="my-3">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="ToggleModal">Add User</MudButton>
+</div>
+       
+        <br />
         <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
             <MudTabPanel Text="Clients">
                 <MudTable Items="userList" Filter="new Func<ApplicationUser,bool>(Search)" @bind-userList="userList">
@@ -221,7 +223,6 @@
         </MudTable>
     </MudTabPanel>
         </MudTabs>
-
         <br />
         <div class="row">
             <div class="col-md-6">
@@ -272,6 +273,7 @@
                 </MudCard>
             </div>
         </div>
+
         @if (editRole != null)
 
 

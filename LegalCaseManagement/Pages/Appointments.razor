@@ -27,20 +27,7 @@
             </MudItem>
         </MudGrid>
 
-        <MudGrid Class="mt-4">
-            <MudItem xs="12" sm="4">
-                <MudDatePicker Label="From Date" @bind-Date="fromDate" />
-            </MudItem>
-            <MudItem xs="12" sm="4">
-                <MudDatePicker Label="To Date" @bind-Date="toDate" />
-            </MudItem>
-            <MudItem xs="12" sm="2">
-                <MudButton Variant="Variant.Outlined" Color="Color.Error" FullWidth="true" OnClick="@ClearFilters">CLEAR</MudButton>
-            </MudItem>
-            <MudItem xs="12" sm="2">
-                <MudButton Variant="Variant.Outlined" Color="Color.Info" FullWidth="true" OnClick="@SearchAppointments">SEARCH</MudButton>
-            </MudItem>
-        </MudGrid>
+        
 
         <MudTable Items="@appointments" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading" LoadingProgressColor="Color.Info" Class="mt-4">
             <ToolBarContent>

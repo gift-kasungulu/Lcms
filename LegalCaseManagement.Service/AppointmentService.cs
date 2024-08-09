@@ -34,7 +34,7 @@ namespace LegalCaseManagement.Service
             await _context.SaveChangesAsync();
 
             // Send email notification
-            await _emailService.SendAppointmentNotificationAsync(appointment);
+            //await _emailService.SendAppointmentNotificationAsync(appointment);
         }
 
         public async Task<IEnumerable<Appointment>> GetAppointments()

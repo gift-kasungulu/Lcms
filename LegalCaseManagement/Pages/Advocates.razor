@@ -393,7 +393,7 @@
     {
         try
         {
-            await emailService.SendEmailAsync(request.Email, "Law Master Legal Case Management", request.Message, null);
+           // await emailService.SendEmailAsync(request.Email, "Law Master Legal Case Management", request.Message, null);
             await jsRuntime.InvokeVoidAsync("alert", "Email sent successfully!");
         }
         catch (SmtpCommandException smtpEx)
@@ -479,7 +479,7 @@
 
 
                 //am sending the defailt welcome email
-                await emailService.SendDefaultWelcomeEmailAsync(user.Email, password);
+                //await emailService.SendDefaultWelcomeEmailAsync(user.Email, password);
 
                 snackbar.Add("Email sent", Severity.Success);
 

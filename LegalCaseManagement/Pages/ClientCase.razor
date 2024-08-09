@@ -48,7 +48,7 @@ else
             <MudTd>@context.EndDate?.ToString("dd MMM yyyy")</MudTd>
             <MudTd>@context.CaseStatus.StatusName</MudTd>
              <MudTd>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => NavigateToDetails(context.CaseId))">View</MudButton>
+                <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => NavigateToDetails(context.CaseId))">View</MudButton>
             </MudTd>
         </RowTemplate>
     </MudTable>

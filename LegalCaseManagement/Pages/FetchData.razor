@@ -179,8 +179,8 @@
         newAppointment.CreatedBy = user.Id;
 
         await AppointmentService.AddAppointment(newAppointment);
-        await EmailService.SendEmailAsync(newAppointment.Email, "Appointment Confirmation",
-            $"Dear {newAppointment.ClientName},<br/>You have an appointment on {newAppointment.Date.ToShortDateString()} at {newAppointment.Time}.<br/><br/>Note: {newAppointment.Note}", null);
+        //await EmailService.SendEmailAsync(newAppointment.Email, "Appointment Confirmation",
+         //   $"Dear {newAppointment.ClientName},<br/>You have an appointment on {newAppointment.Date.ToShortDateString()} at {newAppointment.Time}.<br/><br/>Note: {newAppointment.Note}", null);
 
         Snackbar.Add("Appointment added successfully!", Severity.Success);
         Navigation.NavigateTo("/appointments");
@@ -210,8 +210,8 @@
         newAppointment.CreatedBy = user.Id;
 
         await AppointmentService.AddAppointment(newAppointment);
-        await EmailService.SendEmailAsync(newAppointment.Email, "Appointment Confirmation",
-            $"Dear {newAppointment.ClientName},<br/>You have an appointment on {newAppointment.Date.ToShortDateString()} at {newAppointment.Time}.<br/><br/>Note: {newAppointment.Note}", null);
+       // await EmailService.SendEmailAsync(newAppointment.Email, "Appointment Confirmation",
+         //   $"Dear {newAppointment.ClientName},<br/>You have an appointment on {newAppointment.Date.ToShortDateString()} at {newAppointment.Time}.<br/><br/>Note: {newAppointment.Note}", null);
 
         Snackbar.Add("Appointment added successfully!", Severity.Success);
         Navigation.NavigateTo("/appointments");
