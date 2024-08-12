@@ -30,8 +30,8 @@ namespace LegalCaseManagement.Data
         {
             try
             {
-                // Find related tasks
-                var tasks = _context.MyTasks.Where(t => t.LawyerId == lawyer.Id).ToList();
+                // Find related tasks asynchronously
+                var tasks = await _context.MyTasks.Where(t => t.LawyerId == lawyer.Id).ToListAsync();
 
                 // Remove related tasks
                 _context.MyTasks.RemoveRange(tasks);
@@ -44,12 +44,20 @@ namespace LegalCaseManagement.Data
 
                 return true;
             }
+            catch (DbUpdateException dbEx)
+            {
+                // Log the database update exception (use a logger in a real application)
+                Console.WriteLine($"Database update error: {dbEx.Message}");
+                return false;
+            }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                // Log the general exception (use a logger in a real application)
+                Console.WriteLine($"An error occurred: {ex.Message}");
                 return false;
             }
         }
+
 
         public async Task<bool> UpdateLawyerAsync(Lawyers lawyer)
         {

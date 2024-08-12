@@ -11,6 +11,8 @@
 @inject AppointmentService AppointmentService
 @inject NotificationService NotificationService
 @inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject EmailService EmailService 
 
 <PageTitle>Notifications</PageTitle>
 
@@ -155,8 +157,81 @@ else
 
     private async Task ApproveAppointment(int appointmentId)
     {
+        var appointment = appointments.FirstOrDefault(a => a.Id == appointmentId);
+        if (appointment == null)
+        {
+            Snackbar.Add("Appointment not found", Severity.Error);
+            return;
+        }
+
+        // Approve the appointment
         await AppointmentService.ApproveAppointment(appointmentId);
         appointments = appointments.Where(a => a.Id != appointmentId).ToList();
         StateHasChanged();
+
+        // Get the creator of the appointment
+        var creator = await UserManager.FindByIdAsync(appointment.CreatedBy);
+        var client = await UserManager.FindByIdAsync(appointment.UserId);
+        var lawyer = await UserManager.FindByIdAsync(appointment.User.Id);
+
+        if (creator == null)
+        {
+            Snackbar.Add("Appointment creator not found", Severity.Warning);
+            return;
+        }
+
+        // Determine if the creator is a lawyer or client and send email accordingly
+        var roles = await UserManager.GetRolesAsync(creator);
+        if (roles.Contains("Team") && client != null)
+        {
+            // Send email to the client
+            var subject = "Appointment Confirmation";
+            var body = $"Dear {client.FirstName} {client.LastName},<br><br>" +
+                       $"Your appointment has been confirmed:<br>" +
+                       $"Advocates: {creator.FirstName} {creator.LastName}<br>" +
+                       $"Date: {appointment.Date.ToShortDateString()}<br>" +
+                       $"Time: {appointment.Time}<br><br>" +
+                       $"Please log in to the system to view more details.<br><br>" +
+                       $"Best regards,<br>Legal Case Management System";
+
+            try
+            {
+                await EmailService.SendEmailAsync(client.Email, subject, body);
+                Snackbar.Add("Client notified successfully", Severity.Success);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Failed to send email to client: {ex.Message}", Severity.Warning);
+            }
+        }
+        else if (roles.Contains("Client") && lawyer != null)
+        {
+            // Send email to the lawyer
+            var subject = "New Appointment Scheduled";
+            var body = $"Dear {lawyer.FirstName} {lawyer.LastName},<br><br>" +
+                       $"You have a new appointment scheduled:<br>" +
+                       $"Client: {creator.FirstName} {creator.LastName}<br>" +
+                       $"Date: {appointment.Date.ToShortDateString()}<br>" +
+                       $"Time: {appointment.Time}<br><br>" +
+                       $"Please log in to the system to view more details.<br><br>" +
+                       $"Best regards,<br>Legal Case Management System";
+
+            try
+            {
+                await EmailService.SendEmailAsync(lawyer.Email, subject, body);
+                Snackbar.Add("Lawyer notified successfully", Severity.Success);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Failed to send email to lawyer: {ex.Message}", Severity.Warning);
+            }
+        }
+        else
+        {
+            Snackbar.Add("No valid recipient found for the appointment notification.", Severity.Warning);
+        }
     }
+
+
+
 }

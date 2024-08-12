@@ -322,7 +322,8 @@
 
             
             // Send email notification to the assigned lawyer
-            if (lawyer != null)
+
+            if (lawyer is not null)
             {
                 var subject = "New Task Assigned";
                 var body = $"Dear {lawyer.FirstName} {lawyer.LastName},<br><br>" +

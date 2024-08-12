@@ -39,8 +39,11 @@
         align-items: center;
         line-height: 3rem;
     }
+.nav-item:hover {
+    background-color: #677D6A;
+}
 
-.nav-item ::deep a.active {
+.nav-item::deep a.active {
     background-color: rgba(10, 10, 10, 0.25);
     color: white;
 }

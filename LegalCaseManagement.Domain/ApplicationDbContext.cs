@@ -36,13 +36,19 @@ namespace LegalCaseManagement.Data
                 .HasOne(t => t.Case)
                 .WithMany() // Assuming there's no collection navigation property in Case for MyTask
                 .HasForeignKey(t => t.CaseId)
-                .OnDelete(DeleteBehavior.Restrict); // Specify Restrict or NoAction
+                .OnDelete(DeleteBehavior.Cascade); // Specify Delete cascade action
+
+            //builder.Entity<Lawyers>()
+            //    .HasKey l => l.Id)
+                
+            //    .OnDelete(DeleteBehavior.Cascade); // tryinh to forcely cascade a delete ont the lawyer
+                
 
             builder.Entity<MyTask>()
                 .HasOne(t => t.LawyerInfo)
-                .WithMany() // Assuming there's no collection navigation property in Lawyers for MyTask
+                .WithMany() 
                 .HasForeignKey(t => t.LawyerId)
-                .OnDelete(DeleteBehavior.Restrict); // Specify Restrict or NoAction
+                .OnDelete(DeleteBehavior.Cascade); // tondelete every principle Entity that is been traced by dbcontext EFCore
 
             builder.Entity<Appointment>()
                .HasOne(a => a.User)
@@ -59,7 +65,7 @@ namespace LegalCaseManagement.Data
                 .HasOne<ApplicationUser>(m => m.Sender)
                 .WithMany(u => u.SentMessages)
                 .HasForeignKey(m => m.SenderId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Case>()
                 .HasMany(c => c.CaseDocuments)

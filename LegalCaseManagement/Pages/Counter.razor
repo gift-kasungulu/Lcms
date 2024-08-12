@@ -16,6 +16,7 @@
 @inject EmailService emailService
 @inject LawyerService lawyerService
 @inject NavigationManager NavigationManager
+@inject EmailService EmailService 
 
 <PageTitle>User Management</PageTitle>
 
@@ -639,10 +640,27 @@
 
                 if (roleAddedResult.Succeeded)
                 {
-                    snackbar.Add("User was added successfully with role", Severity.Success);
+                    // Send email notification to the new user
+
+                    var subject = "Welcome to Legal Case Management System";
+                    var body = $"Dear {user.FirstName} {user.LastName},<br><br>" +
+                               $"You have been successfully added to the Legal Case Management System.<br>" +
+                               $"Your login username is: {user.UserName}<br><br>" +
+                               $"Please log in to the system to get started.<br><br>" +
+                               $"Best regards,<br>Legal Case Management System";
+
+                    try
+                    {
+                        await EmailService.SendEmailAsync(user.Email, subject, body);
+                        snackbar.Add("User was added successfully with role, and notification email sent.", Severity.Success);
+                    }
+                    catch (Exception ex)
+                    {
+                        snackbar.Add($"User was added successfully, but failed to send email: {ex.Message}", Severity.Warning);
+                    }
+
                     newUser = new User();
                     ToggleModal();
-                    
                     return;
                 }
                 else
@@ -664,6 +682,7 @@
             snackbar.Add("An error occurred during user creation. Please try again later.", Severity.Error);
         }
     }
+
 
 
 
