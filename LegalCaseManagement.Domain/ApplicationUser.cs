@@ -5,7 +5,7 @@ namespace LegalCaseManagement.Data
 {
     public class ApplicationUser : IdentityUser
     {
-        // Removed the UserId property because IdentityUser already has an Id property
+      
         public string City { get; set; } = string.Empty;
         public string Country { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
@@ -16,8 +16,8 @@ namespace LegalCaseManagement.Data
         public List<Case> Cases = new List<Case>();
         public List<Appointment> Appointments { get; set; } = new List<Appointment>();
         public virtual ICollection<Notification> Notifications { get; set; }
-        public virtual ICollection<Message> SentMessages { get; set; }
-        public virtual ICollection<Message> ReceivedMessages { get; set; }
+       
+        
 
 
     }

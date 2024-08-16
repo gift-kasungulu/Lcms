@@ -113,6 +113,7 @@ namespace LegalCaseManagement.Areas.Identity.Pages.Account
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
                 var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");
@@ -129,7 +130,19 @@ namespace LegalCaseManagement.Areas.Identity.Pages.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    // Check if the email exists in the system
+                    var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+                    if (user == null)
+                    {
+                        // If the user does not exist, provide a specific message
+                        ModelState.AddModelError(string.Empty, "No account found with the provided email address!");
+                    }
+                    else
+                    {
+                        // If the email exists but password is incorrect
+                        ModelState.AddModelError(string.Empty, "Invalid password. Please try again.");
+                    }
+
                     return Page();
                 }
             }
@@ -137,5 +150,6 @@ namespace LegalCaseManagement.Areas.Identity.Pages.Account
             // If we got this far, something failed, redisplay form
             return Page();
         }
+
     }
 }

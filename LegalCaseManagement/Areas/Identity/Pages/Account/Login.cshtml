@@ -13,6 +13,14 @@
             <div class="col-md-6">
                 <div class="card-body p-5">
                     <h2 class="card-title text-center mb-4 fw-bold">Sign In</h2>
+
+                    @if (ModelState.ErrorCount > 0)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).FirstOrDefault()
+                        </div>
+                    }
+
                     <form id="account" method="post" class="needs-validation" novalidate>
                         <div class="mb-3">
                             <label asp-for="Input.Email" class="form-label">Email address</label>
@@ -48,7 +56,6 @@
         </div>
     </div>
 </div>
-
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

@@ -49,6 +49,10 @@ namespace LegalCaseManagement.Data
         [ForeignKey("StatusId")]
         public CaseStatus CaseStatus { get; set; } = new CaseStatus();
 
+        [ForeignKey("WonLostId")]
+        public int WonLostId { get; set; }
+        public MyCaseWonOrLost WonOrLost { get; set; } = new MyCaseWonOrLost();
+
         // Foreign key for ApplicationUser
         [Required(ErrorMessage = "Client is required.")]
         public string? UserId { get; set; }  // This is the foreign key property referencing ApplicationUser.Id

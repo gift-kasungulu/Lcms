@@ -174,6 +174,9 @@ namespace LegalCaseManagement.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("WonLostId")
+                        .HasColumnType("int");
+
                     b.HasKey("CaseId");
 
                     b.HasIndex("AssignedLawyerId");
@@ -185,6 +188,8 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.HasIndex("StatusId");
 
                     b.HasIndex("UserId");
+
+                    b.HasIndex("WonLostId");
 
                     b.ToTable("Cases");
                 });
@@ -256,7 +261,6 @@ namespace LegalCaseManagement.Domain.Migrations
                         .HasColumnType("time");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
@@ -295,39 +299,21 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.ToTable("Documents");
                 });
 
-            modelBuilder.Entity("LegalCaseManagement.Domain.Message", b =>
+            modelBuilder.Entity("LegalCaseManagement.Domain.MyCaseWonOrLost", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("WonLostId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("WonLostId"), 1L, 1);
 
-                    b.Property<string>("Content")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
+                    b.HasKey("WonLostId");
 
-                    b.Property<string>("ReceiverId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("SenderId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ReceiverId");
-
-                    b.HasIndex("SenderId");
-
-                    b.ToTable("Messages");
+                    b.ToTable("MyCaseWonOrLost");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Domain.MyTask", b =>
@@ -631,6 +617,12 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.HasOne("LegalCaseManagement.Data.ApplicationUser", "AppUser")
                         .WithMany()
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("LegalCaseManagement.Domain.MyCaseWonOrLost", "WonOrLost")
+                        .WithMany()
+                        .HasForeignKey("WonLostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -643,15 +635,15 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.Navigation("CaseType");
 
                     b.Navigation("CreatedByUser");
+
+                    b.Navigation("WonOrLost");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Domain.Appointment", b =>
                 {
                     b.HasOne("LegalCaseManagement.Data.ApplicationUser", "User")
                         .WithMany("Appointments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId");
 
                     b.Navigation("User");
                 });
@@ -667,25 +659,6 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.Navigation("Case");
                 });
 
-            modelBuilder.Entity("LegalCaseManagement.Domain.Message", b =>
-                {
-                    b.HasOne("LegalCaseManagement.Data.ApplicationUser", "Receiver")
-                        .WithMany("ReceivedMessages")
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("LegalCaseManagement.Data.ApplicationUser", "Sender")
-                        .WithMany("SentMessages")
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
-                });
-
             modelBuilder.Entity("LegalCaseManagement.Domain.MyTask", b =>
                 {
                     b.HasOne("LegalCaseManagement.Data.Case", "Case")
@@ -697,7 +670,7 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.HasOne("LegalCaseManagement.Data.Lawyers", "LawyerInfo")
                         .WithMany()
                         .HasForeignKey("LawyerId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("LegalCaseManagement.Domain.Priority", "Priority")
@@ -784,10 +757,6 @@ namespace LegalCaseManagement.Domain.Migrations
                     b.Navigation("Appointments");
 
                     b.Navigation("Notifications");
-
-                    b.Navigation("ReceivedMessages");
-
-                    b.Navigation("SentMessages");
                 });
 
             modelBuilder.Entity("LegalCaseManagement.Data.Case", b =>

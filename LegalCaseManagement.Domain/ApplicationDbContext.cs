@@ -23,9 +23,9 @@ namespace LegalCaseManagement.Data
         public DbSet<MyTask> MyTasks { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-        public DbSet<Message> Messages { get; set; }
+       
         public DbSet<CaseDocument> Documents { get; set; }
-
+        public DbSet<MyCaseWonOrLost> MyCaseWonOrLost { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -58,14 +58,7 @@ namespace LegalCaseManagement.Data
             builder.Entity<Notification>()
                 .HasKey(n => n.Id);
 
-            builder.Entity<Message>()
-                .HasKey(m => m.Id);
-
-            builder.Entity<Message>()
-                .HasOne<ApplicationUser>(m => m.Sender)
-                .WithMany(u => u.SentMessages)
-                .HasForeignKey(m => m.SenderId)
-                .OnDelete(DeleteBehavior.Cascade);
+           
 
             builder.Entity<Case>()
                 .HasMany(c => c.CaseDocuments)
@@ -84,7 +77,23 @@ namespace LegalCaseManagement.Data
                 .HasForeignKey(d => d.CaseId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            
+           
+
+            // Example of configuring other foreign key constraints
+            builder.Entity<Case>()
+                .HasOne(c => c.WonOrLost)
+                .WithMany()
+                .HasForeignKey(c => c.WonLostId)
+                .OnDelete(DeleteBehavior.Cascade); // Use Cascade if needed or Restrict
+
+            // Configure other relationships
+            builder.Entity<Case>()
+                .HasOne(c => c.AppUser)
+                .WithMany()
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
         }
 
     }

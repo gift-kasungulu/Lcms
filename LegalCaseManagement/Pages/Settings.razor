@@ -3,11 +3,14 @@
 
 @using LegalCaseManagement.Data
 @using LegalCaseManagement.Data.LegalServices
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
 @inject LawyerService lawyerService
 @inject IJSRuntime jstRuntime
 @inject ISnackbar snackbar
 @inject CaseTypeService caseTypeService
 @inject CaseStatusService casestatusService
+@inject WonOrLostCaseService WonOrLostCaseService
 
 <PageTitle>Settings</PageTitle>
 
@@ -63,6 +66,47 @@
                 </MudTable>
             </MudPaper>
         </MudTabPanel>
+
+        <!-- won or lost case status  -->
+    <MudTabPanel Text="Case Statuses (won\lost)">
+        <MudGrid>
+    <MudItem xs="12" sm="6" md="4">
+                <MudTextField @bind-Value="myCaseWonOrLost.Name" Label="New Status Name" Variant="Variant.Outlined" Margin="Margin.Dense" />
+    </MudItem>
+    <MudItem xs="12" sm="6" md="4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddWonOrLostStatus" Class="mt-2" FullWidth="true">
+            Add Status (won\lost)
+        </MudButton>
+    </MudItem>
+</MudGrid>
+
+<MudDivider Class="my-4" />
+
+        <MudTable Items="Winstatuses" Hover="true" Striped="true">
+    
+            <HeaderContent>
+                <th>ID</th>
+            <th>Name</th>
+            <th>Actions</th>
+            </HeaderContent>
+            
+            <RowTemplate>
+                <MudTh>@context.WonLostId</MudTh>
+                <MudTh>@context.Name</MudTh>
+                <MudTh>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => EditStatus(context))">
+                        Edit
+                    </MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => DeleteStatus(context.WonLostId))">
+                        Delete
+                    </MudButton>
+                </MudTh>
+
+            </RowTemplate>
+
+</MudTable>
+    </MudTabPanel>
+
     </MudTabs>
 
 <MudDialog @bind-IsVisible="showModal" Options="dialogOptions" MaxWidth="MaxWidth.Large" FullWidth="true">
@@ -104,11 +148,20 @@
     private bool isDeletingType = false;
     private bool isDeletingStatus = false;
     private DialogOptions dialogOptions = new DialogOptions { CloseOnEscapeKey = true };
+    private MyCaseWonOrLost myCaseWonOrLost = new MyCaseWonOrLost();
+    private List<MyCaseWonOrLost> statuses = new List<MyCaseWonOrLost>();
+    private string newStatusName = string.Empty;
+    private MyCaseWonOrLost? statusToEdit;
+
+
+
 
     protected override async Task OnInitializedAsync()
     {
         await GetAll();
         await GetAllStatus();
+        await LoadStatuses();
+
     }
 
     private async Task GetAll()
@@ -131,43 +184,43 @@
         showModalsecond = !showModalsecond;
     }
 
-   private async Task Add()
-{
-    try
+    private async Task Add()
     {
-        // Check if CaseTypeId is not null or empty
-        if (casetype.CaseTypeId == 0)
+        try
         {
-            isAddingType = true;
-            var success = await caseTypeService.AddAsync(casetype);
-            if (success)
+            // Check if CaseTypeId is not null or empty
+            if (casetype.CaseTypeId == 0)
             {
-                await GetAll();
-                snackbar.Add("Case Type Was Added Successfully", Severity.Success);
+                isAddingType = true;
+                var success = await caseTypeService.AddAsync(casetype);
+                if (success)
+                {
+                    await GetAll();
+                    snackbar.Add("Case Type Was Added Successfully", Severity.Success);
+                }
+                else
+                {
+                    caseTypeService.Update(casetype);
+                    snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+                }
+
+
             }
             else
             {
-                caseTypeService.Update(casetype);
-                snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+                snackbar.Add("Case Type ID cannot be null or empty.", Severity.Error);
             }
-
-        
         }
-        else
+        catch (Exception ex)
         {
-            snackbar.Add("Case Type ID cannot be null or empty.", Severity.Error);
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+        }
+        finally
+        {
+            isAddingType = false;
         }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-        snackbar.Add("Operation Failed. Try Again later", Severity.Error);
-    }
-    finally
-    {
-        isAddingType = false;
-    }
-}
 
     public void Update(CaseType casetypeRecord)
     {
@@ -175,44 +228,44 @@
         casetype = casetypeRecord;
         StateHasChanged();
     }
-    
-   private async Task AddStatus()
-{
-    try
+
+    private async Task AddStatus()
     {
-        // Check if StatusId is not null or empty
-        if (casestatus.StatusId == 0)
+        try
         {
-            isAddingStatus = true;
-            var success = await casestatusService.AddAsync(casestatus);
-            if (success)
+            // Check if StatusId is not null or empty
+            if (casestatus.StatusId == 0)
             {
-                await GetAllStatus();
-                snackbar.Add("Case Status Was Added Successfully", Severity.Success);
+                isAddingStatus = true;
+                var success = await casestatusService.AddAsync(casestatus);
+                if (success)
+                {
+                    await GetAllStatus();
+                    snackbar.Add("Case Status Was Added Successfully", Severity.Success);
+                }
+                else
+                {
+                    casestatusService.Update(casestatus);
+                    snackbar.Add("status updated ", Severity.Error);
+                }
             }
             else
             {
-                casestatusService.Update(casestatus);
-                snackbar.Add("status updated ", Severity.Error);
+                snackbar.Add("Operation Failed. Try Again later", Severity.Error);
             }
         }
-        else
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);
             snackbar.Add("Operation Failed. Try Again later", Severity.Error);
         }
+        finally
+        {
+            isAddingStatus = false;
+        }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine(ex.Message);
-        snackbar.Add("Operation Failed. Try Again later", Severity.Error);
-    }
-    finally
-    {
-        isAddingStatus = false;
-    }
-}
 
-     public void UpdateStatus(CaseStatus casestatusRecord)
+    public void UpdateStatus(CaseStatus casestatusRecord)
     {
         ToggleModal();
         casestatus = casestatusRecord;
@@ -258,4 +311,51 @@
             isDeletingType = false;
         }
     }
+
+    private List<MyCaseWonOrLost> Winstatuses = new List<MyCaseWonOrLost>();
+    private string WinnewStatusName = string.Empty;
+    private MyCaseWonOrLost WinstatusToEdit;
+
+
+
+    private async Task LoadStatuses()
+    {
+        Winstatuses = await WonOrLostCaseService.GetAllStatusesAsync();
+    }
+
+    private async Task AddWonOrLostStatus()
+    {
+        await WonOrLostCaseService.AddStatusAsync(myCaseWonOrLost);
+        await LoadStatuses();
+        snackbar.Add("Status added successfully", Severity.Success);
+
+      
+       
+
+    }
+
+    private void EditStatus(MyCaseWonOrLost status)
+    {
+        WinstatusToEdit = status;
+        // You may want to open a dialog or navigate to an edit page
+    }
+
+    private async Task UpdateStatus()
+    {
+        if (WinstatusToEdit != null)
+        {
+            await WonOrLostCaseService.UpdateStatusAsync(WinstatusToEdit);
+            snackbar.Add("Status updated successfully", Severity.Success);
+            WinstatusToEdit = null;
+            await LoadStatuses();
+        }
+    }
+
+    private async Task DeleteStatus(int id)
+    {
+        await WonOrLostCaseService.DeleteStatusAsync(id);
+        snackbar.Add("Status deleted successfully", Severity.Success);
+        await LoadStatuses();
+    }
+
 }

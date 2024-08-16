@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LegalCaseManagement.Domain.Migrations
 {
-    public partial class Legalcsemanagement : Migration
+    public partial class NewDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -34,14 +34,13 @@ namespace LegalCaseManagement.Domain.Migrations
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LFirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LLastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CaseWinPercentage = table.Column<double>(type: "float", nullable: true),
                     CaseType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ExperienceYears = table.Column<int>(type: "int", nullable: true),
                     Age = table.Column<int>(type: "int", nullable: true),
                     Gender = table.Column<int>(type: "int", nullable: true),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -89,6 +88,19 @@ namespace LegalCaseManagement.Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MyCaseWonOrLost",
+                columns: table => new
+                {
+                    WonLostId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MyCaseWonOrLost", x => x.WonLostId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PriorityLevel",
                 columns: table => new
                 {
@@ -133,6 +145,32 @@ namespace LegalCaseManagement.Domain.Migrations
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Appointments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ClientName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    MobileNo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Time = table.Column<TimeSpan>(type: "time", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsApproved = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Appointments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Appointments_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -221,6 +259,28 @@ namespace LegalCaseManagement.Domain.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Cases",
                 columns: table => new
                 {
@@ -235,18 +295,32 @@ namespace LegalCaseManagement.Domain.Migrations
                     Discription = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     CaseTypeId = table.Column<int>(type: "int", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
+                    WonLostId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FileAttachment = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    FileAttachment = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedByUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AssignedLawyerId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Cases", x => x.CaseId);
                     table.ForeignKey(
+                        name: "FK_Cases_AspNetUsers_AssignedLawyerId",
+                        column: x => x.AssignedLawyerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Cases_AspNetUsers_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Cases_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Cases_CaseStatus_StatusId",
                         column: x => x.StatusId,
@@ -258,6 +332,34 @@ namespace LegalCaseManagement.Domain.Migrations
                         column: x => x.CaseTypeId,
                         principalTable: "CaseType",
                         principalColumn: "CaseTypeId",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Cases_MyCaseWonOrLost_WonLostId",
+                        column: x => x.WonLostId,
+                        principalTable: "MyCaseWonOrLost",
+                        principalColumn: "WonLostId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Documents",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CaseId = table.Column<int>(type: "int", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FilePath = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UploadDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Documents", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Documents_Cases_CaseId",
+                        column: x => x.CaseId,
+                        principalTable: "Cases",
+                        principalColumn: "CaseId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -283,13 +385,13 @@ namespace LegalCaseManagement.Domain.Migrations
                         column: x => x.LawyerId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MyTasks_Cases_CaseId",
                         column: x => x.CaseId,
                         principalTable: "Cases",
                         principalColumn: "CaseId",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MyTasks_PriorityLevel_PriorityId",
                         column: x => x.PriorityId,
@@ -303,6 +405,11 @@ namespace LegalCaseManagement.Domain.Migrations
                         principalColumn: "StatusId",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Appointments_UserId",
+                table: "Appointments",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -344,9 +451,19 @@ namespace LegalCaseManagement.Domain.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Cases_AssignedLawyerId",
+                table: "Cases",
+                column: "AssignedLawyerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Cases_CaseTypeId",
                 table: "Cases",
                 column: "CaseTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Cases_CreatedByUserId",
+                table: "Cases",
+                column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Cases_StatusId",
@@ -357,6 +474,16 @@ namespace LegalCaseManagement.Domain.Migrations
                 name: "IX_Cases_UserId",
                 table: "Cases",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Cases_WonLostId",
+                table: "Cases",
+                column: "WonLostId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Documents_CaseId",
+                table: "Documents",
+                column: "CaseId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MyTasks_CaseId",
@@ -377,10 +504,18 @@ namespace LegalCaseManagement.Domain.Migrations
                 name: "IX_MyTasks_StatusId",
                 table: "MyTasks",
                 column: "StatusId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_ApplicationUserId",
+                table: "Notifications",
+                column: "ApplicationUserId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Appointments");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -397,7 +532,13 @@ namespace LegalCaseManagement.Domain.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Documents");
+
+            migrationBuilder.DropTable(
                 name: "MyTasks");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -419,6 +560,9 @@ namespace LegalCaseManagement.Domain.Migrations
 
             migrationBuilder.DropTable(
                 name: "CaseType");
+
+            migrationBuilder.DropTable(
+                name: "MyCaseWonOrLost");
         }
     }
 }

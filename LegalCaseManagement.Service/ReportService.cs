@@ -26,11 +26,20 @@ public class ReportService
         var cases = await _context.Cases
             .Where(c => c.RegistrationDate >= startDate && c.RegistrationDate <= endDate)
             .Include(c => c.CaseStatus) // Ensure CaseStatus is loaded
+            .Include(c => c.WonOrLost) // include win or lost caess
             .ToListAsync();
 
+        // Log or debug output to verify data
+        Console.WriteLine($"Total cases fetched: {cases.Count}");
+
         var completedCases = cases.Where(c => c.CaseStatus.StatusName == "Completed").ToList();
-        var wonCases = cases.Where(c => c.CaseStatus.StatusName == "Won").ToList();
-        var lostCases = cases.Where(c => c.CaseStatus.StatusName == "Lost").ToList();
+        var wonCases = cases.Where(c => c.WonOrLost.Name == "Won").ToList(); // for won casese
+        var lostCases = cases.Where(c => c.WonOrLost.Name == "Lost").ToList(); // for Lost cases
+
+        // Log the counts
+        Console.WriteLine($"Completed Cases: {completedCases.Count}");
+        Console.WriteLine($"Won Cases: {wonCases.Count}");
+        Console.WriteLine($"Lost Cases: {lostCases.Count}");
 
         return new MonthlyReport
         {
@@ -40,6 +49,7 @@ public class ReportService
             LostCases = lostCases.Count
         };
     }
+
 
 
 
