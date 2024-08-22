@@ -23,7 +23,7 @@ namespace LegalCaseManagement.Data
         public DbSet<MyTask> MyTasks { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-       
+        public DbSet<Notice> Notices { get; set; }
         public DbSet<CaseDocument> Documents { get; set; }
         public DbSet<MyCaseWonOrLost> MyCaseWonOrLost { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
@@ -66,10 +66,10 @@ namespace LegalCaseManagement.Data
                 .HasForeignKey(d => d.CaseId);
 
             builder.Entity<Case>()
-        .HasMany(c => c.Tasks)
-        .WithOne(t => t.Case)
-        .HasForeignKey(t => t.CaseId)
-        .OnDelete(DeleteBehavior.Cascade);
+                .HasMany(c => c.Tasks)
+                .WithOne(t => t.Case)
+                .HasForeignKey(t => t.CaseId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             builder.Entity<Case>()
                 .HasMany(c => c.CaseDocuments)
@@ -78,6 +78,7 @@ namespace LegalCaseManagement.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
            
+
 
             // Example of configuring other foreign key constraints
             builder.Entity<Case>()

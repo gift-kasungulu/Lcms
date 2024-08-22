@@ -16,6 +16,7 @@ namespace LegalCaseManagement.Data
 
         [Required(ErrorMessage = "Next Hearing Date is required.")]
         public DateTime? EndDate { get; set; }
+        public string? Remark { get; set; } // added this to hold the remark of the next date when or if changed 
 
         [Required(ErrorMessage = "Registration Date is required.")]
         public DateTime? RegistrationDate { get; set; }
@@ -61,13 +62,13 @@ namespace LegalCaseManagement.Data
         public ApplicationUser? AppUser { get; set; }  // Navigation property for the related ApplicationUser
 
         // Optional file attachment
-        public string? FileAttachment { get; set; } // New optional field for file attachment
-                                                    // New properties for tracking creation info
-        public string? CreatedByUserId { get; set; } // UserId of the creator
-        public DateTime CreatedAt { get; set; } // Timestamp of creation
+        public string? FileAttachment { get; set; }
+                                                    
+        public string? CreatedByUserId { get; set; } 
+        public DateTime CreatedAt { get; set; } 
 
         [ForeignKey("CreatedByUserId")]
-        public ApplicationUser? CreatedByUser { get; set; } // Navigation property for the creator
+        public ApplicationUser? CreatedByUser { get; set; } 
         public ICollection<CaseDocument> CaseDocuments { get; set; }
         public string? AssignedLawyerId { get; set; }
         [ForeignKey("AssignedLawyerId")]

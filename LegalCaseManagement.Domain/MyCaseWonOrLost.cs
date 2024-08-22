@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LegalCaseManagement.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -12,6 +13,9 @@ namespace LegalCaseManagement.Domain
         [Key]
         public int WonLostId { get; set; }
         public string Name { get; set; } = String.Empty;
+
+        //public Case? CAses { get; set; } 
+
 
 
     }

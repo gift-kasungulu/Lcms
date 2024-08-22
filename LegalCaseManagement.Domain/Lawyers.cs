@@ -12,6 +12,8 @@ namespace LegalCaseManagement.Data
     }
     public class Lawyers : ApplicationUser
     {
+        [Required]
+        [RegularExpression(@"^\d{10}$", ErrorMessage = "Phone number must be exactly 10 digits.")]
         public string Phone { get; set; } = string.Empty;
         public double CaseWinPercentage { get; set; }
         public string CaseType { get; set; } = string.Empty;

@@ -329,8 +329,6 @@
                             <i class="bi bi-pencil"></i>
                             Edit
                         </MudMenuItem>
-
-
                         <MudMenuItem OnClick="@(() => Deletecase(context))">
                             <i class="bi bi-bi-trash"></i>
                             Delete
@@ -345,77 +343,85 @@
     </MudTabPanel>
     <MudTabPanel Text="Completed Cases">
         @* Completed Cases Table *@
-        <MudTable Items="completedCases" Filter="new Func<Case, bool>(Search)">
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Cases</MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search by Description, Client, or Case ID"
-                              IconSize="Size.Large" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
-            </ToolBarContent>
-            <HeaderContent>
-                <MudTh>#</MudTh>
-                <MudTh>Next Date</MudTh>
-                <MudTh>Petitioner</MudTh>
-                <MudTh>Vs Client</MudTh>
-                <MudTh>Court Name</MudTh>
-                <MudTh>Status</MudTh>
-                <MudTh>Action</MudTh>
-            </HeaderContent>
-            <RowTemplate>
-                <MudTd DataLabel="CaseId">@context.CaseId</MudTd>
-                <MudTd DataLabel="EndDate">@context.EndDate?.ToString("dd-MM-yyyy")</MudTd>
-                <MudTd DataLabel="Petitioner">@context.Petitioner</MudTd>
-                <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
-                <MudTd DataLabel="Defendant">@context.Defendant</MudTd>
-                <MudTd DataLabel="CaseStatus">@context.CaseStatus?.StatusName</MudTd>
-                <MudTd DataLabel="Actions">
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                        <MudMenuItem OnClick="@(() => NavigateToCaseDetails(context.CaseId))">
-                            <i class="bi bi-eye"></i>
-                            View
-                        </MudMenuItem>
-                        <MudMenuItem >
-                            <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="() => MarkCaseAsWon(context.CaseId)">Mark as Won</MudButton>
-                            
-                        </MudMenuItem>
-                        <MudMenuItem>
-                            <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="() => MarkCaseAsLost(context.CaseId)">Mark as Lost</MudButton>
-                        </MudMenuItem>
-                        <MudMenuItem OnClick="@(() => Deletecase(context))">
-                            <i class="bi bi-trash"></i>
-                            Delete
-                        </MudMenuItem>
-                    </MudMenu>
-                </MudTd>
-            </RowTemplate>
-            <PagerContent>
-                <MudTablePager />
-            </PagerContent>
-        </MudTable>
+        @if(completedCases is not null)
+        {
+            <MudTable Items="completedCases" Filter="new Func<Case, bool>(Search)">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Cases</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="searchString" Placeholder="Search by Description, Client, or Case ID"
+                                  IconSize="Size.Large" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh>#</MudTh>
+                    <MudTh>Next Date</MudTh>
+                    <MudTh>Petitioner</MudTh>
+                    <MudTh>Vs Client</MudTh>
+                    <MudTh>Court Name</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh>Action</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="CaseId">@context.CaseId</MudTd>
+                    <MudTd DataLabel="EndDate">@context.EndDate?.ToString("dd-MM-yyyy")</MudTd>
+                    <MudTd DataLabel="Petitioner">@context.Petitioner</MudTd>
+                    <MudTd DataLabel="AppUser">@context.AppUser?.FirstName @context.AppUser?.LastName</MudTd>
+                    <MudTd DataLabel="Defendant">@context.Defendant</MudTd>
+                    <MudTd DataLabel="CaseStatus">@context.CaseStatus?.StatusName</MudTd>
+                    <MudTd DataLabel="Actions">
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                            <MudMenuItem OnClick="@(() => NavigateToCaseDetails(context.CaseId))">
+                                <i class="bi bi-eye"></i>
+                                View
+                            </MudMenuItem>
+                            <MudMenuItem OnClick="() => OpenUpdateModal(context)">
+                                <i class="bi bi-pencil"></i>
+                                Edit
+                            </MudMenuItem>
+                            <MudMenuItem OnClick="@(() => Deletecase(context))">
+                                <i class="bi bi-trash"></i>
+                                Delete
+                            </MudMenuItem>
+                        </MudMenu>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager />
+                </PagerContent>
+            </MudTable>
+        }
+        else
+        {
+           <p>There are noo completed cases yet </p>
+        }
+       
     </MudTabPanel>
 
 </MudTabs>
-<MudDialog @bind-IsVisible="isEditDateModalVisible">
+<MudDialog @bind-IsVisible="isEditDateModalVisible" MaxWidth="MaxWidth.Medium" FullWidth="true">
     <TitleContent>
         <MudText Typo="Typo.h6">Edit Next Hearing Date</MudText>
     </TitleContent>
     <DialogContent>
         <MudDatePicker @bind-Date="editingCase.EndDate" Label="Next Hearing Date" />
-        
+        <MudTextField @bind-Value="editingCase.Remark" Label="Remarks" />
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="CloseEditDateModal">Cancel</MudButton>
+        <MudButton Color="Color.Error" OnClick="CloseEditDateModal">Cancel</MudButton>
         <MudButton Color="Color.Primary" OnClick="UpdateNextHearingDate">Save</MudButton>
     </DialogActions>
 </MudDialog>
+
     
 <br />
 <MudTooltip Text="Select Date"> 
          <MudDatePicker @bind-Date="selectedDate" Label="Select Date" />
 </MudTooltip>
-            <br />
-            <MudButton OnClick="SearchCases" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search"
-                Color="Color.Primary">Search</MudButton>
+     
+<MudButton class="mt-4 my-4 search-b" OnClick="SearchCases" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Search"
+       Color="Color.Primary">Search
+</MudButton>
+            
 <MudTable Items="@filteredCaseList" Dense="true" Hover="true" Filter="new Func<Case,bool>(Search)">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Cases Listed</MudText>
@@ -465,23 +471,26 @@
     private List<Case> runningCases = new List<Case>();
     private List<Case> highPriorityCases = new List<Case>();
     private List<Case> abandonedCases = new List<Case>();
-    private List<Case> decidedCases = new List<Case>();
+
+    private List<Case> decidedCases = new List<Case>(); ///won cases 
+    private List<Case> LostDecidedded = new List<Case>(); // Lost cases
+
     private bool isEditDateModalVisible = false;
     private Case editingCase = new Case();
     private bool isUpdateModalVisible = false;
     private List<Case> completedCases = new List<Case>();
     private List<Case> cases = new List<Case>();
 
-   
+
 
     protected override async Task OnInitializedAsync()
     {
-        
+
         await GetAllAsync();
         clients = (await _userManager.GetUsersInRoleAsync("Client")).ToList();
         caseTypes = await caseTypeService.GetAllAsync();
         caseStatuses = await caseStatusService.GetAllAsync();
-        FilterCases();
+        FilterCases(); // filter the case according to types 
 
         selectedDate = DateTime.Today;
     }
@@ -532,28 +541,68 @@
 
     private async Task MarkCaseAsWon(int caseId)
     {
-        if (await caseService.MarkCaseAsWonAsync(caseId))
+        using (var scope = ServiceScopeFactory.CreateScope())
         {
-            UpdateCaseStatus(caseId, "Won");
-            snackbar.Add("Case marked as won successfully", Severity.Success);
+            // Attach existing CaseType won or lost
+            if (newCase.WonLostId != 0)
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                var existingCaseType = await context.MyCaseWonOrLost.FindAsync(newCase.WonLostId);
+                if (existingCaseType != null)
+                {
+                    newCase.WonOrLost = existingCaseType;
+                    context.Entry(existingCaseType).State = EntityState.Unchanged;
+                }
+            }
+
+            //follow along with the marking as won 
+
+            if (await caseService.MarkCaseAsWonAsync(caseId))
+            {
+                UpdateCaseStatus(caseId, "Won");
+                snackbar.Add("Case marked as won successfully", Severity.Success);
+            }
+            else
+            {
+                snackbar.Add("Failed to mark case as won try again letter", Severity.Error);
+            }
         }
-        else
-        {
-            snackbar.Add("Failed to mark case as won", Severity.Error);
-        }
+
+
     }
 
     private async Task MarkCaseAsLost(int caseId)
     {
-        if (await caseService.MarkCaseAsLostAsync(caseId))
+        using (var scope = ServiceScopeFactory.CreateScope())
         {
-            UpdateCaseStatus(caseId, "Lost");
-            snackbar.Add("Case marked as lost successfully", Severity.Success);
+            // Attach existing CaseType won or lost
+            if (newCase.WonLostId != 0)
+            {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                var existingCaseType = await context.MyCaseWonOrLost.FindAsync(newCase.WonLostId);
+                if (existingCaseType != null)
+                {
+                    newCase.WonOrLost = existingCaseType;
+                    context.Entry(existingCaseType).State = EntityState.Unchanged;
+                }
+            }
+
+            // now assign the lost status
+
+            if (await caseService.MarkCaseAsLostAsync(caseId))
+            {
+                UpdateCaseStatus(caseId, "Lost");
+                snackbar.Add("Case marked as lost successfully", Severity.Success);
+            }
+            else
+            {
+                snackbar.Add("Failed to mark case as lost", Severity.Error);
+            }
         }
-        else
-        {
-            snackbar.Add("Failed to mark case as lost", Severity.Error);
-        }
+
+
     }
 
     private void UpdateCaseStatus(int caseId, string statusName)
@@ -561,7 +610,7 @@
         var caseToUpdate = cases.FirstOrDefault(c => c.CaseId == caseId);
         if (caseToUpdate != null)
         {
-            caseToUpdate.CaseStatus.StatusName = statusName;
+            caseToUpdate.WonOrLost.Name = statusName; // use the won ro lost case status instead 
         }
     }
 
@@ -587,6 +636,8 @@
     {
         using (var scope = ServiceScopeFactory.CreateScope())
         {
+
+
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>();
             var caseToUpdate = await context.Cases.FindAsync(editingCase.CaseId);
@@ -616,8 +667,12 @@
         runningCases = caseList.Where(c => c.CaseStatus.StatusName == "In Progress").ToList();
         highPriorityCases = caseList.Where(c => c.CaseType.TypeName == "High").ToList();
         abandonedCases = caseList.Where(c => c.CaseType.TypeName == "Abandoned").ToList();
-        decidedCases = caseList.Where(c => c.CaseType.TypeName == "Decided").ToList();
-        completedCases = caseList.Where(c => c.CaseStatus.StatusName == "Completed").ToList();
+
+        LostDecidedded = caseList.Where(c => c.CaseType.TypeName == "Lost").ToList(); //Lost cases 
+        decidedCases = caseList.Where(c => c.CaseType.TypeName == "Won").ToList(); //won case type in the mean time
+
+
+        completedCases = caseList.Where(c => c.CaseStatus.StatusName == "Completed").ToList(); // completed cases
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

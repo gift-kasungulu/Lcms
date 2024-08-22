@@ -5,12 +5,16 @@
 @using LegalCaseManagement.Data.LegalServices
 @using LegalCaseManagement.Domain
 @using LegalCaseManagement.Service
+@using LegalCaseManagement.Service.LegalServices
 @inject LawyerService lawyerService
 @inject IJSRuntime jstRuntime
 @inject ISnackbar snackbar
 @inject CaseTypeService caseTypeService
 @inject CaseStatusService casestatusService
-@inject WonOrLostCaseService WonOrLostCaseService
+@inject WonOrLostCaseService WonOrLostCaseService 
+@inject NoticeService noticeService
+
+@inject MywonLostCasServicee mywonlostservice  
 
 <PageTitle>Settings</PageTitle>
 
@@ -97,7 +101,7 @@
                     <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => EditStatus(context))">
                         Edit
                     </MudButton>
-                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => DeleteStatus(context.WonLostId))">
+                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => DeleteStatus(context))">
                         Delete
                     </MudButton>
                 </MudTh>
@@ -135,6 +139,34 @@
         <MudButton Color="Color.Primary" OnClick="AddStatus">@(casestatus.StatusId == 0 ? "Add" : "Update")</MudButton>
     </DialogActions>
 </MudDialog>
+<br />
+<!-- handle adding of notices here  -->
+<MudGrid>
+    <MudItem xs="12" sm="6">
+        <InputFile OnChange="HandleFileSelected" />
+    </MudItem>
+    <MudItem xs="12" sm="6">
+        <MudTextField Label="Notice Title" @bind-Value="newNotice.Title" FullWidth="true" />
+    </MudItem>
+    <MudItem xs="12" sm="6">
+        <MudButton Color="Color.Primary" OnClick="AddNoticeAsync" Variant="Variant.Filled">Add Notice</MudButton>
+    </MudItem>
+</MudGrid>
+
+<br />
+<MudTable Items="notices" Striped="true" Hover="true">
+    <HeaderContent>
+        <MudTh>Notice Title</MudTh>
+        
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Notice Title">@context.Title</MudTd>
+        
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
 
 @code {
     private CaseType casetype = new CaseType();
@@ -151,7 +183,55 @@
     private MyCaseWonOrLost myCaseWonOrLost = new MyCaseWonOrLost();
     private List<MyCaseWonOrLost> statuses = new List<MyCaseWonOrLost>();
     private string newStatusName = string.Empty;
-    private MyCaseWonOrLost? statusToEdit;
+    private MyCaseWonOrLost statusToEdit = new MyCaseWonOrLost();
+    private MyCaseWonOrLost winorlostcaes = new MyCaseWonOrLost();
+
+    private Notice newNotice = new Notice();
+    private List<Notice> notices = new List<Notice>(); // Declare the list here
+    private byte[]? selectedFileContent;
+
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            using (var stream = file.OpenReadStream())
+            {
+                selectedFileContent = new byte[file.Size];
+                await stream.ReadAsync(selectedFileContent);
+            }
+            newNotice.PdfFileContent = selectedFileContent;
+            newNotice.PdfFileName = file.Name; // Store the file name
+        }
+    }
+
+
+    private async Task AddNoticeAsync()
+    {
+        if (string.IsNullOrWhiteSpace(newNotice.Title) || selectedFileContent == null)
+        {
+            // Show validation error message to the user
+            snackbar.Add("Please provide both a title and a file.", Severity.Error);
+            return;
+        }
+
+        try
+        {
+            // Add the notice with the provided title and file content
+            await noticeService.AddNoticeAsync(newNotice);
+            // Refresh the notices list to show the newly added notice
+            notices = await noticeService.GetAllNoticesAsync();
+            // Reset the form fields
+            newNotice = new Notice();
+            selectedFileContent = null;
+            snackbar.Add("Notice added successfully!", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            // Handle any errors that occur during the addition process
+            snackbar.Add($"An error occurred while adding the notice: {ex.Message}", Severity.Error);
+        }
+    }
 
 
 
@@ -161,6 +241,7 @@
         await GetAll();
         await GetAllStatus();
         await LoadStatuses();
+        notices = await noticeService.GetAllNoticesAsync();
 
     }
 
@@ -320,18 +401,43 @@
 
     private async Task LoadStatuses()
     {
-        Winstatuses = await WonOrLostCaseService.GetAllStatusesAsync();
+        Winstatuses = await mywonlostservice.GetAllAsync();
     }
 
-    private async Task AddWonOrLostStatus()
+    private async Task AddWonOrLostStatus() //fix this 
     {
+        try
+        {
+            if (winorlostcaes.WonLostId == 0)
+            {
+                var success = await mywonlostservice.AddAsync(winorlostcaes);
+
+                if (success)
+                {
+                    snackbar.Add("won lost status added successfuly", Severity.Success);
+                    await mywonlostservice.GetAllAsync();
+                }
+                else
+                {
+                    mywonlostservice.Update(winorlostcaes);
+                    snackbar.Add("Operation Failed", Severity.Error);
+                }
+            }
+            else
+            {
+                snackbar.Add("Failed to Add the Won Lost Status, is not null", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            snackbar.Add("Operation Failed. Try Again later", Severity.Error);
+        }
+        
+
         await WonOrLostCaseService.AddStatusAsync(myCaseWonOrLost);
         await LoadStatuses();
         snackbar.Add("Status added successfully", Severity.Success);
-
-      
-       
-
     }
 
     private void EditStatus(MyCaseWonOrLost status)
@@ -351,9 +457,9 @@
         }
     }
 
-    private async Task DeleteStatus(int id)
+    private async Task DeleteStatus(MyCaseWonOrLost wonlost)
     {
-        await WonOrLostCaseService.DeleteStatusAsync(id);
+        await mywonlostservice.DeleteAsync(wonlost);
         snackbar.Add("Status deleted successfully", Severity.Success);
         await LoadStatuses();
     }

@@ -75,3 +75,37 @@
 .nav-hover:hover{
     color:black;
 }
+
+.bi-border-all{
+    color: yellow;
+}
+
+.bi-people-fill {
+    color: forestgreen;
+}
+
+.bi-hammer{
+    color: red;
+}
+.bi-mortarboard-fill{
+    color: lightyellow;
+}
+.bi-chat-fill{
+    color: blue;
+}
+
+.bi-list-task{
+    color: darkgreen;
+}
+
+.bi-bell-fill{
+    color: rebeccapurple;
+}
+
+.bi-activity{
+    color: chocolate;
+}
+
+.bi-file-fill{
+    color: springgreen;
+}

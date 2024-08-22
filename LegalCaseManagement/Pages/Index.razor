@@ -4,6 +4,8 @@
 @using LegalCaseManagement.Data
 @inject NavigationManager Nav
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Identity
@@ -11,11 +13,13 @@
 @inject CaseService caseService
 @inject ISnackbar snackbar
 @inject UserManager<ApplicationUser> UserManager
+@inject NoticeService noticeService
+@inject IJSRuntime JSRuntime
 
 <MudGrid>
     <MudItem xs="12">
         <MudText Typo="Typo.h6">Notice</MudText>
-        @foreach (var notice in GetNotices())
+        @foreach (var notice in notices)
         {
             <div class="notice-item">
                 <div class="notice-icon">
@@ -25,14 +29,11 @@
                     @notice.Title
                 </div>
                 <div class="notice-action">
-                    <MudButton Color="Color.Primary" Variant="Variant.Text">Read</MudButton>
+                    <MudButton Color="Color.Primary" Variant="Variant.Text" OnClick="() => DownloadPdf(notice.Id)">Read</MudButton>
                 </div>
             </div>
         }
     </MudItem>
-</MudGrid>
-<br />
-<MudGrid>
 </MudGrid>
 <br />
 @if (isClient)
@@ -87,7 +88,7 @@
 }
 
 @code {
-    private Lawyers lawyers = new Lawyers();
+    private List<Notice> notices = new List<Notice>();
     private List<Case> caseList = new List<Case>();
     private List<Lawyers> lawyersList = new List<Lawyers>();
     private string searchString = " ";
@@ -98,9 +99,9 @@
     {
         lawyersList = lawyerService.GetAll();
         caseList = await caseService.GetAllAsync();
+        notices = await noticeService.GetAllNoticesAsync();
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-
         var user = authState.User;
         var isAuthenticated = user.Identity.IsAuthenticated;
 
@@ -127,26 +128,26 @@
         }
     }
 
-    public class Notice
+    private async Task DownloadPdf(int noticeId)
     {
-        public int Id { get; set; }
-        public string Title { get; set; }
+        var notice = await noticeService.GetNoticeByIdAsync(noticeId);
+
+        if (notice?.PdfFileContent != null)
+        {
+            var fileName = notice.PdfFileName;
+            var fileContent = notice.PdfFileContent;
+            var base64 = Convert.ToBase64String(fileContent);
+            var dataUrl = $"data:application/pdf;base64,{base64}";
+
+            // Call the JavaScript function from site.js
+            await JSRuntime.InvokeVoidAsync("downloadPdf", dataUrl, fileName);
+        }
+        else
+        {
+            snackbar.Add("The document is not available.", Severity.Warning);
+        }
     }
 
-    private List<Notice> GetNotices()
-    {
-        return new List<Notice>
-        {
-            new Notice { Id = 1, Title = "New Supreme Court Ruling on Copyright Law" },
-            new Notice { Id = 2, Title = "Upcoming Legal Workshop: 'Effective Client Communication'" },
-            new Notice { Id = 3, Title = "Changes to Court Filing Procedures Effective Next Month" },
-            new Notice { Id = 4, Title = "Pro Bono Opportunity: Local Community Legal Clinic" },
-            new Notice { Id = 5, Title = "Reminder: Annual Bar Association Dues Deadline Approaching" },
-            new Notice { Id = 6, Title = "New Feature: Online Client Portal Now Available" },
-            new Notice { Id = 7, Title = "Important: Data Privacy and Security Update for All Users" },
-            new Notice { Id = 8, Title = "Courtroom Etiquette Seminar for Junior Associates" }
-        };
-    }
 
     private List<Case> GetRecentCases()
     {
@@ -174,10 +175,6 @@
     private bool Searchrec(Lawyers lawyer)
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
-        if (lawyer.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-        return false;
+        return lawyer.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase);
     }
 }

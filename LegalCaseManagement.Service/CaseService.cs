@@ -16,7 +16,6 @@ namespace LegalCaseManagement.Data
         {
             _context = context;
         }
-
         public async Task<bool> MarkCaseAsWonAsync(int caseId)
         {
             var caseToUpdate = await _context.Cases.FindAsync(caseId);
@@ -46,7 +45,6 @@ namespace LegalCaseManagement.Data
                 .Include(c => c.CaseType)
                 .ToListAsync();
         }
-
         public async Task<Case> GetByIdAsync(int id)
         {
             return await _context.Cases
@@ -56,7 +54,6 @@ namespace LegalCaseManagement.Data
                 .Include(c => c.CaseDocuments) // Include documents
                 .FirstOrDefaultAsync(c => c.CaseId == id);
         }
-
         public async Task<int> GetCasesCreatedCountByLawyerAsync(string lawyerId)
         {
             return await _context.Cases.CountAsync(c => c.CreatedByUserId == lawyerId);

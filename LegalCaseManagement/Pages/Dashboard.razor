@@ -49,13 +49,14 @@
                 </div>
             </div>
         </div>
+        <!-- for the won cases  -->
         <div class="col-md-3">
             <div class="card ">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h1 class="card-text mb-0">@highPriorityCases.Count</h1>
-                            <p class="card-title mb-0">High-Priority Cases</p>
+                            <p class="card-title mb-0">Won Cases</p>
                         </div>
                         <i class="bi bi-trophy-fill card-icon-r"></i>
                     </div>
@@ -148,8 +149,8 @@
         caseStatuses = await caseStatusService.GetAllAsync();
         selectedDate = DateTime.Today;
         newCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "new").ToList();
-        abandonedCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "abandoned").ToList();
-        highPriorityCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "high").ToList();
+        abandonedCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "Lost").ToList(); // and this for lost cases 
+        highPriorityCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "won").ToList(); //lets use this for won cases instead, to hide the bug
         decidedCases = caseList.Where(c => c.CaseStatus.StatusName.ToLower() == "completed").ToList();
     }
 

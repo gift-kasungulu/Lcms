@@ -26,15 +26,15 @@ public class ReportService
         var cases = await _context.Cases
             .Where(c => c.RegistrationDate >= startDate && c.RegistrationDate <= endDate)
             .Include(c => c.CaseStatus) // Ensure CaseStatus is loaded
-            .Include(c => c.WonOrLost) // include win or lost caess
+            .Include(c => c.CaseType) // include win or lost caess
             .ToListAsync();
 
         // Log or debug output to verify data
         Console.WriteLine($"Total cases fetched: {cases.Count}");
 
         var completedCases = cases.Where(c => c.CaseStatus.StatusName == "Completed").ToList();
-        var wonCases = cases.Where(c => c.WonOrLost.Name == "Won").ToList(); // for won casese
-        var lostCases = cases.Where(c => c.WonOrLost.Name == "Lost").ToList(); // for Lost cases
+        var wonCases = cases.Where(c => c.CaseType.TypeName == "Won").ToList(); // for won casese
+        var lostCases = cases.Where(c => c.CaseType.TypeName == "Lost").ToList(); // for Lost cases
 
         // Log the counts
         Console.WriteLine($"Completed Cases: {completedCases.Count}");
@@ -49,9 +49,6 @@ public class ReportService
             LostCases = lostCases.Count
         };
     }
-
-
-
 
     public async Task<byte[]> GeneratePdfReportAsync(DateTime month, int totalCases, int completedCases, int wonCases, int lostCases)
     {

@@ -67,5 +67,14 @@
 }
 
 .dialog-edit{
-    width: 50%;
+    width: 100%;
+}
+
+.search-b:hover{
+    background-color: deepskyblue;
+
+}
+
+body{
+    background-color: navajowhite;
 }

@@ -11,6 +11,7 @@ using MudBlazor.Services;
 using LegalCaseManagement.Data.LegalServices;
 using LegalCaseManagement.Service;
 using PdfSharp.Charting;
+using LegalCaseManagement.Service.LegalServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,6 +48,8 @@ builder.Services.AddScoped<NotificationService>();
 builder.Services.AddHostedService<NotificationHostedService>();
 builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<WonOrLostCaseService>();
+builder.Services.AddScoped<NoticeService>();
+builder.Services.AddScoped<MywonLostCasServicee>(); // we are using this one for now 
 builder.Services.AddScoped<DocumentService>();
 builder.Services.AddHttpContextAccessor();
 
