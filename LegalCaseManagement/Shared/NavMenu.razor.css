@@ -11,6 +11,11 @@
     font-size: 1.1rem;
 }
 
+.bi {
+    width: 2rem;
+    font-size: 1.1rem;
+}
+
 .oi {
     width: 2rem;
     font-size: 1.1rem;
@@ -39,9 +44,9 @@
         align-items: center;
         line-height: 3rem;
     }
-.nav-item:hover {
-    background-color: #677D6A;
-}
+    .nav-item:hover {
+        background-color: #161D6F;
+    }
 
 .nav-item::deep a.active {
     background-color: rgba(10, 10, 10, 0.25);
@@ -108,4 +113,13 @@
 
 .bi-file-fill{
     color: springgreen;
+}
+@font-face {
+    font-family: 'Bebas Neue';
+    src: url('/fonts/BebasNeue-Regular.woff2') format('woff2'), url('/fonts/BebasNeue-Regular.woff') format('woff'), url('/fonts/BebasNeue-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+nav-link {
+    font-family: 'Bebas Neue', sans-serif;
 }

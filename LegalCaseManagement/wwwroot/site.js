@@ -7,6 +7,15 @@ function saveAsFile(filename, bytesBase64) {
     document.body.removeChild(link);
 }
 
+function downloadPdf(dataUrl, fileName) {
+    var a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+}
+
 function focusDatePicker(datePickerId) {
     // Focus on the MudDatePicker with the provided ID
     var datePicker = document.getElementById(datePickerId);
@@ -17,7 +26,7 @@ function focusDatePicker(datePickerId) {
 
 let calendar;
 
-function renderCalendar(calendarElement, events) {
+export function renderCalendar(calendarElement, events) {
     calendar = new FullCalendar.Calendar(document.getElementById(calendarElement), {
         events: events,
         // Add other FullCalendar options as needed
@@ -34,6 +43,9 @@ function downloadFileFromStream(fileName, base64String) {
     document.body.removeChild(link);
 }
 
+export function getCalendarInstance() {
+    return calendar;
+}
 function downloadFile(fileName, base64String) {
     const link = document.createElement('a');
     link.download = fileName;
@@ -43,14 +55,47 @@ function downloadFile(fileName, base64String) {
     document.body.removeChild(link);
 }
 
-window.generatePdf = function (cases) {
+window.generatePdf = (cases) => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
     doc.setFontSize(18);
-    doc.text("Law Master", 105, 15, null, null, "center");
+    doc.text("LawMaster Pro", 105, 15, null, null, "center");
     doc.setFontSize(12);
-    doc.text("Lcms, Court", 105, 22, null, null, "center");
+    doc.text("Chamber No. 600 District Courts, Rohtak - 124001, Haryana, India", 105, 22, null, null, "center");
+
+    doc.setFontSize(14);
+    doc.text(`Cases Listed on ${new Date().toLocaleDateString()}`, 14, 35);
+    doc.text(`Total Cases : ${cases.length}`, 14, 42);
+
+    const tableColumn = ["Sr No", "Cases", "Petitioner vs Respondent", "Stage of Case", "Next Date"];
+    const tableRows = cases.map((caseItem, index) => [
+        index + 1,
+        caseItem.registrationNo,
+        `${caseItem.petitioner} vs ${caseItem.appUser?.firstName} ${caseItem.appUser?.lastName}`,
+        caseItem.caseStatus.statusName,
+        caseItem.endDate ? new Date(caseItem.endDate).toLocaleDateString() : ''
+    ]);
+
+    doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 50,
+        styles: { fontSize: 10, cellPadding: 2 },
+        columnStyles: { 0: { cellWidth: 15 }, 1: { cellWidth: 30 } }
+    });
+
+    doc.save("cases_list.pdf");
+};
+
+window.generatePdf = (cases) => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text("LCMS", 105, 15, null, null, "center");
+    doc.setFontSize(12);
+    doc.text("Court", 105, 22, null, null, "center");
 
     doc.setFontSize(14);
     doc.text(`Cases Listed on ${new Date().toLocaleDateString()}`, 14, 35);
@@ -85,13 +130,4 @@ window.downloadreportFile = function (fileName, content) {
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(link.href); // Clean up
-}
-
-function downloadPdf(dataUrl, fileName) {
-    var a = document.createElement('a');
-    a.href = dataUrl;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
 }

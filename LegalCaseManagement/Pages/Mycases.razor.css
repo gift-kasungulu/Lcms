@@ -78,3 +78,8 @@
 body{
     background-color: navajowhite;
 }
+
+.enlarge-modol{
+    max-width: 50%;
+    width: 50%;
+}

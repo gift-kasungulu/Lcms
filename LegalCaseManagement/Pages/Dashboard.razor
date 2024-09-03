@@ -21,7 +21,7 @@
 <PageTitle>Dashboard</PageTitle>
 
 <div class="container-fluid">
-    <MudText Typo="Typo.h6" Class="mb-4">Dashboard</MudText>
+    <h4 class="mb-4">Dashboard</h4>
     <div class="row">
         <div class="col-md-3">
             <div class="card ">
@@ -78,47 +78,77 @@
         </div>
     </div>
 </div>
+<br /> 
+<MudGrid>
+    <MudItem xs="12">
+        <MudPaper Class="pa-4 rounded">
+            <h4 class="mb-4">Upcoming Hearing Dates</h4>
+            <div id="calendar"></div>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<script>
+    function initializeCalendar(events) {
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: events
+        });
+        calendar.render();
+    }
+
+</script>
+
 <br />
 <MudGrid>
     <MudItem xs="12">
         <MudPaper Class="pa-4 rounded">
-            <MudText Typo="Typo.h6" Class="mb-4">Cause List</MudText>
+            <h4 class="mb-4">Cause List</h4>
             <MudDatePicker @bind-Date="selectedDate" Label="Select Date" />
             <br />
             <MudButton OnClick="SearchCases" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Search"
                        Color="Color.Primary" Class="ml-auto">Search</MudButton>
-            <MudTable Items="filteredCaseList" Filter="new Func<Case,bool>(Search)" Class="mt-4">
-                <HeaderContent>
-                    <MudTh>No</MudTh>
-                    <MudTh>Case No</MudTh>
-                    <MudTh>Case</MudTh>
-                    <MudTh>Next Date</MudTh>
-                    <MudTh>Status</MudTh>
-                    <MudTh>Action</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="No">@context.CaseId</MudTd>
-                    <MudTd DataLabel="Case No">@context.CaseId</MudTd>
-                    <MudTd DataLabel="Case">@context.Petitioner VS @context.Defendant</MudTd>
-                    <MudTd DataLabel="Next Date">@context.EndDate?.ToString("dd-MM-yyyy")</MudTd>
-                    <MudTd DataLabel="Status">@context.CaseStatus.StatusName</MudTd>
-                    <MudTd DataLabel="Action">
-                        <MudMenu Icon="@Icons.Material.Filled.MoreVert">
-                            <MudMenuItem>
-                                <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.DateRange"
-                                        Size="Size.Small" />
-                            </MudMenuItem>
-                            <MudMenuItem>
-                                <MudFab Color="Color.Error" StartIcon="@Icons.Material.Filled.SwapHoriz"
-                                        Size="Size.Small" />
-                            </MudMenuItem>
-                        </MudMenu>
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
+            @if (filteredCaseList.Any())
+            {
+                <MudTable Items="filteredCaseList" Filter="new Func<Case,bool>(Search)" Class="mt-4">
+                    <HeaderContent>
+                        <MudTh>No</MudTh>
+                        <MudTh>Case No</MudTh>
+                        <MudTh>Case</MudTh>
+                        <MudTh>Next Date</MudTh>
+                        <MudTh>Status</MudTh>
+                        <MudTh>Action</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="No">@context.CaseId</MudTd>
+                        <MudTd DataLabel="Case No">@context.CaseId</MudTd>
+                        <MudTd DataLabel="Case">@context.Petitioner VS @context.Defendant</MudTd>
+                        <MudTd DataLabel="Next Date">@context.EndDate?.ToString("dd-MM-yyyy")</MudTd>
+                        <MudTd DataLabel="Status">@context.CaseStatus.StatusName</MudTd>
+                        <MudTd DataLabel="Action">
+                            <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                                <MudMenuItem>
+                                    <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.DateRange"
+                                            Size="Size.Small" />
+                                </MudMenuItem>
+                                <MudMenuItem>
+                                    <MudFab Color="Color.Error" StartIcon="@Icons.Material.Filled.SwapHoriz"
+                                            Size="Size.Small" />
+                                </MudMenuItem>
+                            </MudMenu>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+            else
+            {
+                <MudText Typo="Typo.subtitle1" Class="mt-4">No cases available for the selected date.</MudText>
+            }
         </MudPaper>
     </MudItem>
 </MudGrid>
+
 <br />
 
 @code {
@@ -140,6 +170,8 @@
     private List<Case> filteredCases = new List<Case>();
     private IJSObjectReference? calendarInstance;
     private IJSObjectReference? module;
+    private List<Case> upcomingHearings = new List<Case>(); // just added this for the next date, you will know 
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -152,6 +184,30 @@
         abandonedCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "Lost").ToList(); // and this for lost cases 
         highPriorityCases = caseList.Where(c => c.CaseType.TypeName.ToLower() == "won").ToList(); //lets use this for won cases instead, to hide the bug
         decidedCases = caseList.Where(c => c.CaseStatus.StatusName.ToLower() == "completed").ToList();
+
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool afterFist)
+    {
+        if (afterFist)
+        {
+            // here is where i am populating the upcoming dates, you are not dumb you will know hahaha
+            upcomingHearings = caseList
+                .Where(c => c.EndDate.HasValue && c.EndDate.Value.Date >= DateTime.Today)
+                .OrderBy(c => c.EndDate)
+                .ToList();
+
+            // display the calender properly here if not working properly call me lol
+
+            var events = upcomingHearings.Select(c => new
+            {
+                title = $"{c.Petitioner} VS {c.Defendant}",
+                start = c.EndDate?.ToString("yyyy-MM-dd")
+            }).ToList();
+
+            await JSRuntime.InvokeVoidAsync("initializeCalendar", events); // fix this also if execution doesnt reach here 
+        }
     }
 
     private async void NavigateToAssignedCases()
@@ -189,9 +245,10 @@
         }
         else
         {
-            filteredCaseList = new List<Case>();
+            filteredCaseList = caseList; // Display all cases when no date is selected, you are not dumd lol
         }
     }
+
 
     private async Task Add()
     {

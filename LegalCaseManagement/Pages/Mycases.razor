@@ -19,11 +19,12 @@
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavManager
 @inject IHttpContextAccessor HttpContextAccessor
+@inject UserManager<ApplicationUser> UserManager
 
 @if (isUpdateModalVisible)
 {
     <div class="modal show" tabindex="-1" aria-labelledby="updateCaseModalLabel" style="display:block">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-xl enlarge-modol">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="updateCaseModalLabel">Update Case</h5>
@@ -99,10 +100,10 @@
 }
 
 <div class="modal @modalClass" tabindex="-1" aria-labelledby="addCaseModalLabel" style="display:@modalDisplay">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl enlarge-modol">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addCaseModalLabel">Add New Case</h5>
+                <h5 class="modal-title justify-content-center" id="addCaseModalLabel">Add New Case</h5>
                 <button type="button" class="btn-close" @onclick="CloseModal" aria-label="Close">&times;</button>
             </div>
             <div class="modal-body">
@@ -185,6 +186,7 @@
         @* Running Cases Table *@
                 <MudTable Items="runningCases" Filter="new Func<Case,bool>(Search)">
                     <ToolBarContent>
+
                         <MudText Typo="Typo.h6">Cases</MudText>
                         <MudSpacer />
                 <MudTextField @bind-Value="searchString" Placeholder="Search by Description, Client, or Case ID"
@@ -636,26 +638,48 @@
     {
         using (var scope = ServiceScopeFactory.CreateScope())
         {
-
-
             var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var notificationService = scope.ServiceProvider.GetRequiredService<NotificationService>();
+            var emailService = scope.ServiceProvider.GetRequiredService<EmailService>(); // Ensure you have an email service registered
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
             var caseToUpdate = await context.Cases.FindAsync(editingCase.CaseId);
             if (caseToUpdate != null)
             {
                 caseToUpdate.EndDate = editingCase.EndDate;
+                caseToUpdate.Remark = editingCase.Remark; //i added this to make sure the remark is updated as well
                 await context.SaveChangesAsync();
                 snackbar.Add("Next hearing date updated successfully.", Severity.Success);
 
                 // Create notification
                 var message = $"Next hearing date for case {caseToUpdate.RegistrationNo} has been updated to {caseToUpdate.EndDate:d}.";
                 await notificationService.CreateNotification(caseToUpdate.UserId, message);
+
+                // Send email to the client
+                var client = await userManager.FindByIdAsync(caseToUpdate.UserId);
+                var subject = "Hearing Date Update Notification";
+                var body = $"Dear {client.FirstName} {client.LastName},<br><br>" +
+                           $"The next hearing date for your case (Case No: {caseToUpdate.RegistrationNo}) has been updated to {caseToUpdate.EndDate:d}.<br>" +
+                           $"Remark: {caseToUpdate.Remark}<br><br>" +
+                           $"Please log in to the system to view more details.<br><br>" +
+                           $"Best regards,<br>Legal Case Management System";
+
+                try
+                {
+                    await emailService.SendEmailAsync(client.Email, subject, body);
+                    snackbar.Add("Client notified successfully", Severity.Success);
+                }
+                catch (Exception ex)
+                {
+                    snackbar.Add($"Failed to send email to client: {ex.Message}", Severity.Warning);
+                }
             }
         }
 
         await GetAllAsync();
         CloseEditDateModal();
     }
+
 
     private void NavigateToCaseDetails(int caseId)
     {

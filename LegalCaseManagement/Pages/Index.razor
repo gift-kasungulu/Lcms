@@ -18,7 +18,7 @@
 
 <MudGrid>
     <MudItem xs="12">
-        <MudText Typo="Typo.h6">Notice</MudText>
+        <h3>Notice</h3>
         @foreach (var notice in notices)
         {
             <div class="notice-item">
@@ -87,6 +87,17 @@
     </MudTabs>
 }
 
+<script>
+    function downloadPdf(dataUrl, fileName) {
+        var a = document.createElement('a');
+        a.href = dataUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+</script>
+
 @code {
     private List<Notice> notices = new List<Notice>();
     private List<Case> caseList = new List<Case>();
@@ -127,6 +138,7 @@
             isClient = await UserManager.IsInRoleAsync(appUser, "Client");
         }
     }
+
 
     private async Task DownloadPdf(int noticeId)
     {
