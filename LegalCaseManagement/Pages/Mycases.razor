@@ -186,7 +186,6 @@
         @* Running Cases Table *@
                 <MudTable Items="runningCases" Filter="new Func<Case,bool>(Search)">
                     <ToolBarContent>
-
                         <MudText Typo="Typo.h6">Cases</MudText>
                         <MudSpacer />
                 <MudTextField @bind-Value="searchString" Placeholder="Search by Description, Client, or Case ID"
@@ -428,7 +427,7 @@
     <ToolBarContent>
         <MudText Typo="Typo.h6">Cases Listed</MudText>
         <MudSpacer />
-        <MudButton OnClick="@DownloadPdf" Variant="Variant.Filled" Color="Color.Primary">Download PDF</MudButton>
+        <MudButton OnClick="@DownloadPdf" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.FileDownload" Color="Color.Primary">Download PDF</MudButton>
     </ToolBarContent>
     <HeaderContent>
         <MudTh>Sr No</MudTh>

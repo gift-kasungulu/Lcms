@@ -14,10 +14,6 @@
 @inject SignInManager<ApplicationUser> SignInManager
 
 <PageTitle>Appointments</PageTitle>
-
-
-    
-        
         <MudGrid>
             <MudItem xs="6">
                 <MudText Typo="Typo.h5">Appointments</MudText>
@@ -26,8 +22,6 @@
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => Navigation.NavigateTo("/fetchdata"))">CREATE APPOINTMENT</MudButton>
             </MudItem>
         </MudGrid>
-
-        
 
         <MudTable Items="@appointments" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading" LoadingProgressColor="Color.Info" Class="mt-4">
             <ToolBarContent>
@@ -72,8 +66,6 @@
                 <MudTablePager />
             </PagerContent>
         </MudTable>
-
-
 
 @code {
     private List<Appointment> appointments = new List<Appointment>();

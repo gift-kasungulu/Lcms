@@ -9,44 +9,64 @@
 @inject LawyerService lawyerService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 
-        <MudText Typo="Typo.h6" Class="mb-4">Case Details</MudText>
-        @if (caseDetails == null)
-        {
-            <MudText Typo="Typo.body1">Loading case details...</MudText>
-        }
-        else
-        {
-            <MudGrid>
-                <MudItem xs="12" sm="6">
-                    <MudText Typo="Typo.subtitle1">Case Number:</MudText>
-                    <MudText Typo="Typo.body1">@caseDetails.RegistrationNo</MudText>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudText Typo="Typo.subtitle1">Petitioner:</MudText>
-                    <MudText Typo="Typo.body1">@caseDetails.Petitioner</MudText>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudText Typo="Typo.subtitle1">Defendant:</MudText>
-                    <MudText Typo="Typo.body1">@caseDetails.Defendant</MudText>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudText Typo="Typo.subtitle1">Start Date:</MudText>
-                    <MudText Typo="Typo.body1">@caseDetails.StartDate?.ToString("d")</MudText>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudText Typo="Typo.subtitle1">Next Hearing Date:</MudText>
-                    <MudText Typo="Typo.body1">@caseDetails.EndDate?.ToString("d")</MudText>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudText Typo="Typo.subtitle1">Description:</MudText>
-                    <MudText Typo="Typo.body1">@caseDetails.Discription</MudText>
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudText Typo="Typo.subtitle1">Assigned Lawyer:</MudText>
-                    <MudText Typo="Typo.body1">@caseDetails.AssignedLawyer?.FirstName @caseDetails.AssignedLawyer?.LastName</MudText>
-                </MudItem>
-            </MudGrid>
-        }
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class="mb-4">Case Details</h2>
+            @if (caseDetails == null)
+            {
+                <div class="spinner-border text-primary" role="status">
+                    <span class="sr-only">Loading...</span>
+                </div>
+                <p class="text-muted">Loading case details...</p>
+            }
+            else
+            {
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Case Information</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>Case Number:</strong> @caseDetails.RegistrationNo
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Petitioner:</strong> @caseDetails.Petitioner
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Defendant:</strong> @caseDetails.Defendant
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Case Dates</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <strong>Start Date:</strong> @caseDetails.StartDate?.ToString("d")
+                            </li>
+                            <li class="list-group-item">
+                                <strong>Next Hearing Date:</strong> @caseDetails.EndDate?.ToString("d")
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Case Description</h5>
+                        <p>@caseDetails.Discription</p>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Assigned Lawyer</h5>
+                        <p>@caseDetails.AssignedLawyer?.FirstName @caseDetails.AssignedLawyer?.LastName</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
 @code {
     [Parameter]
     public int caseId { get; set; }
@@ -54,6 +74,11 @@
     private Case caseDetails = new Case();
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadCaseDetailsAsync();
+    }
+
+    private async Task LoadCaseDetailsAsync()
     {
         caseDetails = await caseService.GetByIdAsync(caseId);
     }

@@ -12,13 +12,21 @@
 @inject IServiceScopeFactory ServiceScopeFactory
 @inject IJSRuntime JSRuntime
 
-<MudText Typo="Typo.h5">Case</MudText>
-<MudSpacer />
+<style>
+    body {
+        background-color: #F5F5F5;
+    }
+</style>
 
-<div class="my-2">
-    <MudIconButton Icon="@Icons.Material.Filled.FileDownload" Color="Color.Primary" />
-    <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Primary" />
-</div>
+<MudGrid>
+    <MudItem xs="6" style="display: flex; align-items: center;">
+        <MudText Typo="Typo.h5">Case</MudText>
+    </MudItem>
+    <MudItem xs="6" style="text-align: right;">
+        <MudIconButton Icon="@Icons.Material.Filled.FileDownload" Color="Color.Primary" />
+        <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Primary" />
+    </MudItem>
+</MudGrid>
 
 @if (caseDetails == null)
 {
@@ -63,11 +71,7 @@ else
                         <strong>Description:</strong> @caseDetails.Discription
                     </MudText>
                 </MudItem>
-                <MudItem xs="12">
-                    <MudText Typo="Typo.body2" Class="mt-4">
-                        <strong>File Attachment:</strong> @(string.IsNullOrEmpty(caseDetails.FileAttachment) ? "No file attached" : caseDetails.FileAttachment)
-                    </MudText>
-                </MudItem>
+                
             </MudGrid>
             <MudDivider Class="my-6" />
             <MudGrid>
@@ -113,7 +117,20 @@ else
                                             <MudText Typo="Typo.caption" Class="text-muted">@doc.UploadDate.ToString("dd MMM yyyy")</MudText>
                                         </MudItem>
                                         <MudItem xs="2">
-                                            <MudIconButton Icon="@Icons.Material.Filled.Download" Color="Color.Primary" OnClick="@(() => DownloadDocument(doc.Id))" />
+                                            <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                                                <MudMenuItem OnClick="@(() => DownloadDocument(doc.Id))">
+                                                    <i class="bi bi-download"></i>
+                                                    Download
+                                                </MudMenuItem>
+                                                <MudMenuItem OnClick="@(() => UpdateDocumentDialog(doc.Id))">
+                                                    <i class="bi bi-pencil-fill"></i>
+                                                    Update
+                                                </MudMenuItem>
+                                                <MudMenuItem OnClick="@(() => DeleteDocument(doc.Id))">
+                                                    <i class="bi bi-trash"></i>
+                                                    Delete
+                                                </MudMenuItem>
+                                            </MudMenu>
                                         </MudItem>
                                     </MudGrid>
                                 </MudPaper>
@@ -132,12 +149,27 @@ else
         </MudTabPanel>
     </MudTabs>
 }
+<!-- Remember to fix this its not eorking yet -->
+
+<MudDialog @bind-IsOpen="updateDialogOpen">
+    <DialogContent>
+        <MudText Typo="Typo.h6">Update Document</MudText>
+        <MudTextField Label="File Name" @bind-Value="selectedDocument.FileName" />
+        <InputFile OnChange="OnFileChange" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="SaveDocumentUpdate" Color="Color.Primary">Save</MudButton>
+        <MudButton OnClick="CloseUpdateDialog" Color="Color.Secondary">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
 
 @code {
     [Parameter] public int CaseId { get; set; }
-    private Case caseDetails;
+    private Case caseDetails = new Case();
     private IReadOnlyList<IBrowserFile> selectedFiles = new List<IBrowserFile>();
     private List<CaseDocument> caseDocuments = new List<CaseDocument>();
+    private CaseDocument? selectedDocument;
+    private bool updateDialogOpen;
 
     protected override async Task OnInitializedAsync()
     {
@@ -238,4 +270,63 @@ else
             await js.InvokeVoidAsync("BlazorDownloadFile", path, document.FileName);
         }
     }
+
+    private void UpdateDocumentDialog(int documentId)
+    {
+        selectedDocument = caseDocuments.FirstOrDefault(d => d.Id == documentId);
+        updateDialogOpen = true; // Ensure this sets to true
+    }
+
+    private void CloseUpdateDialog()
+    {
+        updateDialogOpen = false;  // Close the modal
+    }
+
+    private async Task SaveDocumentUpdate()
+    {
+        if (selectedDocument != null)
+        {
+            using var scope = ServiceScopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            // If a new file was uploaded, update the file path
+            if (selectedFiles.Any())
+            {
+                var file = selectedFiles.First();
+                var trustedFileName = Path.GetRandomFileName();
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", trustedFileName);
+
+                await using FileStream fs = new(path, FileMode.Create);
+                await file.OpenReadStream().CopyToAsync(fs);
+
+                selectedDocument.FilePath = path;
+            }
+
+            context.Documents.Update(selectedDocument);
+            await context.SaveChangesAsync();
+
+            Snackbar.Add("Document updated successfully", Severity.Success);
+            caseDocuments = await GetCaseDocumentsAsync(CaseId);  // Refresh document list
+            CloseUpdateDialog();  // Close the modal
+        }
+    }
+
+    private async Task DeleteDocument(int documentId)
+    {
+        var document = caseDocuments.FirstOrDefault(d => d.Id == documentId);
+        if (document != null)
+        {
+            using var scope = ServiceScopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+            context.Documents.Remove(document);
+            await context.SaveChangesAsync();
+
+            Snackbar.Add("Document deleted successfully", Severity.Success);
+            caseDocuments = await GetCaseDocumentsAsync(CaseId);  // Refresh document list
+        }
+    }
+
+
+
 }

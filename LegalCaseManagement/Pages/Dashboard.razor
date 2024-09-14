@@ -20,8 +20,14 @@
 
 <PageTitle>Dashboard</PageTitle>
 
+<style>
+    body {
+        background-color: #F5F5F5;
+    }
+</style>
+
 <div class="container-fluid">
-    <h4 class="mb-4">Dashboard</h4>
+    <h4 class="mb-4" style="font-size: 2rem; ">Dashboard</h4>
     <div class="row">
         <div class="col-md-3">
             <div class="card ">
@@ -82,7 +88,7 @@
 <MudGrid>
     <MudItem xs="12">
         <MudPaper Class="pa-4 rounded">
-            <h4 class="mb-4">Upcoming Hearing Dates</h4>
+            <MudText Typo="Typo.h6">Upcoming Hearing Dates</MudText>
             <div id="calendar"></div>
         </MudPaper>
     </MudItem>

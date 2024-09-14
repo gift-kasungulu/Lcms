@@ -98,3 +98,8 @@ input{
 h1, h2, h3, h4, h5, h6 {
     font-family: 'Bebas Neue', sans-serif;
 }
+
+h3 {
+    color: darkslategrey;
+    letter-spacing: 1.5px;
+}

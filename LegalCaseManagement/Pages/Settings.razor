@@ -141,17 +141,20 @@
 </MudDialog>
 <br />
 <!-- handle adding of notices here  -->
+
 <MudGrid>
     <MudItem xs="12" sm="6">
-        <InputFile OnChange="HandleFileSelected" />
+            <InputFile Class="my-5" OnChange="HandleFileSelected" />
     </MudItem>
     <MudItem xs="12" sm="6">
-        <MudTextField Label="Notice Title" @bind-Value="newNotice.Title" FullWidth="true" />
+        <MudTextField  Label="Notice Title" @bind-Value="newNotice.Title" FullWidth="true" />
     </MudItem>
     <MudItem xs="12" sm="6">
         <MudButton Color="Color.Primary" OnClick="AddNoticeAsync" Variant="Variant.Filled">Add Notice</MudButton>
     </MudItem>
 </MudGrid>
+
+
 
 <br />
 <MudTable Items="notices" Striped="true" Hover="true">
@@ -232,9 +235,6 @@
             snackbar.Add($"An error occurred while adding the notice: {ex.Message}", Severity.Error);
         }
     }
-
-
-
 
     protected override async Task OnInitializedAsync()
     {
