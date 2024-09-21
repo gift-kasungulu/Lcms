@@ -1,5 +1,5 @@
 ﻿@page "/counter"
-@* @attribute [Authorize(Roles = "Admin")]  *@
+@attribute [Authorize(Roles = "Admin")]  
 
 @using LegalCaseManagement.Domain
 @using LegalCaseManagement.Service
@@ -135,7 +135,7 @@
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Advocates</MudText>
                         <MudSpacer />
-                        <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium"
+                        <MudTextField @bind-Value="searchString" Label="Search" Placeholder="Search by Name" IconSize="Size.Medium"
                             StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
                     </ToolBarContent>
                     <HeaderContent>
@@ -186,7 +186,7 @@
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Admin Users</MudText>
                 <MudSpacer />
-                <MudTextField @bind-Value="searchStringAdmin" Placeholder="Search Here" IconSize="Size.Medium"
+                <MudTextField @bind-Value="searchStringAdmin" Label="Search" Placeholder="Search Here" IconSize="Size.Medium"
                               StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
             </ToolBarContent>
             <HeaderContent>
@@ -682,8 +682,5 @@
             snackbar.Add("An error occurred during user creation. Please try again later.", Severity.Error);
         }
     }
-
-
-
 
 }

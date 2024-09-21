@@ -14,50 +14,56 @@
 @inject SignInManager<ApplicationUser> SignInManager
 
 <PageTitle>Appointments</PageTitle>
-        <MudGrid>
-            <MudItem xs="6">
-                <MudText Typo="Typo.h5">Appointments</MudText>
-            </MudItem>
-            <MudItem xs="6" Class="d-flex justify-end">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => Navigation.NavigateTo("/fetchdata"))">CREATE APPOINTMENT</MudButton>
-            </MudItem>
-        </MudGrid>
+@page "/my-appointments"
+@attribute [Authorize(Roles = "Client, Admin, Team")]
 
-        <MudTable Items="@appointments" Hover="true" Breakpoint="Breakpoint.Sm" Loading="@_loading" LoadingProgressColor="Color.Info" Class="mt-4">
-            <ToolBarContent>
-                <MudText Typo="Typo.h6">Appointments</MudText>
-                <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
-            </ToolBarContent>
+<PageTitle>My Appointments</PageTitle>
+
+<style>
+    body {
+        background-color: #F5F5F5;
+    }
+</style>
+
+<MudCard Elevation="3">
+    <MudCardHeader>
+        <CardHeaderContent>
+            <MudText Typo="Typo.h4">My Appointments</MudText>
+        </CardHeaderContent>
+        <CardHeaderActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@(() => Navigation.NavigateTo("/fetchdata"))">Create Appointment</MudButton>
+        </CardHeaderActions>
+    </MudCardHeader>
+
+    <MudCardContent>
+        <MudTable Items="@appointments" Hover="true" Loading="@_loading"
+                  LoadingProgressColor="Color.Info" Dense="true" Striped="true" Bordered="true" Elevation="0">
             <HeaderContent>
-                <MudTh></MudTh>
-                <MudTh>Client Name</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Appointment, object>(x=>x.ClientName)">Client Name</MudTableSortLabel></MudTh>
                 <MudTh>Mobile</MudTh>
-                <MudTh>Date</MudTh>
-                <MudTh>Time</MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Appointment, object>(x=>x.Date)">Date</MudTableSortLabel></MudTh>
+                <MudTh><MudTableSortLabel SortBy="new Func<Appointment, object>(x=>x.Time)">Time</MudTableSortLabel></MudTh>
                 <MudTh>Action</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Created By">
-                    @if (context.CreatedBy == currentUser.Id)
-                    {
-                        <MudBadge Color="Color.Success"></MudBadge>
-                    }
-                </MudTd>
                 <MudTd DataLabel="Client Name">@context.ClientName</MudTd>
                 <MudTd DataLabel="Mobile">@context.MobileNo</MudTd>
-                <MudTd DataLabel="Date">@context.Date.ToShortDateString()</MudTd>
-                <MudTd DataLabel="Time">@context.Time.ToString(@"hh\:mm")</MudTd>
-                
+                <MudTd DataLabel="Date">
+                    @context.Date?.ToShortDateString() ?? "N/A"
+                </MudTd>
+                <MudTd DataLabel="Time">
+                    @context.Time.ToString("hh\\:mm")
+                </MudTd>
                 <MudTd DataLabel="Action">
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" AnchorOrigin="Origin.BottomRight" TransformOrigin="Origin.TopRight">
                         <MudMenuItem OnClick="@(() => ViewAppointmentsDetails(context.Id))">
-                            <i class="bi bi-eye"></i>
-                            View
+                            <MudIcon Icon="@Icons.Material.Filled.Visibility" Class="mr-2" /> View
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => EditAppointment(context.Id))">
+                            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-2" /> Edit
                         </MudMenuItem>
                         <MudMenuItem OnClick="@(() => DeleteAppointment(context.Id))">
-                            <i class="bi bi-trash-fill"></i>
-                            Delete
+                            <MudIcon Icon="@Icons.Material.Filled.Delete" Class="mr-2" /> Delete
                         </MudMenuItem>
                     </MudMenu>
                 </MudTd>
@@ -66,6 +72,8 @@
                 <MudTablePager />
             </PagerContent>
         </MudTable>
+    </MudCardContent>
+</MudCard>
 
 @code {
     private List<Appointment> appointments = new List<Appointment>();
@@ -74,11 +82,42 @@
     private DateTime? fromDate;
     private DateTime? toDate;
     private ApplicationUser? currentUser;
+    private Appointment appointment = new Appointment();
+    private bool showModal = false;
 
     protected override async Task OnInitializedAsync()
     {
         currentUser = await UserManager.GetUserAsync(SignInManager.Context.User);
         await LoadAppointments();
+    }
+
+    private void EditAppointment(int appointmentId)
+    {
+        Navigation.NavigateTo($"/editappointments/{appointmentId}");
+    }
+
+    private void StartEditingAppointment(Appointment appt)
+    {
+        appointment = appt;  // Load the existing appointment
+        showModal = true;  // Show the modal
+    }
+
+    private async Task SaveAppointment()
+    {
+        // Assuming you have the time as a string from the input
+        var timeValue = appointment.Time.ToString(); // Get the time as string
+        appointment.Time = TimeSpan.Parse(timeValue); // Convert it to TimeSpan
+
+        await AppointmentService.UpdateAppointment(appointment);
+        Snackbar.Add("Appointment updated successfully", Severity.Success);
+    }
+
+
+    
+
+    private void CloseModal()
+    {
+        showModal = false;
     }
 
     private void ViewAppointmentsDetails(int id)
@@ -124,22 +163,32 @@
         LoadAppointments();
     }
 
-    private void EditAppointment(int id)
-    {
-        Navigation.NavigateTo($"/editappointment/{id}");
-    }
+    
 
     private async Task DeleteAppointment(int id)
     {
         bool? result = await DialogService.ShowMessageBox(
             "Warning",
-            "Deleting can not be undone!",
-            yesText: "Delete!", cancelText: "Cancel");
+            "Deleting cannot be undone!",
+            yesText: "Delete", cancelText: "Cancel",
+            options: new DialogOptions { CloseOnEscapeKey = true });
 
         if (result ?? false)
         {
             await AppointmentService.DeleteAppointment(id);
             await LoadAppointments();
+            Snackbar.Add("Appointment deleted successfully", Severity.Success);
         }
+    }
+
+    private bool FilterFunc(Appointment appointment)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (appointment.ClientName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (appointment.MobileNo.Contains(searchString))
+            return true;
+        return false;
     }
 }

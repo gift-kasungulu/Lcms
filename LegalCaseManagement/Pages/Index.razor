@@ -22,8 +22,6 @@
     }
 </style>
 
-<MudCard>
-    <MudCardContent>
         <MudGrid>
             <MudItem xs="12">
                 <h5>Notice</h5>
@@ -31,20 +29,18 @@
                 {
                     <div class="notice-item">
                         <div class="notice-icon">
-                            <i class="fas fa-info-circle"></i>
+                            <i class="bi bi-info-circle"></i>
                         </div>
                         <div class="notice-content">
                             @notice.Title
                         </div>
                         <div class="notice-action">
-                            <MudButton Color="Color.Primary" Variant="Variant.Text" OnClick="() => DownloadPdf(notice.Id)">Read</MudButton>
+                            <MudButton Color="Color.Primary" Variant="Variant.Text" OnClick="() => DownloadPdf(notice.Id)">read</MudButton>
                         </div>
                     </div>
                 }
             </MudItem>
         </MudGrid>
-    </MudCardContent>
-</MudCard>
 
 <br />
 @if (isClient)

@@ -126,5 +126,27 @@ namespace LegalCaseManagement.Service
                 //await _emailService.SendAppointmentApprovalNotificationAsync(appointment);
             }
         }
+
+        public async Task UpdateAppointment(Appointment appointment)
+        {
+            // Ensure that the appointment exists
+            var existingAppointment = await _context.Appointments.FindAsync(appointment.Id);
+            if (existingAppointment == null)
+            {
+                throw new ArgumentException("Appointment not found.");
+            }
+
+            // Update the properties
+            existingAppointment.ClientName = appointment.ClientName;
+            existingAppointment.MobileNo = appointment.MobileNo;
+            existingAppointment.Date = appointment.Date;
+            existingAppointment.Time = appointment.Time;
+            existingAppointment.Note = appointment.Note;
+            existingAppointment.IsApproved = appointment.IsApproved; // Optional, if you want to update this too
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

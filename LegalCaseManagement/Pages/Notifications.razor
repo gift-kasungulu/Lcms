@@ -1,5 +1,4 @@
 ﻿@page "/notifications"
-
 @attribute [Authorize(Roles = "Admin, Client, Team")]
 
 @using LegalCaseManagement.Data
@@ -16,72 +15,75 @@
 
 <PageTitle>Notifications</PageTitle>
 
-<MudGrid>
-    <MudItem xs="12">
-        <MudText Typo="Typo.h5">Notifications</MudText>
-    </MudItem>
-</MudGrid>
-<MudDivider Class="my-2" />
+   
+        <MudText Typo="Typo.h4" Class="mb-4">Notifications</MudText>
 
-<MudList Dense="true">
-    @foreach (var notification in notifications)
-    {
-        <MudListItem>
-            <MudGrid>
-                <MudItem xs="10">
-                    <MudText Typo="Typo.body1">@notification.Message</MudText>
-                </MudItem>
-                <MudItem xs="2" Class="d-flex justify-end">
-                    <MudText Typo="Typo.caption">@notification.CreatedAt.ToLocalTime().ToString("g")</MudText>
-                </MudItem>
-            </MudGrid>
-            <MudButton Color="Color.Primary" OnClick="@(() => MarkAsRead(notification.Id))">Mark as Read</MudButton>
-        </MudListItem>
-        <MudDivider />
-    }
-</MudList>
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+            <MudTabPanel Text="Unread Notifications">
+                <MudList Clickable="true">
+                    @foreach (var notification in notifications)
+                    {
+                        <MudListItem>
+                            <MudCard Elevation="0">
+                                <MudCardContent>
+                                    <MudGrid>
+                                        <MudItem xs="12" sm="10">
+                                            <MudText Typo="Typo.body1">@notification.Message</MudText>
+                                        </MudItem>
+                                        <MudItem xs="12" sm="2" Class="d-flex justify-end align-center">
+                                            <MudChip Size="Size.Small" Color="Color.Info">@notification.CreatedAt.ToLocalTime().ToString("g")</MudChip>
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudCardContent>
+                                <MudCardActions>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" Size="Size.Small" OnClick="@(() => MarkAsRead(notification.Id))">Mark as Read</MudButton>
+                                </MudCardActions>
+                            </MudCard>
+                        </MudListItem>
+                        <MudDivider Class="my-2" />
+                    }
+                </MudList>
+            </MudTabPanel>
 
-@if (isAdmin)
-{
-    <MudText Typo="Typo.h6" Class="mt-4">Pending Appointments</MudText>
-    <MudList Dense="true">
-        @foreach (var appointment in appointments)
-        {
-            <MudListItem>
-                <MudGrid>
-                    <MudItem xs="10">
-                        <MudText Typo="Typo.body1">@notificationMessages[appointment.Id]</MudText>
-                    </MudItem>
-                    <MudItem xs="2" Class="d-flex justify-end">
-                        <MudText Typo="Typo.caption">@appointment.Date.ToShortDateString()</MudText>
-                    </MudItem>
-                </MudGrid>
-                <MudButton Color="Color.Success" OnClick="@(() => ApproveAppointment(appointment.Id))">Approve</MudButton>
-            </MudListItem>
-            <MudDivider />
-        }
-    </MudList>
-}
-else
-{
-    <MudText Typo="Typo.h6" Class="mt-4">Approved Appointments</MudText>
-    <MudList Dense="true">
-        @foreach (var appointment in appointments)
-        {
-            <MudListItem>
-                <MudGrid>
-                    <MudItem xs="10">
-                        <MudText Typo="Typo.body1">@notificationMessages[appointment.Id]</MudText>
-                    </MudItem>
-                    <MudItem xs="2" Class="d-flex justify-end">
-                        <MudText Typo="Typo.caption">@appointment.Date.ToShortDateString()</MudText>
-                    </MudItem>
-                </MudGrid>
-            </MudListItem>
-            <MudDivider />
-        }
-    </MudList>
-}
+            <MudTabPanel Text="Appointments">
+                @if (isAdmin)
+                {
+                    <MudText Typo="Typo.h6" Class="mb-4">Pending Appointments</MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.h6" Class="mb-4">Approved Appointments</MudText>
+                }
+
+                <MudList Clickable="true">
+                    @foreach (var appointment in appointments)
+                    {
+                        <MudListItem>
+                            <MudCard Elevation="0">
+                                <MudCardContent>
+                                    <MudGrid>
+                                        <MudItem xs="12" sm="10">
+                                            <MudText Typo="Typo.body1">@notificationMessages[appointment.Id]</MudText>
+                                        </MudItem>
+                                        <MudItem xs="12" sm="2" Class="d-flex justify-end align-center">
+                                    <MudChip Size="Size.Small" Color="Color.Success">@appointment.Date?.ToShortDateString() ?? "N/A"</MudChip>
+
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudCardContent>
+                                @if (isAdmin)
+                                {
+                                    <MudCardActions>
+                                        <MudButton Variant="Variant.Filled" Color="Color.Success" Size="Size.Small" OnClick="@(() => ApproveAppointment(appointment.Id))">Approve</MudButton>
+                                    </MudCardActions>
+                                }
+                            </MudCard>
+                        </MudListItem>
+                        <MudDivider Class="my-2" />
+                    }
+                </MudList>
+            </MudTabPanel>
+        </MudTabs>
 
 @code {
     private List<Appointment> appointments = new List<Appointment>();
@@ -131,20 +133,21 @@ else
         var creator = await UserManager.FindByIdAsync(appointment.CreatedBy);
         if (creator == null)
         {
-            return $"Appointment on {appointment.Date.ToShortDateString()} (creator not found)";
+            return $"Appointment on {appointment.Date?.ToShortDateString()} (creator not found)";
         }
         var roles = await UserManager.GetRolesAsync(creator);
         if (roles.Contains("Client"))
         {
-            return $"Appointment with Client {creator.UserName} on {appointment.Date.ToShortDateString()}";
+            return $"Appointment with Lawyer {creator.UserName} on {appointment.Date?.ToShortDateString()}";
+            
         }
-        else if (roles.Contains("Team"))
+        else if (roles.Contains("Team")) // if its the lawyer it should display this try and fix otherwise 
         {
-            return $"Appointment with Lawyer {creator.UserName} on {appointment.Date.ToShortDateString()}";
+            return $"Appointment with Client {creator.UserName} on {appointment.Date?.ToShortDateString()}";
         }
         else
         {
-            return $"Appointment on {appointment.Date.ToShortDateString()}";
+            return $"Appointment on {appointment.Date?.ToShortDateString()}";
         }
     }
 
@@ -189,7 +192,7 @@ else
             var body = $"Dear {client.FirstName} {client.LastName},<br><br>" +
                        $"Your appointment has been confirmed:<br>" +
                        $"Advocates: {creator.FirstName} {creator.LastName}<br>" +
-                       $"Date: {appointment.Date.ToShortDateString()}<br>" +
+                       $"Date: {appointment.Date?.ToShortDateString()}<br>" +
                        $"Time: {appointment.Time}<br><br>" +
                        $"Please log in to the system to view more details.<br><br>" +
                        $"Best regards,<br>Legal Case Management System";
@@ -211,7 +214,7 @@ else
             var body = $"Dear {lawyer.FirstName} {lawyer.LastName},<br><br>" +
                        $"You have a new appointment scheduled:<br>" +
                        $"Client: {creator.FirstName} {creator.LastName}<br>" +
-                       $"Date: {appointment.Date.ToShortDateString()}<br>" +
+                       $"Date: {appointment.Date?.ToShortDateString()}<br>" +
                        $"Time: {appointment.Time}<br><br>" +
                        $"Please log in to the system to view more details.<br><br>" +
                        $"Best regards,<br>Legal Case Management System";
@@ -231,7 +234,5 @@ else
             Snackbar.Add("No valid recipient found for the appointment notification.", Severity.Warning);
         }
     }
-
-
 
 }

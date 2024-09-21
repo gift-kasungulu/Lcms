@@ -34,69 +34,80 @@
                     <EditForm Model="editingCase" OnValidSubmit="UpdateCase">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
-                        <div class="mb-3">
-                            <label for="description" class="form-label">Description</label>
-                            <InputText @bind-Value="editingCase.Discription" id="description" class="form-control" required />
+
+                        <!-- Use a Bootstrap grid to organize the form fields into two columns -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <InputText @bind-Value="editingCase.Discription" id="description" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="registrationDate" class="form-label">Registration Date</label>
+                                <InputDate @bind-Value="editingCase.RegistrationDate" id="registrationDate" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="registrationNo" class="form-label">Registration Number</label>
+                                <InputText @bind-Value="editingCase.RegistrationNo" id="registrationNo" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="startDate" class="form-label">Starting Date</label>
+                                <InputDate @bind-Value="editingCase.StartDate" id="startDate" class="form-control" />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="endDate" class="form-label">Next Hearing Date</label>
+                                <InputDate @bind-Value="editingCase.EndDate" id="endDate" class="form-control" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="petitioner" class="form-label">Petitioner</label>
+                                <InputText @bind-Value="editingCase.Petitioner" id="petitioner" class="form-control" required />
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="defendant" class="form-label">Court Name</label>
+                                <InputText @bind-Value="editingCase.Defendant" id="defendant" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="client" class="form-label">Client</label>
+                                <InputSelect @bind-Value="editingCase.UserId" id="client" class="form-select" required>
+                                    @foreach (var client in clients)
+                                    {
+                                        <option value="@client.Id">@client.FirstName @client.LastName</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="caseType" class="form-label">Case Type</label>
+                                <InputSelect @bind-Value="editingCase.CaseTypeId" id="caseType" class="form-select" required>
+                                    @foreach (var caseType in caseTypes)
+                                    {
+                                        <option value="@caseType.CaseTypeId">@caseType.TypeName</option>
+                                    }
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="caseStatus" class="form-label">Case Status</label>
+                                <InputSelect @bind-Value="editingCase.StatusId" id="caseStatus" class="form-select" required>
+                                    @foreach (var caseStatus in caseStatuses)
+                                    {
+                                        <option value="@caseStatus.StatusId">@caseStatus.StatusName</option>
+                                    }
+                                    }
+                                </InputSelect>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="registrationDate" class="form-label">Registration Date</label>
-                            <InputDate @bind-Value="editingCase.RegistrationDate" id="registrationDate" class="form-control" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="registrationNo" class="form-label">Registration Number</label>
-                            <InputText @bind-Value="editingCase.RegistrationNo" id="registrationNo" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="startDate" class="form-label">Starting Date</label>
-                            <InputDate @bind-Value="editingCase.StartDate" id="startDate" class="form-control" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="endDate" class="form-label">Next Hearing Date</label>
-                            <InputDate @bind-Value="editingCase.EndDate" id="endDate" class="form-control" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="petitioner" class="form-label">Petitioner</label>
-                            <InputText @bind-Value="editingCase.Petitioner" id="petitioner" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="defendant" class="form-label">Court Name</label>
-                            <InputText @bind-Value="editingCase.Defendant" id="defendant" class="form-control" required />
-                        </div>
-                        <div class="mb-3">
-                            <label for="client" class="form-label">Client</label>
-                            <InputSelect @bind-Value="editingCase.UserId" id="client" class="form-select" required>
-                                @foreach (var client in clients)
-                                {
-                                    <option value="@client.Id">@client.FirstName @client.LastName</option>
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label for="caseType" class="form-label">Case Type</label>
-                            <InputSelect @bind-Value="editingCase.CaseTypeId" id="caseType" class="form-select" required>
-                                @foreach (var caseType in caseTypes)
-                                {
-                                    <option value="@caseType.CaseTypeId">@caseType.TypeName</option>
-                                }
-                                }
-                            </InputSelect>
-                        </div>
-                        <div class="mb-3">
-                            <label for="caseStatus" class="form-label">Case Status</label>
-                            <InputSelect @bind-Value="editingCase.StatusId" id="caseStatus" class="form-select" required>
-                                @foreach (var caseStatus in caseStatuses)
-                                {
-                                    <option value="@caseStatus.StatusId">@caseStatus.StatusName</option>
-                                }
-                                }
-                            </InputSelect>
-                        </div>
+
                         <button type="submit" class="btn btn-primary">Update Case</button>
                     </EditForm>
                 </div>
             </div>
         </div>
     </div>
+
 }
 
 <div class="modal @modalClass" tabindex="-1" aria-labelledby="addCaseModalLabel" style="display:@modalDisplay">
@@ -110,66 +121,72 @@
                 <EditForm Model="newCase" OnValidSubmit="Add">
                     <DataAnnotationsValidator />
                     <ValidationSummary />
-                    <div class="mb-3">
-                        <label for="description" class="form-label">Description</label>
-                        <InputText @bind-Value="newCase.Discription" id="description" class="form-control" required />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="description" class="form-label">Description</label>
+                            <InputText @bind-Value="newCase.Discription" id="description" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="registrationDate" class="form-label">Registration Date</label>
+                            <InputDate @bind-Value="newCase.RegistrationDate" id="registrationDate" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="registrationNo" class="form-label">Registration Number</label>
+                            <InputText @bind-Value="newCase.RegistrationNo" id="registrationNo" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="fileAttachment" class="form-label">Attach File</label>
+                            <InputFile @bind-Value="newCase.FileAttachment" id="fileAttachment" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="startDate" class="form-label">Starting Date</label>
+                            <InputDate @bind-Value="newCase.StartDate" id="startDate" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="endDate" class="form-label">Next Hearing Date</label>
+                            <InputDate @bind-Value="newCase.EndDate" id="endDate" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="petitioner" class="form-label">Petitioner</label>
+                            <InputText @bind-Value="newCase.Petitioner" id="petitioner" class="form-control" required />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="defendant" class="form-label">Court Name</label>
+                            <InputText @bind-Value="newCase.Defendant" id="defendant" class="form-control" required />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="client" class="form-label">Client</label>
+                            <InputSelect @bind-Value="newCase.UserId" id="client" class="form-select" required>
+                                @foreach (var client in clients)
+                                {
+                                    <option value="@client.Id">@client.FirstName @client.LastName</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="caseType" class="form-label">Case Type</label>
+                            <InputSelect @bind-Value="newCase.CaseTypeId" id="caseType" class="form-select" required>
+                                @foreach (var caseType in caseTypes)
+                                {
+                                    <option value="@caseType.CaseTypeId">@caseType.TypeName</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="caseStatus" class="form-label">Case Status</label>
+                            <InputSelect @bind-Value="newCase.StatusId" id="caseStatus" class="form-select" required>
+                                @foreach (var caseStatus in caseStatuses)
+                                {
+                                    <option value="@caseStatus.StatusId">@caseStatus.StatusName</option>
+                                }
+                            </InputSelect>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="registrationDate" class="form-label">Registration Date</label>
-                        <InputDate @bind-Value="newCase.RegistrationDate" id="registrationDate" class="form-control" />
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Add Case</button>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="registrationNo" class="form-label">Registration Number</label>
-                        <InputText @bind-Value="newCase.RegistrationNo" id="registrationNo" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label for="fileAttachment" class="form-label">Attach File</label>
-                        <InputFile @bind-Value="newCase.FileAttachment" id="fileAttachment" class="form-control" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="startDate" class="form-label">Starting Date</label>
-                        <InputDate @bind-Value="newCase.StartDate" id="startDate" class="form-control" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="endDate" class="form-label">Next Hearing Date</label>
-                        <InputDate @bind-Value="newCase.EndDate" id="endDate" class="form-control" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="petitioner" class="form-label">Petitioner</label>
-                        <InputText @bind-Value="newCase.Petitioner" id="petitioner" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label for="defendant" class="form-label">Court Name</label>
-                        <InputText @bind-Value="newCase.Defendant" id="defendant" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label for="client" class="form-label">Client</label>
-                        <InputSelect @bind-Value="newCase.UserId" id="client" class="form-select" required>
-                            @foreach (var client in clients)
-                            {
-                                <option value="@client.Id">@client.FirstName @client.LastName</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="mb-3">
-                        <label for="caseType" class="form-label">Case Type</label>
-                        <InputSelect @bind-Value="newCase.CaseTypeId" id="caseType" class="form-select" required>
-                            @foreach (var caseType in caseTypes)
-                            {
-                                <option value="@caseType.CaseTypeId">@caseType.TypeName</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <div class="mb-3">
-                        <label for="caseStatus" class="form-label">Case Status</label>
-                        <InputSelect @bind-Value="newCase.StatusId" id="caseStatus" class="form-select" required>
-                            @foreach (var caseStatus in caseStatuses)
-                            {
-                                <option value="@caseStatus.StatusId">@caseStatus.StatusName</option>
-                            }
-                        </InputSelect>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Add Case</button>
                 </EditForm>
             </div>
         </div>
@@ -184,12 +201,14 @@
             <MudTabs Elevation="1">
     <MudTabPanel Text="Running Cases">
         @* Running Cases Table *@
-                <MudTable Items="runningCases" Filter="new Func<Case,bool>(Search)">
+                <MudTable Items="runningCases" Striped="true" Filter="new Func<Case,bool>(Search)">
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Cases</MudText>
                         <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search by Description, Client, or Case ID"
-                              IconSize="Size.Large" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                <MudTextField @bind-Value="searchString" Label="Search" Placeholder="Search by Description, Client, or Case ID"
+                                Class="mt-0">
+                    <i class="bi bi-search"></i>
+                           </MudTextField>
 
                     </ToolBarContent>
             <HeaderContent>
@@ -238,12 +257,12 @@
     </MudTabPanel>
     <MudTabPanel Text="High-Priority Cases">
         @* High-Priority Cases Table *@
-                <MudTable Items="highPriorityCases" Filter="new Func<Case,bool>(Search)">
+        <MudTable Items="highPriorityCases" Striped="true" Filter="new Func<Case,bool>(Search)">
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Cases</MudText>
                         <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search by Description, Client, or Case ID"
-                              IconSize="Size.Large" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                <MudTextField @bind-Value="searchString" Label="Search" Placeholder="Search by Description, Client, or Case ID"
+                              IconSize="Size.Large" AdornmentIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
 
                     </ToolBarContent>
             <HeaderContent>
@@ -292,12 +311,12 @@
     </MudTabPanel>
     <MudTabPanel Text="Abandoned Cases">
         @* Abandoned Cases Table *@
-                <MudTable Items="abandonedCases" Filter="new Func<Case,bool>(Search)">
+        <MudTable Items="abandonedCases" Striped="true" Filter="new Func<Case,bool>(Search)">
                     <ToolBarContent>
                         <MudText Typo="Typo.h6">Cases</MudText>
                         <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search by Description, Client, or Case ID"
-                              IconSize="Size.Large" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                <MudTextField @bind-Value="searchString" Label="Search" Placeholder="Search by Description, Client, or Case ID"
+                              IconSize="Size.Large" AdornmentIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
 
                     </ToolBarContent>
             <HeaderContent>
@@ -346,12 +365,12 @@
         @* Completed Cases Table *@
         @if(completedCases is not null)
         {
-            <MudTable Items="completedCases" Filter="new Func<Case, bool>(Search)">
+            <MudTable Items="completedCases" Striped="true" Filter="new Func<Case, bool>(Search)">
                 <ToolBarContent>
                     <MudText Typo="Typo.h6">Cases</MudText>
                     <MudSpacer />
-                    <MudTextField @bind-Value="searchString" Placeholder="Search by Description, Client, or Case ID"
-                                  IconSize="Size.Large" StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
+                    <MudTextField @bind-Value="searchString" Label="Search" Placeholder="Search by Description, Client, or Case ID"
+                                  IconSize="Size.Large" AdornmentIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
                 </ToolBarContent>
                 <HeaderContent>
                     <MudTh>#</MudTh>
@@ -423,7 +442,7 @@
        Color="Color.Primary">Search
 </MudButton>
             
-<MudTable Items="@filteredCaseList" Dense="true" Hover="true" Filter="new Func<Case,bool>(Search)">
+<MudTable Items="@filteredCaseList" Striped="true" Dense="true" Hover="true" Filter="new Func<Case,bool>(Search)">
     <ToolBarContent>
         <MudText Typo="Typo.h6">Cases Listed</MudText>
         <MudSpacer />
@@ -717,7 +736,7 @@
         {
             title = $"Case {c.RegistrationNo}",
             start = c.EndDate?.ToString("yyyy-MM-dd"), // Correct usage of ToString with format 
-                                                       // Add any other relevant case properties
+                                                       
         });
 
         await module.InvokeVoidAsync("renderCalendar", "calendar", events);

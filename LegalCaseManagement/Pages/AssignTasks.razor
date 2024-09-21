@@ -60,7 +60,7 @@
         </MudItem>
 
         <MudItem xs="12" md="6">
-            <MudSelect @bind-Value="newTask.CaseId" Label="Case" Required="true">
+            <MudSelect @bind-Value="newTask.CaseId" Label="Case" Required="true" Search="true" SearchFunc="@SearchCases">
                 @foreach (var legalCase in filteredCases)
                 {
                     <MudSelectItem Value="@legalCase.CaseId">@legalCase.Discription</MudSelectItem>
@@ -161,8 +161,8 @@
                 <MudSelectItem Value="@lawyer.Id">@lawyer.FirstName @lawyer.LastName</MudSelectItem>
             }
         </MudSelect>
-        <MudSelect @bind-Value="editingTask.CaseId" Label="Case" Required="true">
-            @foreach (var legalCase in filteredCases)
+        <MudSelect @bind-Value="newTask.CaseId" Label="Case" Required="true" Search="true" SearchFunc="SearchCases">
+            @foreach (var legalCase in filteredCaseses)
             {
                 <MudSelectItem Value="@legalCase.CaseId">@legalCase.Discription</MudSelectItem>
             }
@@ -186,6 +186,16 @@
     private List<MyTaskStatus> taskStatuses = new List<MyTaskStatus>();
     private bool editDialogVisible = false;
     private MyTask editingTask = new MyTask();
+    private IEnumerable<Case> filteredCaseses = new List<Case>(); 
+
+    // Sample search function
+    private bool SearchCases(string searchTerm, Case legalCase)
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+            return true;
+
+        return legalCase.Discription.Contains(searchTerm, StringComparison.OrdinalIgnoreCase);
+    }
 
     private string GetPriorityBadgeClass(string priority)
     {

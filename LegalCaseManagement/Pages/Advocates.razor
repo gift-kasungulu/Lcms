@@ -179,6 +179,16 @@
     </div>
 }
 
+ <div class="total-advocates">
+    <i class="bi bi-hammer" style="font-size: 2rem;"></i>
+    <MudText Typo="Typo.h5"> Advocates: @lawyersList.Count</MudText>
+ </div>
+ <style>
+    .total-advocates{
+        display: flex;
+        justify-content: flex-end;
+    }
+ </style>
 
 <MudCard Elevation="25">
     <MudCardHeader>
@@ -192,7 +202,7 @@
             <ToolBarContent>
                 <MudText Typo="Typo.h6">Advocates</MudText>
                 <MudSpacer />
-                <MudTextField @bind-Value="searchString" Placeholder="Search Here" IconSize="Size.Medium"
+                <MudTextField @bind-Value="searchString" Label="Search" Placeholder="Search by Name" IconSize="Size.Medium"
                     StartIcon="@Icons.Material.Filled.Search" Class="mt-0"></MudTextField>
             </ToolBarContent>
             <HeaderContent>

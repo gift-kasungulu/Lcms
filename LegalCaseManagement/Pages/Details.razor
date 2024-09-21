@@ -1,5 +1,6 @@
 ﻿@page "/details/{LawyerId}"
 @using LegalCaseManagement.Data
+@using LegalCaseManagement.Service
 @using MailKit.Net.Smtp
 @using Microsoft.AspNetCore.Identity
 @inject LawyerService lawyerService
@@ -8,6 +9,7 @@
 @inject IJSRuntime jstRuntime
 @inject AuthenticationStateProvider authenticationStateprovider
 @inject UserManager<ApplicationUser> userManager
+@inject NotificationService notificationService
 
 
 @if (lawyer != null)
@@ -67,19 +69,8 @@
         @if (isClient)
         {
             <h6>Request for Lawyer</h6>
-            <EditForm Model="request" OnValidSubmit="HandleValidSubmit">
-                <div class="mb-3">
-                    <label class="form-label">Your Email</label>
-                    <MudTextField @bind-Value="request.Email" />
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Message</label>
-                    <MudTextField @bind-Value="request.Message" TextArea="true" />
-                </div>
-                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
-                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" @onclick="GoBack">Back</MudButton>
-
-            </EditForm>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" @onclick="RequestLawyer">Request</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" @onclick="GoBack">Close</MudButton>
         }
         
     </div>
@@ -95,6 +86,7 @@ else
     [Parameter]
     public string LawyerId { get; set; }
     private bool isClient = false;
+    private string clientEmail = String.Empty;
 
     private Lawyers lawyer;
     private RequestModel request = new RequestModel();
@@ -112,10 +104,41 @@ else
 
         if (user.Identity.IsAuthenticated)
         {
-            var appClient = await userManager.GetUserAsync(user);
+            var appClient = await userManager.GetUserAsync(user); // getting the current loged in user 
             isClient = await userManager.IsInRoleAsync(appClient, "Client");
+
+            clientEmail = appClient.UserName; // assign the loged in user with the clientEmail (remember to change the username if not successful bro)
+        }
+
+    }
+
+    private async Task RequestLawyer()
+    {
+        try
+        {
+            string adminEmail = "giftkasungulu30@gmail.com"; // Admin email
+            string subject = "Lawyer Request";
+            string message = $"Client ({clientEmail}) has requested lawyer: {lawyer.FirstName} {lawyer.LastName}";
+
+            // Send email notification
+            //await emailService.SendEmailAsync(adminEmail, subject, message, clientEmail); ?? lets jubp this for now 
+
+            // Get the admin's user ID
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+            if (adminUser != null)
+            {
+                // Create and save an in-app notification for the admin
+                await notificationService.CreateNotification(adminUser.Id, message);
+            }
+
+            await jstRuntime.InvokeVoidAsync("alert", "Request sent successfully!");
+        }
+        catch (Exception ex)
+        {
+            await jstRuntime.InvokeVoidAsync("alert", $"An error occurred: {ex.Message}");
         }
     }
+
 
     private async Task HandleValidSubmit()
     {

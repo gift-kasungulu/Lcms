@@ -1,0 +1,106 @@
+﻿@page "/editappointments/{Id:int}"
+@attribute [Authorize(Roles = "Client, Admin, Team")]
+
+@using LegalCaseManagement.Data
+@using LegalCaseManagement.Domain
+@using LegalCaseManagement.Service
+@inject AppointmentService AppointmentService
+@inject NavigationManager Navigation
+@inject ISnackbar Snackbar
+@inject ILogger<EditAppointment> Logger
+
+<PageTitle>Edit Appointment</PageTitle>
+
+<MudText Typo="Typo.h5" Class="mb-4">Edit Appointment</MudText>
+
+@if (appointment != null)
+{
+    <EditForm Model="appointment" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <MudGrid>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="appointment.ClientName" Label="Client Name" Disabled="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="appointment.MobileNo" Label="Mobile No" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="appointment.Email" Label="Email" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudDatePicker @bind-Value="appointment.Date" Label="Date" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTimePicker @bind-Value="appointment.Time" Label="Time" Required="true" />
+            </MudItem>
+            <MudItem xs="12" sm="6">
+                <MudTextField @bind-Value="appointment.Note" Label="Note" />
+            </MudItem>
+        </MudGrid>
+
+        <br />
+        <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Update</MudButton>
+        <MudButton @onclick="Cancel" Variant="Variant.Outlined" Color="Color.Secondary">Cancel</MudButton>
+    </EditForm>
+}
+else
+{
+    <MudAlert Severity="Severity.Error">Loading appointment details...</MudAlert>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private Appointment appointment;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAppointment();
+    }
+
+    private async Task LoadAppointment()
+    {
+        try
+        {
+            appointment = await AppointmentService.GetAppointmentById(Id);
+            if (appointment == null)
+            {
+                Snackbar.Add("Appointment not found", Severity.Warning);
+                Navigation.NavigateTo("/appointments");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"Error loading appointment with ID {Id}");
+            Snackbar.Add($"Error loading appointment: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            await AppointmentService.UpdateAppointment(appointment);
+            Snackbar.Add("Appointment updated successfully!", Severity.Success);
+            Navigation.NavigateTo("/appointments");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error updating appointment");
+            Snackbar.Add("Error updating appointment: " + ex.Message, Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/appointments");
+    }
+}

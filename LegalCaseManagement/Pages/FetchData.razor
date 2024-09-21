@@ -21,7 +21,7 @@
             <MudText Typo="Typo.h5">Create Appointments</MudText>
         </MudItem>
         <MudItem xs="12">
-            <MudPaper>
+          
                 @if (userRole == "Client")
                 {
                     <EditForm Model="newAppointment" OnValidSubmit="HandleValidSubmitClient">
@@ -53,9 +53,9 @@
                                 <MudTextField @bind-Value="newAppointment.Note" Label="Note" />
                             </MudItem>
                         </MudGrid>
-                        <MudSpacer />
+                        <br />
                         <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">Save</MudButton>
-                        <MudButton @onclick="Cancel" Variant="Variant.Filled" Color="Color.Secondary">Cancel</MudButton>
+                        <MudButton @onclick="Cancel" Variant="Variant.Outlined" Color="Color.Secondary">Cancel</MudButton>
                     </EditForm>
                 }
                 else
@@ -95,7 +95,7 @@
                             <MudButton @onclick="Cancel" Variant="Variant.Filled" Color="Color.Secondary">Cancel</MudButton>
                         </EditForm>
                 }
-                </MudPaper>
+               
             </MudItem>
         </MudGrid>
 

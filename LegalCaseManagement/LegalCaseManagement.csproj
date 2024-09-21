@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Pages\EditAppointment.razor" />
     <Content Remove="Pages\EditLawyer.razor" />
     <Content Remove="Pages\MyReports.razor" />
   </ItemGroup>
@@ -41,12 +42,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="Pages\EditAppointment.razor" />
     <_ContentIncludedByDefault Remove="Pages\EditLawyer.razor" />
     <_ContentIncludedByDefault Remove="Pages\MyReports.razor" />
     <_ContentIncludedByDefault Remove="Pages\ViewCaseDetails.razor" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="Pages\EditAppointment.razor" />
     <None Include="Pages\EditLawyer.razor" />
     <None Include="Shared\MyReports.razor" />
     <None Include="Pages\ViewCaseDetails.razor" />
@@ -63,6 +66,10 @@
 
   <ItemGroup>
     <UpToDateCheckInput Remove="Pages\MyReports.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Pages\EditAppointment.razor" />
   </ItemGroup>
 
 </Project>

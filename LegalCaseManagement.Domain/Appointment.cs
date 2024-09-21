@@ -18,7 +18,7 @@ namespace LegalCaseManagement.Domain
         public string? MobileNo { get; set; }
 
         [Required]
-        public DateTime Date { get; set; }
+        public DateTime? Date { get; set; }
 
         [Required]
         public TimeSpan Time { get; set; }
