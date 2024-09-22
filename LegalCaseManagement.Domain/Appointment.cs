@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components.Routing;
 
 namespace LegalCaseManagement.Domain
 {
@@ -28,7 +29,7 @@ namespace LegalCaseManagement.Domain
 
         [ForeignKey("ApplicationUser")]
         public string? UserId { get; set; }
-        public ApplicationUser? User { get; set; }
+        public ApplicationUser? User { get; set; } //navigate to the user that
         public string? CreatedBy { get; set; } //this will help me store the ID of the user that created the Appointment for easy tracking 
         public bool IsApproved { get; set; } //help to track the approved cases 
     }

@@ -763,6 +763,7 @@
     {
         if (string.IsNullOrWhiteSpace(searchString)) return true;
         if (mycase.Petitioner.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+        if (mycase.AppUser.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase))
         {
             return true;
         }

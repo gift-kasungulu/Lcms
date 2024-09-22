@@ -138,12 +138,12 @@
         var roles = await UserManager.GetRolesAsync(creator);
         if (roles.Contains("Client"))
         {
-            return $"Appointment with Lawyer {creator.UserName} on {appointment.Date?.ToShortDateString()}";
+            return $"you have an Appointment with your Lawyer on {appointment.Date?.ToShortDateString()}";
             
         }
         else if (roles.Contains("Team")) // if its the lawyer it should display this try and fix otherwise 
         {
-            return $"Appointment with Client {creator.UserName} on {appointment.Date?.ToShortDateString()}";
+            return $"You have an Appointment on {appointment.Date?.ToShortDateString()} check with your client";
         }
         else
         {
